@@ -23,7 +23,7 @@ devtools::install_github("data2intelligence/SecAct")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(SpaCET)
+library(SecAct)
 ## basic example code
 ```
 
