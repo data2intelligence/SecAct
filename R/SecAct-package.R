@@ -3,4 +3,7 @@
 
 ## usethis namespace: start
 ## usethis namespace: end
+
+#' @useDynLib SecAct, .registration=TRUE
+
 NULL
