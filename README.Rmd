@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 ```
 
 
-# SecAct (Secreted signaling activity) <img src="man/figures/sticker.png" align="right" alt="" width="120" />
+# SecAct (Secretion Activity) <img src="man/figures/sticker.png" align="right" alt="" width="120" />
 
 
 <!-- badges: start -->
