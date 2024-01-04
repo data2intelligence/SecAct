@@ -24,7 +24,7 @@ The goal of SecAct is to infer secreted proteins' activity from RNA-seq data, in
 
 ## Installation
 
-You can install the development version of SecAct from [GitHub](https://github.com/) with:
+To install `SecAct`, we recommend using `devtools`:
 
 ``` r
 # install.packages("devtools")
@@ -32,9 +32,6 @@ devtools::install_github("data2intelligence/SecAct")
 ```
 
 ## Example
-
-This is a basic example :
-
 ```
 library(SecAct)
 
@@ -46,7 +43,7 @@ res <- SecAct.inference(Y, lambda=10000, nrand=1000)
 names(res)
 ## "beta"   "se"     "zscore" "pvalue"
 
-head(res$zscore[,1:3])
+head(res$zscore[,1:2])
 ##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg
 ## Activin A                      -1.8047150                      1.4755992
 ## BDNF                           -7.6590132                     -2.7108527

@@ -18,7 +18,9 @@ hello <- function(n) {
 
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
-#' @param n PARAM_DESCRIPTION
+#' @param Y PARAM_DESCRIPTION
+#' @param lambda PARAM_DESCRIPTION
+#' @param nrand PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -29,7 +31,7 @@ hello <- function(n) {
 #' head(res$zscore)
 #' @rdname SecAct.inference
 #' @export
-SecAct.inference <- function(Y,lambda=10000,nrand=1000)
+SecAct.inference <- function(Y,lambda,nrand)
 {
   Xfile<- file.path(system.file(package = "SecAct"), "extdata/signature.centroid")
   X <- read.table(Xfile,sep="\t",check.names=F)

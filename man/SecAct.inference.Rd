@@ -4,10 +4,14 @@
 \alias{SecAct.inference}
 \title{FUNCTION_TITLE}
 \usage{
-SecAct.inference(Y, lambda = 10000, nrand = 1000)
+SecAct.inference(Y, lambda, nrand)
 }
 \arguments{
-\item{n}{PARAM_DESCRIPTION}
+\item{Y}{PARAM_DESCRIPTION}
+
+\item{lambda}{PARAM_DESCRIPTION}
+
+\item{nrand}{PARAM_DESCRIPTION}
 }
 \value{
 OUTPUT_DESCRIPTION

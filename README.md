@@ -11,8 +11,7 @@ data, including bulk, single-cell, and spatial data.
 
 ## Installation
 
-You can install the development version of SecAct from
-[GitHub](https://github.com/) with:
+To install `SecAct`, we recommend using `devtools`:
 
 ``` r
 # install.packages("devtools")
@@ -20,8 +19,6 @@ devtools::install_github("data2intelligence/SecAct")
 ```
 
 ## Example
-
-This is a basic example :
 
     library(SecAct)
 
@@ -33,7 +30,7 @@ This is a basic example :
     names(res)
     ## "beta"   "se"     "zscore" "pvalue"
 
-    head(res$zscore[,1:3])
+    head(res$zscore[,1:2])
     ##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg
     ## Activin A                      -1.8047150                      1.4755992
     ## BDNF                           -7.6590132                     -2.7108527
