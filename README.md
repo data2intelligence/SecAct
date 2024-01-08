@@ -18,6 +18,15 @@ To install `SecAct`, we recommend using `devtools`:
 devtools::install_github("data2intelligence/SecAct")
 ```
 
+Or user can install `SecAct` from the source code. Click
+<a href="https://api.github.com/repos/data2intelligence/SecAct/tarball/HEAD" target="_blank">here</a>
+to download it.
+
+``` r
+# install SecAct in the R environment.
+install.packages("Path_to_the_source_code", repos = NULL, type="source")
+```
+
 ## Example
 
     library(SecAct)
