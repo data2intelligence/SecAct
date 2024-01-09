@@ -6,12 +6,13 @@ touch ./src/Makevars
 fi
 
 #if mac
-if [[ `uname` -eq Darwin ]] ; then
-
-echo "PKG_LIBS=/usr/local/lib/*gsl*.a" > ./src/Makevars
-#if linux
-elif [[ `uname` -eq Linux ]] ;then
+if [[ `uname` -eq Linux ]] ; then
 
 echo "PKG_LIBS=/usr/local7/GSL/gcc-9.2.0/2.7/lib/*gsl*.a" > ./src/Makevars
+
+#if linux
+elif [[ `uname` -eq Darwin ]] ;then
+
+echo "PKG_LIBS=/usr/local/lib/*gsl*.a" > ./src/Makevars
 
 fi
