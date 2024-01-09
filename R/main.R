@@ -44,8 +44,8 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   m <- ncol(Y)
 
   res <- .C("ridgeReg",
-    X_olp=as.double(t(X)),
-    Y_olp=as.double(t(Y)),
+    X=as.double(t(X)),
+    Y=as.double(t(Y)),
     as.integer(n),
     as.integer(p),
     as.integer(m),

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#make the Makevars file
+if [ ! -e "./src/Makevars" ]; then
+touch ./src/Makevars
+fi
+
+#if mac
+if [[ "$(uname -s)" -eq "Darwin" ]] ; then
+echo "PKG_LIBS=/usr/local/lib/*gsl*.a" > ./src/Makevars
+
+#if linux
+elif [[ "$(uname -s)" -eq "Linux" ]] ; then
+echo "PKG_LIBS=/usr/local/gsl/2.7/gcc-11.3.0/lib/*gsl*.a" > ./src/Makevars
+
+else
+echo "PKG_LIBS=/to/be/determined/*gsl*.a" > ./src/Makevars
+
+fi
