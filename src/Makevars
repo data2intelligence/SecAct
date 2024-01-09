@@ -1,1 +1,1 @@
-PKG_LIBS=/usr/local7/GSL/gcc-9.2.0/2.7/lib/*gsl*.a
+PKG_LIBS=/usr/local/gsl/2.7/gcc-11.3.0/lib/*gsl*.a
