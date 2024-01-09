@@ -44,17 +44,18 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   m <- ncol(Y)
 
   res <- .C("ridgeReg",
-            X_olp=as.double(t(X)),
-            Y_olp=as.double(t(Y)),
-            as.integer(n),
-            as.integer(p),
-            as.integer(m),
-            as.double(lambda),
-            as.double(nrand),
-            beta=double(p*m),
-            se=double(p*m),
-            zscore=double(p*m),
-            pvalue=double(p*m))
+    X_olp=as.double(t(X)),
+    Y_olp=as.double(t(Y)),
+    as.integer(n),
+    as.integer(p),
+    as.integer(m),
+    as.double(lambda),
+    as.double(nrand),
+    beta=double(p*m),
+    se=double(p*m),
+    zscore=double(p*m),
+    pvalue=double(p*m)
+  )
 
   beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
   se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
