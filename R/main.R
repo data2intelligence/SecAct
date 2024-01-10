@@ -8,8 +8,7 @@
 #' @details DETAILS
 #' @examples
 #'
-#' library(SecAct)
-#' Yfile<- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
+#' Yfile <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
 #' Y <- read.table(Yfile,sep="\t",check.names=F)
 #' res <- SecAct.inference(Y, SigMat=NULL, lambda=10000, nrand=1000)
 #' names(res)
@@ -20,13 +19,26 @@
 #'
 SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
 {
+  Y_type <- "matrix"
+  if(class(Y)=="SpaCET")
+  {
+    Y_type <- "SpaCET"
+    SpaCET_obj <- Y
+
+    Y <- SpaCET_obj@input$counts
+
+    Y <- Matrix::t(Matrix::t(Y)*1e5/Matrix::colSums(Y))
+    Y@x <- log2(Y@x + 1)
+    Y <- Y - Matrix::rowMeans(Y)
+  }
+
   if(is.null(SigMat))
   {
     Xfile<- file.path(system.file(package = "SecAct"), "extdata/signature.centroid")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }
 
-  olp <- intersect(row.names(X),row.names(Y))
+  olp <- intersect(row.names(Y),row.names(X))
   X <- as.matrix(X[olp,])
   Y <- as.matrix(Y[olp,])
 
@@ -62,5 +74,14 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
   pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
 
-  list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
+  res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
+
+  if(Y_type=="SpaCET")
+  {
+    SpaCET_obj@results$SecAct_res <- res
+    SpaCET_obj
+  }else{
+    res
+  }
+
 }

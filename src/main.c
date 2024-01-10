@@ -56,7 +56,19 @@ void gsl_matrix_partial_free(gsl_matrix *x)
   free(x);
 }
 
-void ridgeReg(double *X_vec, double *Y_vec, int *n_pt, int *p_pt, int *m_pt, double *lambda_pt, double *nrand_pt, double *beta_vec, double *se_vec, double *zscore_vec, double *pvalue_vec)
+void ridgeReg(
+  double *X_vec,
+  double *Y_vec,
+  int *n_pt,
+  int *p_pt,
+  int *m_pt,
+  double *lambda_pt,
+  double *nrand_pt,
+  double *beta_vec,
+  double *se_vec,
+  double *zscore_vec,
+  double *pvalue_vec
+)
 {
   gsl_matrix *X, *Y, *I, *T, *beta, *Y_rand, *beta_rand, *aver, *aver_sq, *zscore, *pvalue;
   int n = *n_pt, p = *p_pt, m = *m_pt, lambda = *lambda_pt, nrand = *nrand_pt;
