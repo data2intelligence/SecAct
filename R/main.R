@@ -100,6 +100,161 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
 }
 
 
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param SpaCET_obj PARAM_DESCRIPTION
+#' @param gene PARAM_DESCRIPTION
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#'
+#' @rdname SecAct.signalling.direction
+#' @export
+#'
+SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
+{
+  if(class(SpaCET_obj)!="SpaCET")
+  {
+    stop("SpaCET object is requried.")
+  }
+
+  set.seed(123456)
+  st.matrix.data <- SpaCET_obj@input$counts
+  vst <- round(sctransform::vst(st.matrix.data, min_cells=5)$y,3)
+  weights <- calWeights(colnames(vst), r=3, diag0=TRUE)
+  act <- SpaCET_obj@results$SecAct_res$zscore
+
+  act_new <- act
+  vst_new <- vst
+
+  act_new[act_new<0] <- 0
+  vst_new[vst_new<0] <- 0
+
+  weights_new <- weights * vst_new[gene,]
+  weights_new <- t(t(weights_new) * act_new[gene,])
+
+
+
+
+  startend <- data.frame()
+  for(i in 1:nrow(weights_new))
+  {
+    vector_len <- sum(weights_new[i,])
+    if(vector_len==0) next
+
+    spot <- rownames(weights_new)[i]
+    neighbors <- colnames(weights_new)[weights_new[i,]>0]
+    neighbors_value <- weights_new[i,weights_new[i,]>0]
+
+    spot_2col <- t(matrix(as.numeric(unlist(strsplit(spot,"x"))),nrow=2))
+    neighbors_2col <- t(matrix(as.numeric(unlist(strsplit(neighbors,"x"))),nrow=2))
+    neighbors_2col[,1] <- neighbors_2col[,1] - spot_2col[,1]
+    neighbors_2col[,2] <- neighbors_2col[,2] - spot_2col[,2]
+
+    neighbors_2col <- t(apply(neighbors_2col,1,scalar1))
+    rownames(neighbors_2col) <- neighbors
+
+    neighbors_2col <- neighbors_2col*neighbors_value
+    neighbors_2col <- colMeans(neighbors_2col)
+    neighbors_2col <- scalar1(neighbors_2col)
+    neighbors_2col <- neighbors_2col * vector_len
+
+    startend[spot,"x_start"] <- spot_2col[,1]
+    startend[spot,"y_start"] <- spot_2col[,2]
+    startend[spot,"x_change"] <- neighbors_2col[1]
+    startend[spot,"y_change"] <- neighbors_2col[2]
+    startend[spot,"x_end"] <- spot_2col[,1] + neighbors_2col[1]
+    startend[spot,"y_end"] <- spot_2col[,2] + neighbors_2col[2]
+    startend[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
+  }
+
+  startend[,3] <- startend[,3]*2/max(abs(startend[,3]))
+  startend[,4] <- startend[,4]*2/max(abs(startend[,4]))
+
+  startend[,5] <- startend[,1] + startend[,3]
+  startend[,6] <- startend[,2] + startend[,4]
+
+  startend[startend[,"vec_len"]<0.1,"vec_len"] <- 0.01
+  startend[startend[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+
+
+
+
+  startend2 <- data.frame()
+  for(i in 1:ncol(weights_new))
+  {
+    vector_len <- sum(weights_new[,i])
+    if(vector_len==0) next
+
+    spot <- colnames(weights_new)[i]
+    neighbors <- rownames(weights_new)[weights_new[,i]>0]
+    neighbors_value <- weights_new[weights_new[,i]>0,i]
+
+    spot_2col <- t(matrix(as.numeric(unlist(strsplit(spot,"x"))),nrow=2))
+    neighbors_2col <- t(matrix(as.numeric(unlist(strsplit(neighbors,"x"))),nrow=2))
+    neighbors_2col[,1] <- -(neighbors_2col[,1] - spot_2col[,1])
+    neighbors_2col[,2] <- -(neighbors_2col[,2] - spot_2col[,2])
+
+    neighbors_2col <- t(apply(neighbors_2col,1,scalar1))
+    rownames(neighbors_2col) <- neighbors
+
+    neighbors_2col <- neighbors_2col*neighbors_value
+    neighbors_2col <- colMeans(neighbors_2col)
+    neighbors_2col <- scalar1(neighbors_2col)
+    neighbors_2col <- neighbors_2col * vector_len
+
+    startend2[spot,"x_start"] <- spot_2col[,1] - neighbors_2col[1]
+    startend2[spot,"y_start"] <- spot_2col[,2] - neighbors_2col[2]
+    startend2[spot,"x_change"] <- neighbors_2col[1]
+    startend2[spot,"y_change"] <- neighbors_2col[2]
+    startend2[spot,"x_end"] <- spot_2col[,1]
+    startend2[spot,"y_end"] <- spot_2col[,2]
+  }
+
+  startend2[,3] <- startend2[,3]*2/max(abs(startend2[,3]))
+  startend2[,4] <- startend2[,4]*2/max(abs(startend2[,4]))
+
+  startend2[,1] <- startend2[,5] - startend2[,3]
+  startend2[,2] <- startend2[,6] - startend2[,4]
+
+
+  library(ggplot2)
+  library(patchwork)
+  library(ggnewscale)
+
+  coordi <- t(matrix(as.numeric(unlist(strsplit(colnames(vst),"x"))),nrow=2))
+
+  fig.df <- data.frame(x=coordi[,1],y=coordi[,2],value=vst_new[gene,])
+  fig.df[fig.df[,3]>5,3] <- 5
+
+  p1 <- ggplot(fig.df,aes(x=x,y=y))+
+    geom_point(aes(colour=value),size=2.5)+
+    scale_color_gradient(low="blue",high="green")+
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,arrow = arrow(length = unit(startend$vec_len, "cm")))+
+    ggtitle(paste0(gene," vst (sending)"))+
+    theme_void()+
+    theme(plot.title = element_text(hjust = 0.5))
+
+
+  fig.df2 <- data.frame(x=coordi[,1],y=coordi[,2],value=act_new[gene,])
+
+
+  p2 <- ggplot(fig.df2,aes(x=x,y=y))+
+    geom_point(aes(colour=value),size=2.5)+
+    scale_color_gradient(low="blue",high="red")+
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2,arrow = arrow(length = unit(0.1, "cm")))+
+    ggtitle(paste0(gene," act (receiving)"))+
+    theme_void()+
+    theme(plot.title = element_text(hjust = 0.5))
+
+  p1|p2
+}
+
+scalar1 <- function(x)
+{
+  x / sqrt(sum(x^2))
+}
+
 calWeights <- function(SpotIDs, r=3, diag0=TRUE)
 {
   d <- matrix(Inf,ncol=length(SpotIDs),nrow=length(SpotIDs))

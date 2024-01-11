@@ -90,6 +90,10 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
     ## BMP6      -0.77698722  0.6405603  0.3362758 -0.6919639  1.1056869  1.2812108
     ## CD40L      0.52564266 -1.2222940  1.2872563  0.2879296 -1.6921668  0.3214071
 
+    SecAct.signalling.direction(SpaCET_obj, gene="TGFB1")
+
+<img src="man/figures/ST.png" width="100%" />
+
 ## Example 3 (Input: single cell)
 
     library(Seurat)
