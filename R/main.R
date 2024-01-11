@@ -19,17 +19,24 @@
 #'
 SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
 {
-  Y_type <- "matrix"
+
   if(class(Y)=="SpaCET")
   {
     Y_type <- "SpaCET"
     SpaCET_obj <- Y
 
     Y <- SpaCET_obj@input$counts
-
     Y <- Matrix::t(Matrix::t(Y)*1e5/Matrix::colSums(Y))
     Y@x <- log2(Y@x + 1)
     Y <- Y - Matrix::rowMeans(Y)
+  }else if (class(Y)=="Seurat"){
+    Y_type <- "Seurat"
+    Seurat_obj <- Y
+
+    Y <- Seurat_obj@assays$RNA@data
+    Y <- Y - Matrix::rowMeans(Y)
+  }else{
+    Y_type <- "matrix"
   }
 
   if(is.null(SigMat))
@@ -80,6 +87,12 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   {
     SpaCET_obj@results$SecAct_res <- res
     SpaCET_obj
+  }else if(Y_type=="Seurat"){
+    res_z <- t(res$zscore)
+    colnames(res_z) <- paste0("SecAct_",colnames(res_z))
+
+    Seurat_obj@meta.data <- cbind(Seurat_obj@meta.data,res_z)
+    Seurat_obj
   }else{
     res
   }

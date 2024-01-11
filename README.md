@@ -89,3 +89,42 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
     ## BMP4       1.85152361 -0.1384111 -0.7384362  1.5279108  0.9950997 -1.0644863
     ## BMP6      -0.77698722  0.6405603  0.3362758 -0.6919639  1.1056869  1.2812108
     ## CD40L      0.52564266 -1.2222940  1.2872563  0.2879296 -1.6921668  0.3214071
+
+## Example 3 (Input: single cell)
+
+    library(Seurat)
+    library(SeuratData)
+
+    InstallData("pbmc3k")
+    data("pbmc3k")
+    pbmc <- UpdateSeuratObject(pbmc3k) 
+
+    pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+    pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+    pbmc <- NormalizeData(pbmc, normalization.method = "LogNormalize", scale.factor = 10000)
+
+    pbmc <- FindVariableFeatures(pbmc, nfeatures = 2000)
+    all.genes <- rownames(pbmc)
+    pbmc <- ScaleData(pbmc, features = all.genes)
+
+    pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+    pbmc <- FindNeighbors(pbmc, dims = 1:10)
+    pbmc <- FindClusters(pbmc, resolution = 0.5)
+    pbmc <- RunUMAP(pbmc, dims = 1:10)
+
+    new.cluster.ids <- c("Naive CD4 T", "CD14+ Mono", "Memory CD4 T", "B", "CD8 T", "FCGR3A+ Mono","NK", "DC", "Platelet")
+    names(new.cluster.ids) <- levels(pbmc)
+    pbmc <- RenameIdents(pbmc, new.cluster.ids)
+
+
+    library(SecAct)
+    pbmc <- SecAct.inference(pbmc, lambda=10000, nrand=10)
+
+
+    p1 <- DimPlot(pbmc, reduction = "umap", label = TRUE, pt.size = 0.5) + NoLegend()
+    p2 <- FeaturePlot(pbmc, features = "SecAct_GCSF", cols = c("blue","white","red"), pt.size = 0.5)
+
+    library(patchwork)
+    p1|p2
+
+<img src="man/figures/scRNA.png" width="100%" />

@@ -26,8 +26,7 @@ DETAILS
 }
 \examples{
 
-library(SecAct)
-Yfile<- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
+Yfile <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
 Y <- read.table(Yfile,sep="\t",check.names=F)
 res <- SecAct.inference(Y, SigMat=NULL, lambda=10000, nrand=1000)
 names(res)
