@@ -85,3 +85,36 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   }
 
 }
+
+
+calWeights <- function(SpotIDs, r=3, diag0=TRUE)
+{
+  d <- matrix(Inf,ncol=length(SpotIDs),nrow=length(SpotIDs))
+  colnames(d) <- SpotIDs
+  rownames(d) <- SpotIDs
+
+  for(i in 1:ncol(d))
+  {
+    xy <- rownames(d)[i]
+    x <- as.numeric(unlist(strsplit(xy,"x")))[1]
+    y <- as.numeric(unlist(strsplit(xy,"x")))[2]
+    xm <- r-1
+    ym <- 2*(r-1)+1
+    x_y <- expand.grid((x-xm):(x+xm),(y-ym):(y+ym))
+    x_y_d <- cbind(x_y,d=sqrt( (0.5*sqrt(3)*(x_y[,1]-x))^2 + (0.5*(x_y[,2]-y))^2) )
+    rownames(x_y_d) <- paste0(x_y[,1],"x",x_y[,2])
+    x_y_d <- x_y_d[rownames(x_y_d)%in%rownames(d),]
+
+    d[xy,rownames(x_y_d)] <- x_y_d[,3]
+    d[rownames(x_y_d),xy] <- x_y_d[,3]
+  }
+
+  W <- exp(-d^2/2)
+
+  if(diag0==TRUE) diag(W) <- 0
+
+  W <- W[,colSums(W)>0] # remove spot island
+  W <- W[rowSums(W)>0,] # remove spot island
+
+  W
+}
