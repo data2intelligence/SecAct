@@ -43,6 +43,8 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   {
     Xfile<- file.path(system.file(package = "SecAct"), "extdata/signature.centroid")
     X <- read.table(Xfile,sep="\t",check.names=F)
+  }else{
+    X <- read.table(SigMat,sep="\t",check.names=F)
   }
 
   olp <- intersect(row.names(Y),row.names(X))
