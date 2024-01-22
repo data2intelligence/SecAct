@@ -20,7 +20,7 @@
 SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
 {
 
-  if(class(Y)=="SpaCET")
+  if(class(Y)[1]=="SpaCET")
   {
     Y_type <- "SpaCET"
     SpaCET_obj <- Y
@@ -29,7 +29,7 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
     Y <- Matrix::t(Matrix::t(Y)*1e5/Matrix::colSums(Y))
     Y@x <- log2(Y@x + 1)
     Y <- Y - Matrix::rowMeans(Y)
-  }else if (class(Y)=="Seurat"){
+  }else if (class(Y)[1]=="Seurat"){
     Y_type <- "Seurat"
     Seurat_obj <- Y
 
