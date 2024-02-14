@@ -126,8 +126,8 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
   weights <- calWeights(colnames(vst), r=3, diag0=TRUE)
   act <- SpaCET_obj@results$SecAct_res$zscore
 
-  act_new <- act
-  vst_new <- vst
+  act_new <- act[,colnames(weights)] # remove spot island
+  vst_new <- vst[,colnames(weights)] # remove spot island
 
   act_new[act_new<0] <- 0
   vst_new[vst_new<0] <- 0
