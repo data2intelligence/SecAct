@@ -135,8 +135,18 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
   weights_new <- weights * vst_new[gene,]
   weights_new <- t(t(weights_new) * act_new[gene,])
 
+  coordi <- data.frame(
+    SpaCET_obj@input$spotCoordinates[colnames(weights_new),1],
+    SpaCET_obj@input$spotCoordinates[colnames(weights_new),2])
 
+  image <- SpaCET_obj@input$image
+  xDiml <- dim(image$grob$raster)[1] # dim pixel
+  yDiml <- dim(image$grob$raster)[2] # dim pixel
 
+  coordi[,1] <- xDiml-coordi[,1]
+
+  colnames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
+  rownames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
 
   startend <- data.frame()
   for(i in 1:nrow(weights_new))
@@ -170,8 +180,8 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
     startend[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
   }
 
-  startend[,3] <- startend[,3]*2/max(abs(startend[,3]))
-  startend[,4] <- startend[,4]*2/max(abs(startend[,4]))
+  startend[,3] <- startend[,3]*10/max(abs(startend[,3]))
+  startend[,4] <- startend[,4]*10/max(abs(startend[,4]))
 
   startend[,5] <- startend[,1] + startend[,3]
   startend[,6] <- startend[,2] + startend[,4]
@@ -211,43 +221,55 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
     startend2[spot,"y_change"] <- neighbors_2col[2]
     startend2[spot,"x_end"] <- spot_2col[,1]
     startend2[spot,"y_end"] <- spot_2col[,2]
+    startend2[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
   }
 
-  startend2[,3] <- startend2[,3]*2/max(abs(startend2[,3]))
-  startend2[,4] <- startend2[,4]*2/max(abs(startend2[,4]))
+  startend2[,3] <- startend2[,3]*10/max(abs(startend2[,3]))
+  startend2[,4] <- startend2[,4]*10/max(abs(startend2[,4]))
 
   startend2[,1] <- startend2[,5] - startend2[,3]
   startend2[,2] <- startend2[,6] - startend2[,4]
 
+  startend2[startend2[,"vec_len"]<0.1,"vec_len"] <- 0.01
+  startend2[startend2[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+
 
   library(ggplot2)
   library(patchwork)
-  library(ggnewscale)
 
-  coordi <- t(matrix(as.numeric(unlist(strsplit(colnames(vst),"x"))),nrow=2))
 
-  fig.df <- data.frame(x=coordi[,1],y=coordi[,2],value=vst_new[gene,])
+  fig.df <- data.frame(
+    x=coordi[,1],
+    y=coordi[,2],
+    value=vst_new[gene,]
+  )
+
   fig.df[fig.df[,3]>5,3] <- 5
 
   p1 <- ggplot(fig.df,aes(x=x,y=y))+
+    annotation_custom(image$grob)+
     geom_point(aes(colour=value),size=2.5)+
     scale_color_gradient(low="blue",high="green")+
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,arrow = arrow(length = unit(startend$vec_len, "cm")))+
+    scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
     ggtitle(paste0(gene," vst (sending)"))+
     theme_void()+
-    theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5))+coord_flip()
 
 
   fig.df2 <- data.frame(x=coordi[,1],y=coordi[,2],value=act_new[gene,])
 
-
   p2 <- ggplot(fig.df2,aes(x=x,y=y))+
+    annotation_custom(image$grob)+
     geom_point(aes(colour=value),size=2.5)+
     scale_color_gradient(low="blue",high="red")+
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2,arrow = arrow(length = unit(0.1, "cm")))+
+    scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
     ggtitle(paste0(gene," act (receiving)"))+
     theme_void()+
-    theme(plot.title = element_text(hjust = 0.5))
+    theme(plot.title = element_text(hjust = 0.5))+coord_flip()
 
   p1|p2
 }
