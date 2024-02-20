@@ -48,8 +48,8 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
   }
 
   olp <- intersect(row.names(Y),row.names(X))
-  X <- as.matrix(X[olp,])
-  Y <- as.matrix(Y[olp,])
+  X <- as.matrix(X[olp,,drop=F])
+  Y <- as.matrix(Y[olp,,drop=F])
 
   #write.table(X,"/Users/rub2/Workspace/GitHub/SecAct/inst/extdata/X",quote=F,sep="\t")
   #write.table(Y,"/Users/rub2/Workspace/GitHub/SecAct/inst/extdata/Y",quote=F,sep="\t")
