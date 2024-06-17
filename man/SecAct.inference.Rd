@@ -4,10 +4,18 @@
 \alias{SecAct.inference}
 \title{FUNCTION_TITLE}
 \usage{
-SecAct.inference(Y, SigMat = NULL, lambda = 10000, nrand = 1000)
+SecAct.inference(
+  Y,
+  Ycontrol = NULL,
+  SigMat = NULL,
+  lambda = 10000,
+  nrand = 1000
+)
 }
 \arguments{
 \item{Y}{PARAM_DESCRIPTION}
+
+\item{Ycontrol}{PARAM_DESCRIPTION}
 
 \item{SigMat}{PARAM_DESCRIPTION}
 

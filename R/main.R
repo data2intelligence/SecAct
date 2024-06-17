@@ -1,6 +1,7 @@
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
 #' @param Y PARAM_DESCRIPTION
+#' @param Ycontrol PARAM_DESCRIPTION
 #' @param SigMat PARAM_DESCRIPTION
 #' @param lambda PARAM_DESCRIPTION
 #' @param nrand PARAM_DESCRIPTION
@@ -17,7 +18,7 @@
 #' @rdname SecAct.inference
 #' @export
 #'
-SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
+SecAct.inference <- function(Y, Ycontrol=NULL, SigMat=NULL, lambda=10000, nrand=1000)
 {
 
   if(class(Y)[1]=="SpaCET")
@@ -25,10 +26,24 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
     Y_type <- "SpaCET"
     SpaCET_obj <- Y
 
+
     Y <- SpaCET_obj@input$counts
     Y <- Matrix::t(Matrix::t(Y)*1e5/Matrix::colSums(Y))
     Y@x <- log2(Y@x + 1)
-    Y <- Y - Matrix::rowMeans(Y)
+
+    if(is.null(Ycontrol))
+    {
+      Y <- Y - Matrix::rowMeans(Y)
+    }else{
+      SpaCET_obj_control <- Ycontrol
+
+      Ycontrol <- SpaCET_obj_control@input$counts
+      Ycontrol <- Matrix::t(Matrix::t(Ycontrol)*1e5/Matrix::colSums(Ycontrol))
+      Ycontrol@x <- log2(Ycontrol@x + 1)
+
+      Y <- Y - Matrix::rowMeans(Ycontrol)
+    }
+
   }else if (class(Y)[1]=="Seurat"){
     Y_type <- "Seurat"
     Seurat_obj <- Y
@@ -106,6 +121,7 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
 #' @description FUNCTION_DESCRIPTION
 #' @param SpaCET_obj PARAM_DESCRIPTION
 #' @param gene PARAM_DESCRIPTION
+#' @param signalMode PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -113,7 +129,7 @@ SecAct.inference <- function(Y, SigMat=NULL, lambda=10000, nrand=1000)
 #' @rdname SecAct.signalling.direction
 #' @export
 #'
-SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
+SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
@@ -128,6 +144,7 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
 
   act_new <- act[,colnames(weights)] # remove spot island
   vst_new <- vst[,colnames(weights)] # remove spot island
+  exp_new <- st.matrix.data[,colnames(weights)]
 
   act_new[act_new<0] <- 0
   vst_new[vst_new<0] <- 0
@@ -148,6 +165,8 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
   colnames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
   rownames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
 
+
+  # sending
   startend <- data.frame()
   for(i in 1:nrow(weights_new))
   {
@@ -191,7 +210,7 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
 
 
 
-
+  # receiving
   startend2 <- data.frame()
   for(i in 1:ncol(weights_new))
   {
@@ -237,6 +256,25 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
   library(ggplot2)
   library(patchwork)
 
+  fig.df <- data.frame(
+    x=coordi[,1],
+    y=coordi[,2],
+    value=exp_new[gene,]
+  )
+
+  p0 <- ggplot(fig.df,aes(x=x,y=y))+
+    annotation_custom(image$grob)+
+    geom_point(aes(colour=value))+
+    scale_color_gradient(low="blue",high="green")+
+    scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
+    ggtitle(paste0(gene," exp (sending)"))+
+    theme_void()+
+    theme(
+      plot.title = element_text(hjust = 0.5)
+    )+coord_flip()
+
 
   fig.df <- data.frame(
     x=coordi[,1],
@@ -248,30 +286,48 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene="TGFB1")
 
   p1 <- ggplot(fig.df,aes(x=x,y=y))+
     annotation_custom(image$grob)+
-    geom_point(aes(colour=value),size=2.5)+
+    geom_point(aes(colour=value))+
     scale_color_gradient(low="blue",high="green")+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
     geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
     ggtitle(paste0(gene," vst (sending)"))+
     theme_void()+
-    theme(plot.title = element_text(hjust = 0.5))+coord_flip()
+    theme(
+      plot.title = element_text(hjust = 0.5)
+    )+coord_flip()
 
 
-  fig.df2 <- data.frame(x=coordi[,1],y=coordi[,2],value=act_new[gene,])
+  fig.df2 <- data.frame(
+    x=coordi[,1],
+    y=coordi[,2],
+    value=act_new[gene,]
+  )
 
   p2 <- ggplot(fig.df2,aes(x=x,y=y))+
-    annotation_custom(image$grob)+
-    geom_point(aes(colour=value),size=2.5)+
-    scale_color_gradient(low="blue",high="red")+
+    #annotation_custom(image$grob)+
+    geom_point(aes(colour=value),size=1)+
+    #scale_color_gradientn(colors=c("#a5a6ff","#ff72a1","brown"))+
+    scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
     geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
     ggtitle(paste0(gene," act (receiving)"))+
     theme_void()+
-    theme(plot.title = element_text(hjust = 0.5))+coord_flip()
+    theme(
+      plot.title = element_text(hjust = 0.5)
+    )+coord_flip()
 
-  p1|p2
+
+  if(signalMode=="sending")
+  {
+    p1
+  }else if(signalMode=="receiving"){
+    p2
+  }else{
+    p1+p2
+  }
+
 }
 
 scalar1 <- function(x)
