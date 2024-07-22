@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# SecAct (Secreted Signaling Activity Inference) <img src="man/figures/sticker.png" align="right" alt="" width="120" />
+# SecAct (Secreted Protein Activity Inference) <img src="man/figures/sticker.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
 <!-- badges: end -->
