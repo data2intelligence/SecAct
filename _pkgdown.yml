@@ -1,0 +1,12 @@
+url: ~
+template:
+  bootstrap: 5
+
+navbar:
+  left:
+    - icon: fas fa-home fa-lg
+      href: index.html
+    - text: Reference
+      href: reference/index.html
+    - text: News
+      href: news/index.html
