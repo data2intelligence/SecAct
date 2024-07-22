@@ -1,11 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# SecAct (Secreted Protein Activity Inference)
+# SecAct (Secreted Protein Activity Inference) <img src="man/figures/sticker.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
-
-<img src="man/figures/sticker.png" align="right" alt="" width="120" />
 <!-- badges: end -->
 
 The goal of SecAct is to infer secreted proteins’ activity from RNA-seq
