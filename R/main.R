@@ -122,6 +122,7 @@ SecAct.inference <- function(Y, Ycontrol=NULL, SigMat=NULL, lambda=10000, nrand=
 #' @param SpaCET_obj PARAM_DESCRIPTION
 #' @param gene PARAM_DESCRIPTION
 #' @param signalMode PARAM_DESCRIPTION
+#' @param signalDir PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -129,7 +130,7 @@ SecAct.inference <- function(Y, Ycontrol=NULL, SigMat=NULL, lambda=10000, nrand=
 #' @rdname SecAct.signalling.direction
 #' @export
 #'
-SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
+SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", signalDir=TRUE)
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
@@ -148,6 +149,11 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
 
   act_new[act_new<0] <- 0
   vst_new[vst_new<0] <- 0
+
+  if(!gene%in%rownames(vst_new))
+  {
+    vst_new <- rbind(vst_new,NTN1=0)
+  }
 
   weights_new <- weights * vst_new[gene,]
   weights_new <- t(t(weights_new) * act_new[gene,])
@@ -199,14 +205,17 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
     startend[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
   }
 
-  startend[,3] <- startend[,3]*10/max(abs(startend[,3]))
-  startend[,4] <- startend[,4]*10/max(abs(startend[,4]))
+  if(nrow(startend)!=0)
+  {
+    startend[,3] <- startend[,3]*10/max(abs(startend[,3]))
+    startend[,4] <- startend[,4]*10/max(abs(startend[,4]))
 
-  startend[,5] <- startend[,1] + startend[,3]
-  startend[,6] <- startend[,2] + startend[,4]
+    startend[,5] <- startend[,1] + startend[,3]
+    startend[,6] <- startend[,2] + startend[,4]
 
-  startend[startend[,"vec_len"]<0.1,"vec_len"] <- 0.01
-  startend[startend[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+    startend[startend[,"vec_len"]<0.1,"vec_len"] <- 0.01
+    startend[startend[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+  }
 
 
 
@@ -243,15 +252,17 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
     startend2[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
   }
 
-  startend2[,3] <- startend2[,3]*10/max(abs(startend2[,3]))
-  startend2[,4] <- startend2[,4]*10/max(abs(startend2[,4]))
+  if(nrow(startend2)!=0)
+  {
+    startend2[,3] <- startend2[,3]*10/max(abs(startend2[,3]))
+    startend2[,4] <- startend2[,4]*10/max(abs(startend2[,4]))
 
-  startend2[,1] <- startend2[,5] - startend2[,3]
-  startend2[,2] <- startend2[,6] - startend2[,4]
+    startend2[,1] <- startend2[,5] - startend2[,3]
+    startend2[,2] <- startend2[,6] - startend2[,4]
 
-  startend2[startend2[,"vec_len"]<0.1,"vec_len"] <- 0.01
-  startend2[startend2[,"vec_len"]>=0.1,"vec_len"] <- 0.08
-
+    startend2[startend2[,"vec_len"]<0.1,"vec_len"] <- 0.01
+    startend2[startend2[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+  }
 
   library(ggplot2)
   library(patchwork)
@@ -268,7 +279,7 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
     scale_color_gradient(low="blue",high="green")+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
+    #geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
     ggtitle(paste0(gene," exp (sending)"))+
     theme_void()+
     theme(
@@ -290,7 +301,7 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
     scale_color_gradient(low="blue",high="green")+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
+    #geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
     ggtitle(paste0(gene," vst (sending)"))+
     theme_void()+
     theme(
@@ -311,7 +322,7 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both")
     scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
+    #geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
     ggtitle(paste0(gene," act (receiving)"))+
     theme_void()+
     theme(

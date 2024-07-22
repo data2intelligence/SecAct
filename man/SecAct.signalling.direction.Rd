@@ -4,7 +4,12 @@
 \alias{SecAct.signalling.direction}
 \title{FUNCTION_TITLE}
 \usage{
-SecAct.signalling.direction(SpaCET_obj, gene, signalMode = "both")
+SecAct.signalling.direction(
+  SpaCET_obj,
+  gene,
+  signalMode = "both",
+  signalDir = TRUE
+)
 }
 \arguments{
 \item{SpaCET_obj}{PARAM_DESCRIPTION}
@@ -12,6 +17,8 @@ SecAct.signalling.direction(SpaCET_obj, gene, signalMode = "both")
 \item{gene}{PARAM_DESCRIPTION}
 
 \item{signalMode}{PARAM_DESCRIPTION}
+
+\item{signalDir}{PARAM_DESCRIPTION}
 }
 \value{
 OUTPUT_DESCRIPTION
