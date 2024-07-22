@@ -1,12 +1,12 @@
 Package: SecAct
-Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: Secreted Signaling Activity Inference
+Description: Inferring secreted protein activities at bulk, single-cell, and spatial levels
+Authors@R: c(person(given = "Beibei",family = "Ru", role = c("aut", "cre"), email = "beibei.ru@nih.gov"),person(given = "Peng",family = "Jiang", role = c("aut"), email = "peng.jiang@nih.gov"))
+License: file LICENSE
+URL: https://github.com/data2intelligence/SecAct
+BugReports: https://github.com/data2intelligence/SecAct/issues
 Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Depends:
+    R (>= 3.5.0)
