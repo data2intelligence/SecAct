@@ -20,7 +20,7 @@ secreted protein-coding gene expression at source cells and signaling
 activities at sink cells.
 
 <p align="center">
-<img src="man/figures/workflow.png" width="60%"/>
+<img src="man/figures/workflow.png" width="52%"/>
 </p>
 
 ## Installation
