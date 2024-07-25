@@ -71,7 +71,10 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>The goal of SecAct is to infer secreted proteins’ activity from RNA-seq data, including bulk, single-cell, and spatial data. Secreted proteins at the tumor microenvironment mediate the intercellular interaction among malignant, stromal, and immune cells, thereby influencing every stage of tumorigenic cascades. Currently, researchers are investigating the oncogenic role of secreted proteins through both conventional molecular experiments and high-throughput techniques like mass spectrometry or sequencing. However, the former is limited to studying only a few secreted proteins per study, while the latter loses the spatial position information of cells and molecules. Here, we propose an innovative analytical platform that leverages spatial transcriptomics, an emerging technology enabling comprehensive mapping of gene expression with spatial information in an intact tumor tissue, to spatially explore the activity and function of secreted proteins at the tumor microenvironment.</p>
+<p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. If input data are spatial transcriptomics, SecAct additionally calculates the secreted signaling velocity at each spatial spot. The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.</p>
+<center>
+<img src="reference/figures/workflow.png" width="45%">
+</center>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -85,6 +88,15 @@
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"Path_to_the_source_code"</span>, repos <span class="op">=</span> <span class="cn">NULL</span>, type<span class="op">=</span><span class="st">"source"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
+<h2 id="dependencies">Dependencies<a class="anchor" aria-label="anchor" href="#dependencies"></a>
+</h2>
+<ul>
+<li>R version &gt;= 4.2.0.</li>
+<li>R packages: Matrix, ggplot2, patchwork.</li>
+<li>C Library: GSL.</li>
+</ul>
+</div>
+<div class="section level2">
 <h2 id="example-1-input-expression-matrix">Example 1 (Input: expression matrix)<a class="anchor" aria-label="anchor" href="#example-1-input-expression-matrix"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(SecAct)</span>
@@ -94,89 +106,25 @@
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(Y, <span class="at">lambda=</span><span class="dv">10000</span>, <span class="at">nrand=</span><span class="dv">1000</span>)</span>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">names</span>(res)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="do">## "beta"   "se"     "zscore" "pvalue"</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>beta[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">## Activin A                   -0.0054571949                   -0.002227756</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## BDNF                        -0.0165308969                   -0.003590268</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="do">## BMP2                        -0.0215501262                    0.019876194</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="do">## BMP4                         0.0039773755                    0.003459698</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="do">## BMP6                         0.0004974797                    0.025879907</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="do">## CD40L                       -0.0051185785                    0.001073442</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="do">##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="do">## Activin A                      -1.2489955                     -0.5632170</span></span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="do">## BDNF                           -3.7953628                     -0.7830596</span></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="do">## BMP2                           -4.9343815                      4.4209498</span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="do">## BMP4                            0.9777525                      0.8402344</span></span>
-<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="do">## BMP6                            0.1167711                      5.7487538</span></span>
-<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="do">## CD40L                          -1.2868588                      0.3233309</span></span></code></pre></div>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="do">##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="do">## Activin A                      -1.2489955                     -0.5632170</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="do">## BDNF                           -3.7953628                     -0.7830596</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## BMP2                           -4.9343815                      4.4209498</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">## BMP4                            0.9777525                      0.8402344</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## BMP6                            0.1167711                      5.7487538</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="do">## CD40L                          -1.2868588                      0.3233309</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example-2-input-visium-data">Example 2 (Input: Visium data)<a class="anchor" aria-label="anchor" href="#example-2-input-visium-data"></a>
+<h2 id="tutorial">Tutorial<a class="anchor" aria-label="anchor" href="#tutorial"></a>
 </h2>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">library</span>(SpaCET)</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>visiumPath <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">system.file</span>(<span class="at">package =</span> <span class="st">"SpaCET"</span>), <span class="st">"extdata/Visium_BC"</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>SpaCET_obj <span class="ot">&lt;-</span> <span class="fu">create.SpaCET.object.10X</span>(<span class="at">visiumPath =</span> visiumPath)</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>SpaCET_obj <span class="ot">&lt;-</span> <span class="fu">SpaCET.quality.control</span>(SpaCET_obj)</span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="fu">library</span>(SecAct)</span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>SpaCET_obj <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(SpaCET_obj, <span class="at">lambda=</span><span class="dv">10000</span>, <span class="at">nrand=</span><span class="dv">1000</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>SpaCET_obj<span class="sc">@</span>results<span class="sc">$</span>SecAct_res<span class="sc">$</span>zscore[<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>]</span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="do">##                50x102      59x19      14x94      47x13      73x43      61x97</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="do">## Activin A -0.05311363  2.4440663 -0.6858406  0.4543983 -1.1893773  0.3020815</span></span>
-<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="do">## BDNF       0.52280289  1.2478663 -1.4952240 -1.3330523 -0.4755956  1.2212656</span></span>
-<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="do">## BMP2      -0.30272668 -2.0417263  1.5261628  2.2138652 -3.3104354 -1.8805104</span></span>
-<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="do">## BMP4       1.85152361 -0.1384111 -0.7384362  1.5279108  0.9950997 -1.0644863</span></span>
-<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="do">## BMP6      -0.77698722  0.6405603  0.3362758 -0.6919639  1.1056869  1.2812108</span></span>
-<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="do">## CD40L      0.52564266 -1.2222940  1.2872563  0.2879296 -1.6921668  0.3214071</span></span>
-<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a></span>
-<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="fu">SecAct.signalling.direction</span>(SpaCET_obj, <span class="at">gene=</span><span class="st">"TGFB1"</span>)</span></code></pre></div>
-<p><img src="reference/figures/ST.png" width="100%"></p>
-</div>
-<div class="section level2">
-<h2 id="example-3-input-single-cell">Example 3 (Input: single cell)<a class="anchor" aria-label="anchor" href="#example-3-input-single-cell"></a>
-</h2>
-<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">library</span>(Seurat)</span>
-<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">library</span>(SeuratData)</span>
-<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">InstallData</span>(<span class="st">"pbmc3k"</span>)</span>
-<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="fu">data</span>(<span class="st">"pbmc3k"</span>)</span>
-<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">UpdateSeuratObject</span>(pbmc3k) </span>
-<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a></span>
-<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>pbmc[[<span class="st">"percent.mt"</span>]] <span class="ot">&lt;-</span> <span class="fu">PercentageFeatureSet</span>(pbmc, <span class="at">pattern =</span> <span class="st">"^MT-"</span>)</span>
-<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">subset</span>(pbmc, <span class="at">subset =</span> nFeature_RNA <span class="sc">&gt;</span> <span class="dv">200</span> <span class="sc">&amp;</span> nFeature_RNA <span class="sc">&lt;</span> <span class="dv">2500</span> <span class="sc">&amp;</span> percent.mt <span class="sc">&lt;</span> <span class="dv">5</span>)</span>
-<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">NormalizeData</span>(pbmc, <span class="at">normalization.method =</span> <span class="st">"LogNormalize"</span>, <span class="at">scale.factor =</span> <span class="dv">10000</span>)</span>
-<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a></span>
-<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">FindVariableFeatures</span>(pbmc, <span class="at">nfeatures =</span> <span class="dv">2000</span>)</span>
-<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>all.genes <span class="ot">&lt;-</span> <span class="fu">rownames</span>(pbmc)</span>
-<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">ScaleData</span>(pbmc, <span class="at">features =</span> all.genes)</span>
-<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a></span>
-<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">RunPCA</span>(pbmc, <span class="at">features =</span> <span class="fu">VariableFeatures</span>(<span class="at">object =</span> pbmc))</span>
-<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">FindNeighbors</span>(pbmc, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
-<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">FindClusters</span>(pbmc, <span class="at">resolution =</span> <span class="fl">0.5</span>)</span>
-<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">RunUMAP</span>(pbmc, <span class="at">dims =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)</span>
-<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a></span>
-<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>new.cluster.ids <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Naive CD4 T"</span>, <span class="st">"CD14+ Mono"</span>, <span class="st">"Memory CD4 T"</span>, <span class="st">"B"</span>, <span class="st">"CD8 T"</span>, <span class="st">"FCGR3A+ Mono"</span>,<span class="st">"NK"</span>, <span class="st">"DC"</span>, <span class="st">"Platelet"</span>)</span>
-<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="fu">names</span>(new.cluster.ids) <span class="ot">&lt;-</span> <span class="fu">levels</span>(pbmc)</span>
-<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">RenameIdents</span>(pbmc, new.cluster.ids)</span>
-<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a></span>
-<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a></span>
-<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="fu">library</span>(SecAct)</span>
-<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>pbmc <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(pbmc, <span class="at">lambda=</span><span class="dv">10000</span>, <span class="at">nrand=</span><span class="dv">10</span>)</span>
-<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a></span>
-<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a></span>
-<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">DimPlot</span>(pbmc, <span class="at">reduction =</span> <span class="st">"umap"</span>, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">pt.size =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="fu">NoLegend</span>()</span>
-<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>p2 <span class="ot">&lt;-</span> <span class="fu">FeaturePlot</span>(pbmc, <span class="at">features =</span> <span class="st">"SecAct_GCSF"</span>, <span class="at">cols =</span> <span class="fu">c</span>(<span class="st">"blue"</span>,<span class="st">"white"</span>,<span class="st">"red"</span>), <span class="at">pt.size =</span> <span class="fl">0.5</span>)</span>
-<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a></span>
-<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="fu">library</span>(patchwork)</span>
-<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a>p1<span class="sc">|</span>p2</span></code></pre></div>
-<p><img src="reference/figures/scRNA.png" width="100%"></p>
+<ul>
+<li>
+<a href="https://data2intelligence.github.io/SecAct/articles/bulk.html" class="external-link">Bulk</a><br>
+</li>
+<li><a href="https://data2intelligence.github.io/SecAct/articles/singleCell.html" class="external-link">Single-Cell</a></li>
+<li><a href="https://data2intelligence.github.io/SecAct/articles/spatial.html" class="external-link">Spatial</a></li>
+</ul>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

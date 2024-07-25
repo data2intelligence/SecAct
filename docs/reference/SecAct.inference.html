@@ -101,29 +101,13 @@
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">Yfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/IFNG_GSE100093.diff"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">Yfile</span>,sep<span class="op">=</span><span class="st">"\t"</span>,check.names<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SecAct.inference</span><span class="op">(</span><span class="va">Y</span>, SigMat<span class="op">=</span><span class="cn">NULL</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "beta"   "se"     "zscore" "pvalue"</span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Activin A                      -1.2489955                     -0.5632170</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BDNF                           -3.7953628                     -0.7830596</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BMP2                           -4.9343815                      4.4209498</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BMP4                            0.9777525                      0.8402344</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BMP6                            0.1167711                      5.7487538</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CD40L                          -1.2868588                      0.3233309</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           IFNG.57d.AMG811.Lesional.180.mg IFNG.57d.Placebo.Lesional.0.mg</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Activin A                      -0.2678819                      -1.737434</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BDNF                           -1.3474272                      -0.507771</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BMP2                            3.9197483                      -4.081269</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BMP4                            5.0416249                       1.873607</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> BMP6                            4.9177453                       3.693013</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> CD40L                           0.5590765                      -2.004034</span>
-<span class="r-in"><span></span></span>
-</code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span></span>
+<span><span class="va">Yfile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/IFNG_GSE100093.diff"</span><span class="op">)</span></span>
+<span><span class="va">Y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">Yfile</span>,sep<span class="op">=</span><span class="st">"\t"</span>,check.names<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SecAct.inference</span><span class="op">(</span><span class="va">Y</span>, SigMat<span class="op">=</span><span class="cn">NULL</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span>
+<span></span></code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

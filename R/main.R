@@ -137,25 +137,24 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", sig
     stop("SpaCET object is requried.")
   }
 
-  set.seed(123456)
-  st.matrix.data <- SpaCET_obj@input$counts
-  vst <- round(sctransform::vst(st.matrix.data, min_cells=5)$y,3)
-  weights <- calWeights(colnames(vst), r=3, diag0=TRUE)
+  counts <- SpaCET_obj@input$counts
+  exp <- Matrix::t(Matrix::t(counts)*1e5/Matrix::colSums(counts))
+  exp <- log2(exp+1)
+
   act <- SpaCET_obj@results$SecAct_res$zscore
+  act[act<0] <- 0
+
+  weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
 
   act_new <- act[,colnames(weights)] # remove spot island
-  vst_new <- vst[,colnames(weights)] # remove spot island
-  exp_new <- st.matrix.data[,colnames(weights)]
+  exp_new <- exp[,colnames(weights)] # remove spot island
 
-  act_new[act_new<0] <- 0
-  vst_new[vst_new<0] <- 0
-
-  if(!gene%in%rownames(vst_new))
+  if(!gene%in%rownames(exp_new))
   {
-    vst_new <- rbind(vst_new,NTN1=0)
+    weights_new <- weights * 0
+  }else{
+    weights_new <- weights * exp_new[gene,]
   }
-
-  weights_new <- weights * vst_new[gene,]
   weights_new <- t(t(weights_new) * act_new[gene,])
 
   coordi <- data.frame(
@@ -262,7 +261,12 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", sig
 
     startend2[startend2[,"vec_len"]<0.1,"vec_len"] <- 0.01
     startend2[startend2[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+
+    #startend2[,"vec_len"] <- startend2[,"vec_len"]/max(startend2[,"vec_len"])
+    #startend2[,"vec_len"] <- startend2[,"vec_len"]/10
   }
+
+
 
   library(ggplot2)
   library(patchwork)
@@ -270,39 +274,19 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", sig
   fig.df <- data.frame(
     x=coordi[,1],
     y=coordi[,2],
-    value=exp_new[gene,]
-  )
-
-  p0 <- ggplot(fig.df,aes(x=x,y=y))+
-    annotation_custom(image$grob)+
-    geom_point(aes(colour=value))+
-    scale_color_gradient(low="blue",high="green")+
-    scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    #geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
-    ggtitle(paste0(gene," exp (sending)"))+
-    theme_void()+
-    theme(
-      plot.title = element_text(hjust = 0.5)
-    )+coord_flip()
-
-
-  fig.df <- data.frame(
-    x=coordi[,1],
-    y=coordi[,2],
-    value=vst_new[gene,]
+    Exp=exp_new[gene,]
   )
 
   fig.df[fig.df[,3]>5,3] <- 5
 
   p1 <- ggplot(fig.df,aes(x=x,y=y))+
     annotation_custom(image$grob)+
-    geom_point(aes(colour=value))+
-    scale_color_gradient(low="blue",high="green")+
+    geom_point(aes(colour=Exp))+
+    scale_color_gradient(low="blue",high="red")+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    #geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
-    ggtitle(paste0(gene," vst (sending)"))+
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
+    ggtitle(paste0(gene," (sending)"))+
     theme_void()+
     theme(
       plot.title = element_text(hjust = 0.5)
@@ -312,23 +296,23 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", sig
   fig.df2 <- data.frame(
     x=coordi[,1],
     y=coordi[,2],
-    value=act_new[gene,]
+    Act=act_new[gene,]
   )
 
   p2 <- ggplot(fig.df2,aes(x=x,y=y))+
-    #annotation_custom(image$grob)+
-    geom_point(aes(colour=value),size=1)+
+    annotation_custom(image$grob)+
+    geom_point(aes(colour=Act))+
     #scale_color_gradientn(colors=c("#a5a6ff","#ff72a1","brown"))+
     scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
     scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    #geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
-    ggtitle(paste0(gene," act (receiving)"))+
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
+    ggtitle(paste0(gene," (receiving)"))+
     theme_void()+
     theme(
       plot.title = element_text(hjust = 0.5)
     )+coord_flip()
-
+  p1+p2
 
   if(signalMode=="sending")
   {

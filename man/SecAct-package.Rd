@@ -4,12 +4,25 @@
 \name{SecAct-package}
 \alias{SecAct}
 \alias{SecAct-package}
-\title{SecAct: What the Package Does (One Line, Title Case)}
+\title{SecAct: Secreted Signaling Activity Inference}
 \description{
-What the package does (one paragraph).
+Inferring secreted protein activities at bulk, single-cell, and spatial levels
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/data2intelligence/SecAct}
+  \item Report bugs at \url{https://github.com/data2intelligence/SecAct/issues}
+}
+
 }
 \author{
-\strong{Maintainer}: First Last \email{first.last@example.com} (\href{https://orcid.org/YOUR-ORCID-ID}{ORCID})
+\strong{Maintainer}: Beibei Ru \email{beibei.ru@nih.gov}
+
+Authors:
+\itemize{
+  \item Peng Jiang \email{peng.jiang@nih.gov}
+}
 
 }
 \keyword{internal}
