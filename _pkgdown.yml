@@ -8,5 +8,13 @@ navbar:
       href: index.html
     - text: Reference
       href: reference/index.html
+    - text: Tutorials
+      menu:
+      - text: Bulk
+        href: articles/Bulk.html
+      - text: SingleCell
+        href: articles/SingleCell.html
+      - text: Spatial
+        href: articles/Spatial.html
     - text: News
       href: news/index.html

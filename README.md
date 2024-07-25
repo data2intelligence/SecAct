@@ -19,9 +19,9 @@ signal. The velocity magnitude represents the product between the
 secreted protein-coding gene expression at source cells and signaling
 activities at sink cells.
 
-<center>
-<img src="man/figures/workflow.png" width="45%"/>
-</center>
+<p align="center">
+<img src="man/figures/workflow.png" width="60%"/>
+</p>
 
 ## Installation
 
@@ -67,6 +67,6 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 
 ## Tutorial
 
-- [Bulk](https://data2intelligence.github.io/SecAct/articles/bulk.html)  
-- [Single-Cell](https://data2intelligence.github.io/SecAct/articles/singleCell.html)
-- [Spatial](https://data2intelligence.github.io/SecAct/articles/spatial.html)
+- [Bulk](https://data2intelligence.github.io/SecAct/articles/Bulk.html)  
+- [Single-Cell](https://data2intelligence.github.io/SecAct/articles/SingleCell.html)
+- [Spatial](https://data2intelligence.github.io/SecAct/articles/Spatial.html)

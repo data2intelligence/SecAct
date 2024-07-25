@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. If input data are spatial transcriptomics, SecAct additionally calculates the secreted signaling velocity at each spatial spot. The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells. 
 
 
-<center><img src="man/figures/workflow.png" width="45%"/></center>
+<p align="center"><img src="man/figures/workflow.png" width="60%"/></p>
 
 
 ## Installation
@@ -68,8 +68,8 @@ head(res$zscore[,1:2])
 ```
 
 ## Tutorial
-* [Bulk](https://data2intelligence.github.io/SecAct/articles/bulk.html)  
-* [Single-Cell](https://data2intelligence.github.io/SecAct/articles/singleCell.html)
-* [Spatial](https://data2intelligence.github.io/SecAct/articles/spatial.html)
+* [Bulk](https://data2intelligence.github.io/SecAct/articles/Bulk.html)  
+* [Single-Cell](https://data2intelligence.github.io/SecAct/articles/SingleCell.html)
+* [Spatial](https://data2intelligence.github.io/SecAct/articles/Spatial.html)
 
 
