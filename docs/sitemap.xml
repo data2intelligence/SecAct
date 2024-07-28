@@ -7,16 +7,16 @@
     <loc>/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>/articles/bulk.html</loc>
+    <loc>/articles/Bulk.html</loc>
+  </url>
+  <url>
+    <loc>/articles/SingleCell.html</loc>
+  </url>
+  <url>
+    <loc>/articles/Spatial.html</loc>
   </url>
   <url>
     <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/singleCell.html</loc>
-  </url>
-  <url>
-    <loc>/articles/spatial.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
