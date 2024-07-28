@@ -62,11 +62,11 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 ## Tutorial
 
 - [Infer the secreted protein activity from gene expression in bulk
-  level](https://data2intelligence.github.io/SecAct/articles/Bulk.html)  
+  level](https://data2intelligence.github.io/SecAct/articles/bulk.html)  
 - [Infer the secreted protein activity from single-cell RNA-Seq
-  data](https://data2intelligence.github.io/SecAct/articles/SingleCell.html)
+  data](https://data2intelligence.github.io/SecAct/articles/singleCell.html)
 - [Infer the secreted protein activity from spatial transcriptomics
-  data](https://data2intelligence.github.io/SecAct/articles/Spatial.html)
+  data](https://data2intelligence.github.io/SecAct/articles/spatial.html)
 
 ## Citation
 
