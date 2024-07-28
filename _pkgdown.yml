@@ -11,10 +11,10 @@ navbar:
     - text: Tutorials
       menu:
       - text: Infer the secreted protein activity from gene expression in bulk level
-        href: articles/Bulk.html
+        href: articles/bulk.html
       - text: Infer the secreted protein activity from single-cell RNA-Seq data
-        href: articles/SingleCell.html
+        href: articles/singleCell.html
       - text: Infer the secreted protein activity from spatial transcriptomics data
-        href: articles/Spatial.html
+        href: articles/spatial.html
     - text: News
       href: news/index.html
