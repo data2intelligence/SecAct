@@ -1,60 +1,30 @@
-#' @title FUNCTION_TITLE
-#' @description FUNCTION_DESCRIPTION
-#' @param Y PARAM_DESCRIPTION
-#' @param Ycontrol PARAM_DESCRIPTION
-#' @param SigMat PARAM_DESCRIPTION
-#' @param lambda PARAM_DESCRIPTION
-#' @param nrand PARAM_DESCRIPTION
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
+#' @title Secreted protein activity inference
+#' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
+#' @param expr Gene expression matrix with gene symbol (row) x sample (column).
+#' @param sigMatrix Secreted protein signature matrix.
+#' @param lambda Penalty factor in the ridge regression.
+#' @param nrand Number of randomizations in the permutation test, with a default value 1000.
+#' @return
+#'
+#' A list with four items, each is a matrix.
+#' beta: regression coefficients
+#' se: standard errors of coefficients
+#' zscore: beta/se
+#' pvalue: statistical significance
+#'
 #' @examples
 #'
-#' Yfile <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
-#' Y <- read.table(Yfile,sep="\t",check.names=F)
-#' res <- SecAct.inference(Y, SigMat=NULL, lambda=10000, nrand=1000)
-#' names(res)
+#' exprPath <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
+#' expr <- read.table(expr, sep="\t", check.names=F)
+#' res <- SecAct.inference(expr, lambda=10000, nrand=1000)
 #' head(res$zscore)
 #'
 #' @rdname SecAct.inference
 #' @export
 #'
-SecAct.inference <- function(Y, Ycontrol=NULL, SigMat=NULL, lambda=10000, nrand=1000)
+SecAct.inference <- function(expr, SigMat="SecAct", lambda=10000, nrand=1000)
 {
-
-  if(class(Y)[1]=="SpaCET")
-  {
-    Y_type <- "SpaCET"
-    SpaCET_obj <- Y
-
-
-    Y <- SpaCET_obj@input$counts
-    Y <- Matrix::t(Matrix::t(Y)*1e5/Matrix::colSums(Y))
-    Y@x <- log2(Y@x + 1)
-
-    if(is.null(Ycontrol))
-    {
-      Y <- Y - Matrix::rowMeans(Y)
-    }else{
-      SpaCET_obj_control <- Ycontrol
-
-      Ycontrol <- SpaCET_obj_control@input$counts
-      Ycontrol <- Matrix::t(Matrix::t(Ycontrol)*1e5/Matrix::colSums(Ycontrol))
-      Ycontrol@x <- log2(Ycontrol@x + 1)
-
-      Y <- Y - Matrix::rowMeans(Ycontrol)
-    }
-
-  }else if (class(Y)[1]=="Seurat"){
-    Y_type <- "Seurat"
-    Seurat_obj <- Y
-
-    Y <- Seurat_obj@assays$RNA@data
-    Y <- Y - Matrix::rowMeans(Y)
-  }else{
-    Y_type <- "matrix"
-  }
-
-  if(is.null(SigMat))
+  if(SigMat=="SecAct")
   {
     Xfile<- file.path(system.file(package = "SecAct"), "extdata/signature.centroid")
     X <- read.table(Xfile,sep="\t",check.names=F)
@@ -62,18 +32,14 @@ SecAct.inference <- function(Y, Ycontrol=NULL, SigMat=NULL, lambda=10000, nrand=
     X <- read.table(SigMat,sep="\t",check.names=F)
   }
 
+  Y <- expr
+
   olp <- intersect(row.names(Y),row.names(X))
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
 
-  #write.table(X,"/Users/rub2/Workspace/GitHub/SecAct/inst/extdata/X",quote=F,sep="\t")
-  #write.table(Y,"/Users/rub2/Workspace/GitHub/SecAct/inst/extdata/Y",quote=F,sep="\t")
-
   X <- scale(X)
   Y <- scale(Y)
-
-  #write.table(X,"/Users/rub2/Workspace/GitHub/SecAct/inst/extdata/X_z",quote=F,sep="\t")
-  #write.table(Y,"/Users/rub2/Workspace/GitHub/SecAct/inst/extdata/Y_z",quote=F,sep="\t")
 
   n <- length(olp)
   p <- ncol(X)
@@ -100,37 +66,27 @@ SecAct.inference <- function(Y, Ycontrol=NULL, SigMat=NULL, lambda=10000, nrand=
 
   res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
 
-  if(Y_type=="SpaCET")
-  {
-    SpaCET_obj@results$SecAct_res <- res
-    SpaCET_obj
-  }else if(Y_type=="Seurat"){
-    res_z <- t(res$zscore)
-    colnames(res_z) <- paste0("SecAct_",colnames(res_z))
-
-    Seurat_obj@meta.data <- cbind(Seurat_obj@meta.data,res_z)
-    Seurat_obj
-  }else{
-    res
-  }
-
+  res
 }
 
-
-#' @title FUNCTION_TITLE
-#' @description FUNCTION_DESCRIPTION
-#' @param SpaCET_obj PARAM_DESCRIPTION
-#' @param gene PARAM_DESCRIPTION
-#' @param signalMode PARAM_DESCRIPTION
-#' @param signalDir PARAM_DESCRIPTION
-#' @return OUTPUT_DESCRIPTION
-#' @details DETAILS
-#' @examples
+#' @title Secreted protein signaling velocity
+#' @description Calculate the signaling velocity of secreted proteins based on their activities.
+#' @param SpaCET_obj An SpaCET object.
+#' @param gene Gene symbol coding a secreted protein.
+#' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
+#' @return A ggplot2 object.
+#' @details
+#' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
 #'
-#' @rdname SecAct.signalling.direction
+#' @examples
+#' SecAct.spatial.velocity(SpaCET_obj, gene="TGFB1", signalMode="receiving")
+#' SecAct.spatial.velocity(SpaCET_obj, gene="TGFB1", signalMode="sending")
+#' SecAct.spatial.velocity(SpaCET_obj, gene="TGFB1", signalMode="both")
+#'
+#' @rdname SecAct.spatial.velocity
 #' @export
 #'
-SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", signalDir=TRUE)
+SecAct.spatial.velocity <- function(SpaCET_obj, gene, signalMode="both")
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
@@ -141,7 +97,7 @@ SecAct.signalling.direction <- function(SpaCET_obj, gene, signalMode="both", sig
   exp <- Matrix::t(Matrix::t(counts)*1e5/Matrix::colSums(counts))
   exp <- log2(exp+1)
 
-  act <- SpaCET_obj@results$SecAct_res$zscore
+  act <- SpaCET_obj@results$activity$zscore
   act[act<0] <- 0
 
   weights <- calWeights(colnames(exp), r=3, diag0=TRUE)

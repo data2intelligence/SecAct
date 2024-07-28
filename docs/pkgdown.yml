@@ -2,8 +2,8 @@ pandoc: 3.1.1
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
-  bulk: bulk.html
-  singleCell: singleCell.html
-  spatial: spatial.html
-last_built: 2024-07-25T01:28Z
+  Bulk: Bulk.html
+  SingleCell: SingleCell.html
+  Spatial: Spatial.html
+last_built: 2024-07-28T19:25Z
 

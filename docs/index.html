@@ -44,6 +44,14 @@
 <li class="nav-item">
   <a class="nav-link" href="reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
+    <a class="dropdown-item" href="articles/Bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
+    <a class="dropdown-item" href="articles/SingleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
+    <a class="dropdown-item" href="articles/Spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+  </div>
+</li>
 <li class="nav-item">
   <a class="nav-link" href="news/index.html">News</a>
 </li>
@@ -71,10 +79,9 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. If input data are spatial transcriptomics, SecAct additionally calculates the secreted signaling velocity at each spatial spot. The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.</p>
-<center>
-<img src="reference/figures/workflow.png" width="45%">
-</center>
+<p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. SecAct achieves this by leveraging intercellular signatures trained from 618 genome-wide spatial transcriptomics profiles across 28 tumor types. If the input are spatial transcriptomics, SecAct additionally calculates the signaling velocities of secreted proteins from source to sink spots.</p>
+<p align="center">
+<img src="reference/figures/workflow.png" width="50%"></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -97,34 +104,35 @@
 </ul>
 </div>
 <div class="section level2">
-<h2 id="example-1-input-expression-matrix">Example 1 (Input: expression matrix)<a class="anchor" aria-label="anchor" href="#example-1-input-expression-matrix"></a>
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(SecAct)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>Yfile <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">system.file</span>(<span class="at">package =</span> <span class="st">"SecAct"</span>), <span class="st">"extdata/IFNG_GSE100093.diff"</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">read.table</span>(Yfile,<span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>,<span class="at">check.names=</span>F)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a></span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(Y, <span class="at">lambda=</span><span class="dv">10000</span>, <span class="at">nrand=</span><span class="dv">1000</span>)</span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore[,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="do">##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg</span></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="do">## Activin A                      -1.2489955                     -0.5632170</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="do">## BDNF                           -3.7953628                     -0.7830596</span></span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="do">## BMP2                           -4.9343815                      4.4209498</span></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">## BMP4                            0.9777525                      0.8402344</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## BMP6                            0.1167711                      5.7487538</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="do">## CD40L                          -1.2868588                      0.3233309</span></span></code></pre></div>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># prepare expression matrix</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>exprPath <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">system.file</span>(<span class="at">package=</span><span class="st">"SecAct"</span>), <span class="st">"extdata/IFNG_GSE100093.diff"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>expr <span class="ot">&lt;-</span> <span class="fu">read.table</span>(exprPath, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>, <span class="at">check.names=</span>F)</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># run SecAct to infer activity</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(expr, <span class="at">lambda=</span><span class="dv">10000</span>, <span class="at">nrand=</span><span class="dv">1000</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># show activity</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="tutorial">Tutorial<a class="anchor" aria-label="anchor" href="#tutorial"></a>
 </h2>
 <ul>
 <li>
-<a href="https://data2intelligence.github.io/SecAct/articles/bulk.html" class="external-link">Bulk</a><br>
+<a href="https://data2intelligence.github.io/SecAct/articles/Bulk.html" class="external-link">Infer the secreted protein activity from gene expression in bulk level</a><br>
 </li>
-<li><a href="https://data2intelligence.github.io/SecAct/articles/singleCell.html" class="external-link">Single-Cell</a></li>
-<li><a href="https://data2intelligence.github.io/SecAct/articles/spatial.html" class="external-link">Spatial</a></li>
+<li><a href="https://data2intelligence.github.io/SecAct/articles/SingleCell.html" class="external-link">Infer the secreted protein activity from single-cell RNA-Seq data</a></li>
+<li><a href="https://data2intelligence.github.io/SecAct/articles/Spatial.html" class="external-link">Infer the secreted protein activity from spatial transcriptomics data</a></li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
+</h2>
+<p>Beibei Ru, Lanqi Gong, Emily Yang, Kenneth Aldape, Lalage Wakefield, Peng Jiang. Inferring secreted protein activities at bulk, single-cell, and spatial levels. [<a href="https://github.com/data2intelligence/SecAct" target="_blank" class="external-link">Link</a>]</p>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">

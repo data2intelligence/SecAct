@@ -46,6 +46,14 @@
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="active nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
+    <a class="dropdown-item" href="../articles/Bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
+    <a class="dropdown-item" href="../articles/SingleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
+    <a class="dropdown-item" href="../articles/Spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+  </div>
+</li>
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">News</a>
 </li>
@@ -76,8 +84,8 @@
       <img src="" class="logo" alt=""><h1>Infer secreted protein activity in spatial transcriptomics data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/data2intelligence/SecAct/blob/HEAD/vignettes/spatial.Rmd" class="external-link"><code>vignettes/spatial.Rmd</code></a></small>
-      <div class="d-none name"><code>spatial.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/data2intelligence/SecAct/blob/HEAD/vignettes/Spatial.Rmd" class="external-link"><code>vignettes/Spatial.Rmd</code></a></small>
+      <div class="d-none name"><code>Spatial.Rmd</code></div>
     </div>
 
     
@@ -90,28 +98,26 @@ will be employed to create an SpaCET object to store the ST data.</p>
 <div class="section level2">
 <h2 id="read-st-data-to-an-spacet-object">Read ST data to an SpaCET object<a class="anchor" aria-label="anchor" href="#read-st-data-to-an-spacet-object"></a>
 </h2>
-<p>First, download the ST data from <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE225690" target="_blank" class="external-link">GSE225690</a>. This dataset includes two endometrial
-cancer patients treated with anti-Netrin-1 (NTN1) compound. Netrin-1 is
-a secreted glycoprotein that plays critical roles in angiogenesis and
-cell survival, and blocking NTN1 inhibits tumor growth. In the data
-folder, 01_039_C1d1 and 01_039_C3d1 represent pre- and on-treatment
-tumor samples for Patient 01_039, respectively. To read ST data into R,
-user can create an SpaCET object by using
-<code>create.SpaCET.object.10X</code>.</p>
+<p>This dataset includes two endometrial cancer patients treated with
+anti-Netrin-1 (NTN1) compound. Netrin-1 is a secreted glycoprotein that
+plays critical roles in angiogenesis and cell survival, and blocking
+NTN1 inhibits tumor growth. Each patient has both pre- and on-treatment
+tumor samples, respectively. To read ST data into R, user can create an
+SpaCET object by using <code>create.SpaCET.object.10X</code>.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SpaCET" class="external-link">SpaCET</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># set the path to the download folder.</span></span>
-<span><span class="va">dataPath</span> <span class="op">&lt;-</span> <span class="st">"/Users/rub2/Downloads/GSE225690_RAW/"</span></span>
+<span><span class="co"># set the path to the data folder.</span></span>
+<span><span class="va">dataPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package<span class="op">=</span><span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># load ST data to create an SpaCET object.</span></span>
 <span><span class="co"># read on-treatment sample</span></span>
-<span><span class="va">visiumPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"01_039_C3d1/outs/"</span><span class="op">)</span></span>
+<span><span class="va">visiumPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"UCEC_On/"</span><span class="op">)</span></span>
 <span><span class="va">SpaCET_obj_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/create.SpaCET.object.10X.html" class="external-link">create.SpaCET.object.10X</a></span><span class="op">(</span>visiumPath <span class="op">=</span> <span class="va">visiumPath</span><span class="op">)</span></span>
 <span><span class="va">SpaCET_obj_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.quality.control.html" class="external-link">SpaCET.quality.control</a></span><span class="op">(</span><span class="va">SpaCET_obj_on</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># read pre-treatment sample</span></span>
-<span><span class="va">visiumPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"01_039_C1d1/outs/"</span><span class="op">)</span></span>
+<span><span class="va">visiumPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"UCEC_Pre/"</span><span class="op">)</span></span>
 <span><span class="va">SpaCET_obj_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/create.SpaCET.object.10X.html" class="external-link">create.SpaCET.object.10X</a></span><span class="op">(</span>visiumPath <span class="op">=</span> <span class="va">visiumPath</span><span class="op">)</span></span>
 <span><span class="va">SpaCET_obj_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.quality.control.html" class="external-link">SpaCET.quality.control</a></span><span class="op">(</span><span class="va">SpaCET_obj_pre</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -120,87 +126,56 @@ user can create an SpaCET object by using
 </h2>
 <p>After loading ST data, user can run <code>SecAct.inference</code> to
 infer the activities of over 1000 secreted proteins across each spot. Of
-note, we recommend user set the parameter <code>Ycontrol</code> to
-include a control (or background) for the current ST sample. For
-example, to analyze the on-treatment sample, the pre-treatment sample
-can be set as a control. <code>SecAct</code> will normalize the
-expression values of each gene in the on-treatment sample with the
-all-spot mean from the pre-treatment sample.</p>
+note, to analyze the on-treatment sample, the pre-treatment sample will
+be set as a control. Then, normalize the expression values of each gene
+in the on-treatment sample with the all-spot mean from the pre-treatment
+sample.</p>
 <p>When analyzing the pre-treatment sample, a control sample is
-unavailable. You can just set the <code>Ycontrol</code> as NULL.
-<code>SecAct</code> will normalize the expression values of each gene in
-the pre-treatment sample to zero mean across all spots. In other words,
-<code>SecAct</code> regards the same ST sample as a control sample.</p>
+unavailable. Just normalize the expression values of each gene in the
+pre-treatment sample to zero mean across all spots. In other words, you
+just regard the same ST sample as a control sample.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span></span>
+<span><span class="co"># extract count matrix</span></span>
+<span><span class="va">expr_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">SpaCET_obj_on</span><span class="op">@</span><span class="va">input</span><span class="op">$</span><span class="va">counts</span><span class="op">)</span></span>
+<span><span class="va">expr_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">SpaCET_obj_pre</span><span class="op">@</span><span class="va">input</span><span class="op">$</span><span class="va">counts</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># calculate secreted protein activity for the on-treatment sample</span></span>
-<span><span class="va">SpaCET_obj_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">SpaCET_obj_on</span>, Ycontrol <span class="op">=</span> <span class="va">SpaCET_obj_pre</span><span class="op">)</span></span>
+<span><span class="co"># normalize to TPM</span></span>
+<span><span class="va">expr_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">expr_on</span><span class="op">)</span><span class="op">*</span><span class="fl">1e6</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">expr_on</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">expr_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">expr_pre</span><span class="op">)</span><span class="op">*</span><span class="fl">1e6</span><span class="op">/</span><span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">expr_pre</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># calculate secreted protein activity for the pre-treatment sample</span></span>
-<span><span class="va">SpaCET_obj_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span>Y <span class="op">=</span> <span class="va">SpaCET_obj_pre</span>, Ycontrol <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="co"># transform to log space</span></span>
+<span><span class="va">expr_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">expr_on</span><span class="op">/</span><span class="fl">10</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="va">expr_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log2</a></span><span class="op">(</span><span class="va">expr_pre</span><span class="op">/</span><span class="fl">10</span> <span class="op">+</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># show the activity value</span></span>
-<span><span class="va">SpaCET_obj_on</span><span class="op">@</span><span class="va">results</span><span class="op">$</span><span class="va">SecAct_res</span><span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">13</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span>
-<span><span class="va">SpaCET_obj_pre</span><span class="op">@</span><span class="va">results</span><span class="op">$</span><span class="va">SecAct_res</span><span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">13</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">]</span></span></code></pre></div>
+<span><span class="co"># normalized with the control samples</span></span>
+<span><span class="va">expr_on_rmControl</span> <span class="op">&lt;-</span> <span class="va">expr_on</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">expr_pre</span><span class="op">)</span></span>
+<span><span class="va">expr_on_rmControl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">expr_on_rmControl</span>,<span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">expr_pre_rmControl</span> <span class="op">&lt;-</span> <span class="va">expr_pre</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">expr_pre</span><span class="op">)</span></span>
+<span><span class="va">expr_pre_rmControl</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">expr_pre_rmControl</span>,<span class="fl">3</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># run SecAct to infer activity</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
+<span><span class="va">res_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr_on_rmControl</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="va">res_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr_pre_rmControl</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="visualize-the-cell-type-proportion">Visualize the cell type proportion<a class="anchor" aria-label="anchor" href="#visualize-the-cell-type-proportion"></a>
+<h2 id="add-secact-output-to-spacet-object">Add SecAct output to SpaCET object<a class="anchor" aria-label="anchor" href="#add-secact-output-to-spacet-object"></a>
 </h2>
-<p>We provide <code>SpaCET.visualize.spatialFeature</code> to present
-the spatial distribution of cell types.</p>
+<p>You can integrate the activity results into the SpaCET object, so
+that visiualize them.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># show the spatial distribution of malignant cells and macrophages.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
-<span>  <span class="va">SpaCET_obj</span>, </span>
-<span>  spatialType <span class="op">=</span> <span class="st">"CellFraction"</span>, </span>
-<span>  spatialFeatures<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Malignant"</span>,<span class="st">"Macrophage"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/visualizeDeconvolution.png" width="100%" style="border:none"></p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># show the spatial distribution of all cell types.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
-<span>  <span class="va">SpaCET_obj</span>, </span>
-<span>  spatialType <span class="op">=</span> <span class="st">"CellFraction"</span>, </span>
-<span>  spatialFeatures<span class="op">=</span><span class="st">"All"</span>, </span>
-<span>  sameScaleForFraction <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span>, </span>
-<span>  nrow<span class="op">=</span><span class="fl">5</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/visualizeDeconvolution2.png" width="100%" style="border:none"></p>
-<p>Since some cell types have relatively low abundance, user can get a
-better vision by setting <code>sameScaleForFraction = FALSE</code>. In
-addition, you can open up an interactive visualization panel by setting
-<code>interactive=TRUE</code> to browse the deconvolution results.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>,interactive<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/visualizeDeconvolution3.png" width="94%" style="border:none"></p>
-</div>
-<div class="section level2">
-<h2 id="estimate-cell-cell-interactions">Estimate cell-cell interactions<a class="anchor" aria-label="anchor" href="#estimate-cell-cell-interactions"></a>
-</h2>
-<p>After decomposing cell fractions, SpaCET can infer intercellular
-interactions based on cell colocalization and ligand-receptor
-coexpression. Linear correlations of cell fraction between cell types
-are computed across all ST spots to evaluate cell-type colocalization.
-High positive correlations indicate that cell-type pairs tend to
-colocalize together. To infer physical interactions, SpaCET tests the
-co-expression of ligand and receptor genes within the same ST spot for
-the co-localized cell-type pairs.</p>
-<div class="section level3">
-<h3 id="find-co-localized-cell-type-pairs">Find co-localized cell-type pairs<a class="anchor" aria-label="anchor" href="#find-co-localized-cell-type-pairs"></a>
-</h3>
-<p>SpaCET provides <code>SpaCET.CCI.colocalization</code> and
-<code>SpaCET.visualize.colocalization</code> to compute and visualize
-the co-localized cell-type pairs.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># calculate the cell-cell colocalization.</span></span>
-<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.CCI.colocalization.html" class="external-link">SpaCET.CCI.colocalization</a></span><span class="op">(</span><span class="va">SpaCET_obj</span><span class="op">)</span></span>
+<code class="sourceCode R"><span></span>
+<span><span class="va">SpaCET_obj_on</span><span class="op">@</span><span class="va">results</span><span class="op">$</span><span class="va">activity</span> <span class="op">&lt;-</span> <span class="va">res_on</span></span>
+<span><span class="va">SpaCET_obj_pre</span><span class="op">@</span><span class="va">results</span><span class="op">$</span><span class="va">activity</span> <span class="op">&lt;-</span> <span class="va">res_pre</span></span>
 <span></span>
-<span><span class="co"># visualize the cell-cell colocalization.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.colocalization.html" class="external-link">SpaCET.visualize.colocalization</a></span><span class="op">(</span><span class="va">SpaCET_obj</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/CCC.png" width="100%" style="border:none"></p>
-</div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.spatial.velocity.html">SecAct.spatial.velocity</a></span><span class="op">(</span><span class="va">SpaCET_obj_pre</span>, gene <span class="op">=</span> <span class="st">"TGFB1"</span>, signalMode<span class="op">=</span><span class="st">"receiving"</span><span class="op">)</span> </span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.spatial.velocity.html">SecAct.spatial.velocity</a></span><span class="op">(</span><span class="va">SpaCET_obj_on</span>, gene <span class="op">=</span> <span class="st">"TGFB1"</span>, signalMode<span class="op">=</span><span class="st">"receiving"</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="va">p1</span><span class="op">|</span><span class="va">p2</span></span></code></pre></div>
+<p><img src="img/st.png" width="100%" style="border:none"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

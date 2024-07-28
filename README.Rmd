@@ -18,10 +18,10 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. If input data are spatial transcriptomics, SecAct additionally calculates the secreted signaling velocity at each spatial spot. The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells. 
+SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. SecAct achieves this by leveraging intercellular signatures trained from 618 genome-wide spatial transcriptomics profiles across 28 tumor types. If the input are spatial transcriptomics, SecAct additionally calculates the signaling velocities of secreted proteins from source to sink spots. 
 
 
-<p align="center"><img src="man/figures/workflow.png" width="52%"/></p>
+<p align="center"><img src="man/figures/workflow.png" width="50%"/></p>
 
 
 ## Installation
@@ -46,30 +46,27 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 * R packages: Matrix, ggplot2, patchwork.
 * C Library: GSL.
 
-## Example 1 (Input: expression matrix)
+## Example
 
 ```
 library(SecAct)
 
-Yfile <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
-Y <- read.table(Yfile,sep="\t",check.names=F)
+# prepare expression matrix
+exprPath <- file.path(system.file(package="SecAct"), "extdata/IFNG_GSE100093.diff")
+expr <- read.table(exprPath, sep="\t", check.names=F)
 
-res <- SecAct.inference(Y, lambda=10000, nrand=1000)
+# run SecAct to infer activity
+res <- SecAct.inference(expr, lambda=10000, nrand=1000)
 
-head(res$zscore[,1:2])
-##           IFNG.15d.AMG811.Lesional.180.mg IFNG.15d.Placebo.Lesional.0.mg
-## Activin A                      -1.2489955                     -0.5632170
-## BDNF                           -3.7953628                     -0.7830596
-## BMP2                           -4.9343815                      4.4209498
-## BMP4                            0.9777525                      0.8402344
-## BMP6                            0.1167711                      5.7487538
-## CD40L                          -1.2868588                      0.3233309
+# show activity
+head(res$zscore)
 
 ```
 
 ## Tutorial
-* [Bulk](https://data2intelligence.github.io/SecAct/articles/Bulk.html)  
-* [Single-Cell](https://data2intelligence.github.io/SecAct/articles/SingleCell.html)
-* [Spatial](https://data2intelligence.github.io/SecAct/articles/Spatial.html)
+* [Infer the secreted protein activity from gene expression in bulk level](https://data2intelligence.github.io/SecAct/articles/Bulk.html)  
+* [Infer the secreted protein activity from single-cell RNA-Seq data](https://data2intelligence.github.io/SecAct/articles/SingleCell.html)
+* [Infer the secreted protein activity from spatial transcriptomics data](https://data2intelligence.github.io/SecAct/articles/Spatial.html)
 
-
+## Citation
+Beibei Ru,  Lanqi Gong, Emily Yang, Kenneth Aldape, Lalage Wakefield, Peng Jiang. Inferring secreted protein activities at bulk, single-cell, and spatial levels. [<a href="https://github.com/data2intelligence/SecAct" target="_blank">Link</a>]

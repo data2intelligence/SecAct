@@ -2,42 +2,34 @@
 % Please edit documentation in R/main.R
 \name{SecAct.inference}
 \alias{SecAct.inference}
-\title{FUNCTION_TITLE}
+\title{Secreted protein activity inference}
 \usage{
-SecAct.inference(
-  Y,
-  Ycontrol = NULL,
-  SigMat = NULL,
-  lambda = 10000,
-  nrand = 1000
-)
+SecAct.inference(expr, SigMat = "SecAct", lambda = 10000, nrand = 1000)
 }
 \arguments{
-\item{Y}{PARAM_DESCRIPTION}
+\item{expr}{Gene expression matrix with gene symbol (row) x sample (column).}
 
-\item{Ycontrol}{PARAM_DESCRIPTION}
+\item{lambda}{Penalty factor in the ridge regression.}
 
-\item{SigMat}{PARAM_DESCRIPTION}
+\item{nrand}{Number of randomizations in the permutation test, with a default value 1000.}
 
-\item{lambda}{PARAM_DESCRIPTION}
-
-\item{nrand}{PARAM_DESCRIPTION}
+\item{sigMatrix}{Secreted protein signature matrix.}
 }
 \value{
-OUTPUT_DESCRIPTION
+A list with four items, each is a matrix.
+beta: regression coefficients
+se: standard errors of coefficients
+zscore: beta/se
+pvalue: statistical significance
 }
 \description{
-FUNCTION_DESCRIPTION
-}
-\details{
-DETAILS
+Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
 }
 \examples{
 
-Yfile <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
-Y <- read.table(Yfile,sep="\t",check.names=F)
-res <- SecAct.inference(Y, SigMat=NULL, lambda=10000, nrand=1000)
-names(res)
+exprPath <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
+expr <- read.table(expr, sep="\t", check.names=F)
+res <- SecAct.inference(expr, lambda=10000, nrand=1000)
 head(res$zscore)
 
 }
