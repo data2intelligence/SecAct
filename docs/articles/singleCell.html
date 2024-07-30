@@ -123,13 +123,13 @@ and Tumor tissue.</p>
 <span><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">expr</span>,<span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># run SecAct to infer activity</span></span>
-<span><span class="va">res_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
-<span></span>
+<span><span class="va">res_sc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.time</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co"># show activity</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="add-secact-output-to-seurat-object">Add SecAct output to Seurat object<a class="anchor" aria-label="anchor" href="#add-secact-output-to-seurat-object"></a>
+<h2 id="add-activity-to-seurat-object">Add activity to Seurat object<a class="anchor" aria-label="anchor" href="#add-activity-to-seurat-object"></a>
 </h2>
 <p>You can integrate the activity results into the Seurat object, so
 that visiualize them.</p>

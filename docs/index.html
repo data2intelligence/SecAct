@@ -79,7 +79,7 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics. The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. SecAct achieves this by leveraging intercellular signatures trained from 618 genome-wide spatial transcriptomics profiles across 28 tumor types. If the input are spatial transcriptomics, SecAct additionally calculates the signaling velocities of secreted proteins from source to sink spots.</p>
+<p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics (ST). The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. SecAct achieves this by leveraging intercellular signatures trained from 618 genome-wide spatial transcriptomics profiles across 28 tumor types. If the input are spatial transcriptomics, SecAct additionally calculates the signaling velocities of secreted proteins from source to sink spots.</p>
 <p align="center">
 <img src="reference/figures/workflow.png" width="50%"></p>
 <div class="section level2">
@@ -102,6 +102,11 @@
 <li>R packages: Matrix, ggplot2, patchwork.</li>
 <li>C Library: GSL.</li>
 </ul>
+<p>The R package has been installed successfully on Operating systems:</p>
+<ul>
+<li>macOS Sonoma 14.5</li>
+<li>Rocky Linux 8.7 (Green Obsidian)</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
@@ -109,14 +114,28 @@
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(SecAct)</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># prepare expression matrix</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>exprPath <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">system.file</span>(<span class="at">package=</span><span class="st">"SecAct"</span>), <span class="st">"extdata/IFNG_GSE100093.diff"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>expr <span class="ot">&lt;-</span> <span class="fu">read.table</span>(exprPath, <span class="at">sep=</span><span class="st">"</span><span class="sc">\t</span><span class="st">"</span>, <span class="at">check.names=</span>F)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>exprPath <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">system.file</span>(<span class="at">package=</span><span class="st">"SecAct"</span>), <span class="st">"extdata/IFNG_GSE100093.diff.gz"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>expr <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(exprPath, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">check.names=</span>F)</span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># run SecAct to infer activity</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(expr, <span class="at">lambda=</span><span class="dv">10000</span>, <span class="at">nrand=</span><span class="dv">1000</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># run SecAct to infer activity; ~3 mins</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(expr)</span>
 <span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
 <span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># show activity</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore)</span></code></pre></div>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore)</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">##         Anti-IFNG.15day Anti-IFNG.57day</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## A1BG        27.41700606       15.560484</span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="do">## A2M         -1.00132544        3.703776</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="do">## A2ML1       -5.70139021       -5.585635</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="do">## AADACL2     -0.03412573        8.556714</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="do">## ABHD15       7.91357240        3.360326</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="do">## ABI3BP      -1.57170759       -4.292832</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co"># show IFNG activity</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>res<span class="sc">$</span>zscore[<span class="st">"IFNG"</span>,]</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="do">## Anti-IFNG.15day Anti-IFNG.57day </span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="do">##       -10.76148       -30.50151 </span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="tutorial">Tutorial<a class="anchor" aria-label="anchor" href="#tutorial"></a>

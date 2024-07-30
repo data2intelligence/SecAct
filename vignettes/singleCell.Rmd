@@ -49,13 +49,13 @@ expr <- expr - rowMeans(expr)
 expr <- round(expr,3)
 
 # run SecAct to infer activity
-res_sc <- SecAct.inference(expr, lambda=10000, nrand=1000)
-
+res_sc <- SecAct.inference(expr)
+Sys.time()
 # show activity
 head(res$zscore)
 ``` 
 
-## Add SecAct output to Seurat object
+## Add activity to Seurat object
 
 You can integrate the activity results into the Seurat object, so that visiualize them.
 

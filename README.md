@@ -9,9 +9,9 @@
 SecAct is an R package desighed for inferring the intercellular activity
 of secreted proteins in tumors from gene expression profiles. Users can
 input multiple modalities of expression data, including bulk,
-single-cell, or spatial transcriptomics. The outputs are 1248 secreted
-protein activities for each sample, individual cell, or ST spot,
-respectively. SecAct achieves this by leveraging intercellular
+single-cell, or spatial transcriptomics (ST). The outputs are 1248
+secreted protein activities for each sample, individual cell, or ST
+spot, respectively. SecAct achieves this by leveraging intercellular
 signatures trained from 618 genome-wide spatial transcriptomics profiles
 across 28 tumor types. If the input are spatial transcriptomics, SecAct
 additionally calculates the signaling velocities of secreted proteins
@@ -45,19 +45,38 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 - R packages: Matrix, ggplot2, patchwork.
 - C Library: GSL.
 
+The R package has been installed successfully on Operating systems:
+
+- macOS Sonoma 14.5
+- Rocky Linux 8.7 (Green Obsidian)
+
 ## Example
 
     library(SecAct)
 
     # prepare expression matrix
-    exprPath <- file.path(system.file(package="SecAct"), "extdata/IFNG_GSE100093.diff")
-    expr <- read.table(exprPath, sep="\t", check.names=F)
+    exprPath <- file.path(system.file(package="SecAct"), "extdata/IFNG_GSE100093.diff.gz")
+    expr <- read.csv(exprPath, row.names=1, check.names=F)
 
-    # run SecAct to infer activity
-    res <- SecAct.inference(expr, lambda=10000, nrand=1000)
+    # run SecAct to infer activity; ~3 mins
+    res <- SecAct.inference(expr)
 
     # show activity
     head(res$zscore)
+
+    ##         Anti-IFNG.15day Anti-IFNG.57day
+    ## A1BG        27.41700606       15.560484
+    ## A2M         -1.00132544        3.703776
+    ## A2ML1       -5.70139021       -5.585635
+    ## AADACL2     -0.03412573        8.556714
+    ## ABHD15       7.91357240        3.360326
+    ## ABI3BP      -1.57170759       -4.292832
+
+    # show IFNG activity
+    res$zscore["IFNG",]
+
+    ## Anti-IFNG.15day Anti-IFNG.57day 
+    ##       -10.76148       -30.50151 
 
 ## Tutorial
 

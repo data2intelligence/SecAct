@@ -72,12 +72,12 @@ expr_pre_rmControl <- round(expr_pre_rmControl,3)
 
 # run SecAct to infer activity
 library(SecAct)
-res_on <- SecAct.inference(expr_on_rmControl, lambda=10000, nrand=1000)
-res_pre <- SecAct.inference(expr_pre_rmControl, lambda=10000, nrand=1000)
+res_on <- SecAct.inference(expr_on_rmControl)
+res_pre <- SecAct.inference(expr_pre_rmControl)
 
 ``` 
 
-## Add SecAct output to SpaCET object
+## Add activity to SpaCET object
 
 You can integrate the activity results into the SpaCET object, so that visiualize them.
 

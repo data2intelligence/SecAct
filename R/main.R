@@ -22,11 +22,11 @@
 #' @rdname SecAct.inference
 #' @export
 #'
-SecAct.inference <- function(expr, SigMat="SecAct", lambda=10000, nrand=1000)
+SecAct.inference <- function(expr, SigMat="SecAct", lambda=5e+5, nrand=1000)
 {
   if(SigMat=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/signature.centroid")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(SigMat,sep="\t",check.names=F)

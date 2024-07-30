@@ -96,7 +96,7 @@ RNASeq or MicroArray, should be transformed by log2(x+1). x could be
 FPKM, RPKM, or TPM for RNASeq. Moreover, the input expression matrix
 should be normalized with the control samples.</p>
 <div class="section level2">
-<h2 id="case-1">Case 1<a class="anchor" aria-label="anchor" href="#case-1"></a>
+<h2 id="case-1-treatment-experiment-">Case 1: Treatment experiment.<a class="anchor" aria-label="anchor" href="#case-1-treatment-experiment-"></a>
 </h2>
 <p>The current case includes the differential expression profiles
 between anti-IFNG treatment and control samples.</p>
@@ -107,14 +107,28 @@ between anti-IFNG treatment and control samples.</p>
 <span><span class="va">exprPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package<span class="op">=</span><span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/IFNG_GSE100093.diff.gz"</span><span class="op">)</span></span>
 <span><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="va">exprPath</span>, row.names<span class="op">=</span><span class="fl">1</span>, check.names<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># run SecAct to infer activity</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
+<span><span class="co"># run SecAct to infer activity; ~3 mins</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">##         Anti-IFNG.15day Anti-IFNG.57day</span></span>
+<span><span class="co">## A1BG        27.41700606       15.560484</span></span>
+<span><span class="co">## A2M         -1.00132544        3.703776</span></span>
+<span><span class="co">## A2ML1       -5.70139021       -5.585635</span></span>
+<span><span class="co">## AADACL2     -0.03412573        8.556714</span></span>
+<span><span class="co">## ABHD15       7.91357240        3.360326</span></span>
+<span><span class="co">## ABI3BP      -1.57170759       -4.292832</span></span>
+<span></span>
+<span><span class="co"># show IFNG activity</span></span>
+<span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="st">"IFNG"</span>,<span class="op">]</span></span>
+<span></span>
+<span><span class="co">## Anti-IFNG.15day Anti-IFNG.57day </span></span>
+<span><span class="co">##       -10.76148       -30.50151 </span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="case-2">Case 2<a class="anchor" aria-label="anchor" href="#case-2"></a>
+<h2 id="case-2-large-rna-seq-cohort-">Case 2: Large RNA-Seq cohort.<a class="anchor" aria-label="anchor" href="#case-2-large-rna-seq-cohort-"></a>
 </h2>
 <p>This case aims to infer secreted protein activity for pancreatic
 cancer RNA-Seq cohorts from CPTAC.</p>

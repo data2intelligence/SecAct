@@ -157,11 +157,11 @@ just regard the same ST sample as a control sample.</p>
 <span></span>
 <span><span class="co"># run SecAct to infer activity</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
-<span><span class="va">res_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr_on_rmControl</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
-<span><span class="va">res_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr_pre_rmControl</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">res_on</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr_on_rmControl</span><span class="op">)</span></span>
+<span><span class="va">res_pre</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.inference.html">SecAct.inference</a></span><span class="op">(</span><span class="va">expr_pre_rmControl</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="add-secact-output-to-spacet-object">Add SecAct output to SpaCET object<a class="anchor" aria-label="anchor" href="#add-secact-output-to-spacet-object"></a>
+<h2 id="add-activity-to-spacet-object">Add activity to SpaCET object<a class="anchor" aria-label="anchor" href="#add-activity-to-spacet-object"></a>
 </h2>
 <p>You can integrate the activity results into the SpaCET object, so
 that visiualize them.</p>
