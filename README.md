@@ -80,16 +80,30 @@ The R package has been installed successfully on Operating systems:
 
 ## Tutorial
 
-- [Infer the secreted protein activity from gene expression in bulk
-  level](https://data2intelligence.github.io/SecAct/articles/bulk.html)  
-- [Infer the secreted protein activity from single-cell RNA-Seq
-  data](https://data2intelligence.github.io/SecAct/articles/singleCell.html)
-- [Infer the secreted protein activity from spatial transcriptomics
-  data](https://data2intelligence.github.io/SecAct/articles/spatial.html)
+##### Spatial transcriptomcis (ST) data
+
+- [Signaling patterns and velocities for multi-cellular ST
+  data](https://data2intelligence.github.io/SecAct/articles/stPattern.html)  
+- [Intercellular communication for single-cell resolution ST
+  data](https://data2intelligence.github.io/SecAct/articles/stCCC.html)
+
+##### Single-cell RNA sequencing data
+
+- [Cell-cell communication mediated by secreted
+  proteins](https://data2intelligence.github.io/SecAct/articles/scCCC.html)  
+- [Secreted protein signaling activity for various cell
+  states](https://data2intelligence.github.io/SecAct/articles/scState.html)
+
+##### Bulk RNA sequencing data
+
+- [Secreted protein activity difference between two
+  phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkDiff.html)
+- [Clinical relavance of secreted proteins in a large patient
+  cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
 
 ## Citation
 
 Beibei Ru, Lanqi Gong, Emily Yang, Kenneth Aldape, Lalage Wakefield,
-Peng Jiang. Inferring secreted protein activities at bulk, single-cell,
-and spatial levels.
+Peng Jiang. Inference of secreted protein activities in intercellular
+communication.
 \[<a href="https://github.com/data2intelligence/SecAct" target="_blank">Link</a>\]

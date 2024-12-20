@@ -10,13 +10,31 @@
     <loc>/articles/bulk.html</loc>
   </url>
   <url>
+    <loc>/articles/bulkCohort.html</loc>
+  </url>
+  <url>
+    <loc>/articles/bulkDiff.html</loc>
+  </url>
+  <url>
     <loc>/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>/articles/scCCC.html</loc>
+  </url>
+  <url>
+    <loc>/articles/scState.html</loc>
   </url>
   <url>
     <loc>/articles/singleCell.html</loc>
   </url>
   <url>
     <loc>/articles/spatial.html</loc>
+  </url>
+  <url>
+    <loc>/articles/stCCC.html</loc>
+  </url>
+  <url>
+    <loc>/articles/stPattern.html</loc>
   </url>
   <url>
     <loc>/authors.html</loc>
@@ -31,13 +49,55 @@
     <loc>/reference/SecAct-package.html</loc>
   </url>
   <url>
+    <loc>/reference/SecAct.CCC.circle.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.CCC.heatmap.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.CCC.scRNAseq.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.CCC.scST.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.activity.inference.ST.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.activity.inference.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.activity.inference.scRNAseq.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.bar.plot.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.coxph.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.heat.map.html</loc>
+  </url>
+  <url>
     <loc>/reference/SecAct.inference.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.lollipop.plot.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.signaling.pattern.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.signaling.velocity.spotST.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.signalling.direction.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.spatial.velocity.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.survival.plot.html</loc>
   </url>
   <url>
     <loc>/reference/index.html</loc>

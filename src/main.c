@@ -146,7 +146,10 @@ void ridgeReg(
 
   gsl_matrix_scale(aver, 1.0/ nrand);
   gsl_matrix_scale(aver_sq, 1.0/ nrand);
-  gsl_matrix_scale(pvalue, 1.0/ nrand);
+
+  gsl_matrix_add_constant(pvalue, 1.0);
+  int nrand1=nrand+1;
+  gsl_matrix_scale(pvalue, 1.0/ nrand1);
 
   // compute z-score
   gsl_matrix_memcpy(zscore, beta);
