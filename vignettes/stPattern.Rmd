@@ -43,7 +43,7 @@ SpaCET_obj <- SpaCET.quality.control(SpaCET_obj, min.genes = 1000)
 SpaCET.visualize.spatialFeature(
   SpaCET_obj, 
   spatialType = "QualityControl", 
-  spatialFeatures=c("UMI","Gene"),
+  spatialFeatures = c("UMI","Gene"),
   imageBg = TRUE
 )
 
@@ -52,11 +52,11 @@ SpaCET.visualize.spatialFeature(
 <img src="img/HCC_visium_QC.png" width="100%" style="border:none" />
 
 ## Infer secreted protein activity 
-After loading ST data, user can run `SecAct.signaling.inference` to infer the activities of 1248 secreted proteins for each spot.
+After loading ST data, user can run `SecAct.activity.inference` to infer the activities of 1248 secreted proteins for each spot.
 
 ``` r
 # infer activity
-SpaCET_obj <- SecAct.signaling.inference(SpaCET_obj)
+SpaCET_obj <- SecAct.activity.inference.ST(SpaCET_obj)
 
 # show activity
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]

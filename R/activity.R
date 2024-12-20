@@ -127,7 +127,7 @@ SecAct.activity.inference <- function(
 #'
 SecAct.activity.inference.ST <- function(
     inputProfile,
-    inputProfile_control=NULL,
+    inputProfile_control = NULL,
     scale.factor = 1e+05,
     sigMatrix="SecAct",
     lambda=5e+5,
@@ -151,7 +151,7 @@ SecAct.activity.inference.ST <- function(
   # transform to log space
   expr@x <- log2(expr@x + 1)
 
-  if(!is.null(inputProfile_control))
+  if(is.null(inputProfile_control))
   {
     # normalized with the control samples
     expr.diff <- expr - Matrix::rowMeans(expr)
