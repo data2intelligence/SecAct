@@ -36,7 +36,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
   # transform to log space
   expr@x <- log2(expr@x + 1)
 
-  weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
+  weights <- calWeights(colnames(expr), r=3, diag0=TRUE)
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- expr[,colnames(weights)] # remove spot island
 
@@ -47,7 +47,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
   {
     act_gene <- act_new[gene,]
 
-    if(gene%in%rownames(exp))
+    if(gene%in%rownames(expr))
     {
       exp_gene <- exp_new_aggr[gene,]
 
