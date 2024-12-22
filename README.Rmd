@@ -83,15 +83,15 @@ res$zscore["IFNG",]
 ```
 
 ## Tutorial
-##### Spatial transcriptomcis (ST) data
+#### Spatial transcriptomcis (ST) data
 * [Signaling patterns and velocities for multi-cellular ST data](https://data2intelligence.github.io/SecAct/articles/stPattern.html)  
 * [Intercellular communication for single-cell resolution ST data](https://data2intelligence.github.io/SecAct/articles/stCCC.html)
 
-##### Single-cell RNA sequencing data
+#### Single-cell RNA sequencing data
 * [Cell-cell communication mediated by secreted proteins](https://data2intelligence.github.io/SecAct/articles/scCCC.html)  
 * [Secreted protein signaling activity for various cell states](https://data2intelligence.github.io/SecAct/articles/scState.html)
 
-##### Bulk RNA sequencing data
+#### Bulk RNA sequencing data
 * [Secreted protein activity difference between two phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkDiff.html)
 * [Clinical relavance of secreted proteins in a large patient cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
 
