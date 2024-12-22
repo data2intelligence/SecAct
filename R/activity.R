@@ -207,7 +207,7 @@ SecAct.activity.inference.ST <- function(
 
   # extract count matrix
   expr <- inputProfile@input$counts
-  expr <- Matrix::expr[rowSums(expr)>0,]
+  expr <- expr[Matrix::rowSums(expr)>0,]
 
   # normalize to TPM
   stats <- Matrix::colSums(expr)
@@ -225,7 +225,7 @@ SecAct.activity.inference.ST <- function(
   }else{
     # extract count matrix
     expr_control <- inputProfile_control@input$counts
-    expr_control <- Matrix::expr[rowSums(expr_control)>0,]
+    expr_control <- expr[Matrix::rowSums(expr_control)>0,]
 
     # normalize to TPM
     stats <- Matrix::colSums(expr_control)
