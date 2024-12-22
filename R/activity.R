@@ -1,7 +1,7 @@
 #' @title Secreted protein activity inference
 #' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
-#' @param expr Gene expression matrix with gene symbol (row) x sample (column).
-#' @param sigMatrix Secreted protein signature matrix.
+#' @param Y Gene expression matrix with gene symbol (row) x sample (column).
+#' @param SigMat Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomizations in the permutation test, with a default value 1000.
 #' @return
@@ -12,17 +12,10 @@
 #' zscore: beta/se
 #' pvalue: statistical significance
 #'
-#' @examples
-#'
-#' exprPath <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
-#' expr <- read.table(expr, sep="\t", check.names=F)
-#' res <- SecAct.inference(expr, lambda=10000, nrand=1000)
-#' head(res$zscore)
-#'
 #' @rdname SecAct.inference
 #' @export
 #'
-SecAct.inference <- function(expr, SigMat="SecAct", lambda=5e+5, nrand=1000)
+SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 {
     if(SigMat=="SecAct")
     {
