@@ -51,7 +51,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
     {
       exp_gene <- exp_new_aggr[gene,]
 
-      cor_res <- cor.test(act_gene, exp_gene, method="pearson")
+      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
 
       corr[gene,"r"] <- cor_res$estimate
       corr[gene,"p"] <- cor_res$p.value

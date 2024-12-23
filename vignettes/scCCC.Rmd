@@ -46,8 +46,8 @@ my_cols <- c(
 	'NK'='#bb8761','Tex'='#fe666d','Treg'='#E6C122','Tumor'='#A4DFF2'
 )
 
-p1 <- DimPlot(Seurat_obj, reduction = "umap", cols = my_cols, group.by = "MyCellType")
-p2 <- DimPlot(Seurat_obj, reduction = "umap", group.by = "Groups")
+p1 <- DimPlot(Seurat_obj, reduction = "tsne", cols = my_cols, group.by = "MyCellType")
+p2 <- DimPlot(Seurat_obj, reduction = "tsne", group.by = "Groups")
 
 p1+p2
 ```
