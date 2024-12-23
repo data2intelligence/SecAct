@@ -4,16 +4,16 @@
 \alias{SecAct.inference}
 \title{Secreted protein activity inference}
 \usage{
-SecAct.inference(expr, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
+SecAct.inference(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
 }
 \arguments{
-\item{expr}{Gene expression matrix with gene symbol (row) x sample (column).}
+\item{Y}{Gene expression matrix with gene symbol (row) x sample (column).}
+
+\item{SigMat}{Secreted protein signature matrix.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 
 \item{nrand}{Number of randomizations in the permutation test, with a default value 1000.}
-
-\item{sigMatrix}{Secreted protein signature matrix.}
 }
 \value{
 A list with four items, each is a matrix.
@@ -24,12 +24,4 @@ pvalue: statistical significance
 }
 \description{
 Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
-}
-\examples{
-
-exprPath <- file.path(system.file(package = "SecAct"), "extdata/IFNG_GSE100093.diff")
-expr <- read.table(expr, sep="\t", check.names=F)
-res <- SecAct.inference(expr, lambda=10000, nrand=1000)
-head(res$zscore)
-
 }

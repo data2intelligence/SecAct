@@ -25,8 +25,6 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
       X <- read.table(SigMat,sep="\t",check.names=F)
     }
 
-    Y <- expr
-
     olp <- intersect(row.names(Y),row.names(X))
     X <- as.matrix(X[olp,,drop=F])
     Y <- as.matrix(Y[olp,,drop=F])
@@ -208,6 +206,85 @@ SecAct.activity.inference.ST <- function(
   # extract count matrix
   expr <- inputProfile@input$counts
   xx <- nrow(expr)
+  yy <- nrow(expr)
+  print(paste0(xx,"/",yy))
+
+  # normalize to TPM
+  stats <- Matrix::colSums(expr)
+  expr <- sweep_sparse(expr,2,stats,"/")
+  expr@x <- expr@x * scale.factor
+
+  # transform to log space
+  expr@x <- log2(expr@x + 1)
+
+  if(is.null(inputProfile_control))
+  {
+    # normalized with the control samples
+    expr.diff <- expr - Matrix::rowMeans(expr)
+
+  }else{
+    # extract count matrix
+    expr_control <- inputProfile_control@input$counts
+    expr_control <- expr[Matrix::rowSums(expr_control)>0,]
+
+    # normalize to TPM
+    stats <- Matrix::colSums(expr_control)
+    expr_control <- sweep_sparse(expr_control,2,stats,"/")
+    expr_control@x <- expr_control@x * scale.factor
+
+    # transform to log space
+    expr_control@x <- log2(expr_control@x + 1)
+
+    olp <- intersect(rownames(expr), rownames(expr_control))
+    expr.diff <- expr[olp,] - Matrix::rowMeans(expr_control[olp,])
+  }
+
+  res <- SecAct.activity.inference(
+    inputProfile = expr.diff,
+    is.differential = TRUE,
+    sigMatrix = sigMatrix,
+    lambda = lambda,
+    nrand = nrand,
+    sigFilter = sigFilter
+  )
+
+  inputProfile @results $SecAct_output $SecretedProteinActivity <- res
+
+  inputProfile
+}
+
+
+#' @title Spot activity inference from spatial data
+#' @description Calculate secreted protein signaling activity of spots from spatial transcriptomocs data.
+#' @param inputProfile A SpaCET object.
+#' @param inputProfile_control A SpaCET object.
+#' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param sigMatrix Secreted protein signature matrix.
+#' @param lambda Penalty factor in the ridge regression.
+#' @param nrand Number of randomization in the permutation test, with a default value 1000.
+#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
+#' @return A SpaCET object.
+#' @rdname SecAct.activity.inference.ST2
+#' @export
+#'
+SecAct.activity.inference.ST2 <- function(
+    inputProfile,
+    inputProfile_control = NULL,
+    scale.factor = 1e+05,
+    sigMatrix="SecAct",
+    lambda=5e+5,
+    nrand=1000,
+    sigFilter=FALSE
+)
+{
+  if(!class(inputProfile)[1]=="SpaCET")
+  {
+    stop("Please input a SpaCET object.")
+  }
+
+  # extract count matrix
+  expr <- inputProfile@input$counts
+  xx <- nrow(expr)
   expr <- expr[Matrix::rowSums(expr)>0,]
   yy <- nrow(expr)
   print(paste0(xx,"/",yy))
@@ -255,6 +332,7 @@ SecAct.activity.inference.ST <- function(
 
   inputProfile
 }
+
 
 
 #' @title Cell state activity inference from single cell data
