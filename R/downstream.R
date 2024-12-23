@@ -51,7 +51,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
     {
       exp_gene <- exp_new_aggr[gene,]
 
-      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
+      cor_res <- cor.test(act_gene, exp_gene, method="pearson")
 
       corr[gene,"r"] <- cor_res$estimate
       corr[gene,"p"] <- cor_res$p.value
@@ -132,7 +132,7 @@ SecAct.signaling.velocity.spotST <- function(
   exp <- sweep(counts, 2, Matrix::colSums(counts), "/") *1e5
   exp <- log2(exp+1)
 
-  act <- SpaCET_obj@results$SecretedProteinActivity$zscore
+  act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
   act[act<0] <- 0
 
   weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
