@@ -207,7 +207,10 @@ SecAct.activity.inference.ST <- function(
 
   # extract count matrix
   expr <- inputProfile@input$counts
+  xx <- nrow(expr)
   expr <- expr[Matrix::rowSums(expr)>0,]
+  yy <- nrow(expr)
+  print(paste0(xx,"/",yy))
 
   # normalize to TPM
   stats <- Matrix::colSums(expr)
