@@ -1,6 +1,7 @@
 #' @title Secreted protein signaling pattern
 #' @description Calculate the signaling pattern of secreted proteins based on their activities.
 #' @param SpaCET_obj A SpaCET object.
+#' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param k Number of patterns for NMF.
 #' @return A ggplot2 object.
 #' @examples
@@ -9,7 +10,7 @@
 #' @rdname SecAct.signaling.pattern
 #' @export
 #'
-SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
+SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
@@ -20,9 +21,10 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
     stop("Please run SecAct.activity.inference first.")
   }
 
-  print("Step 1. Filtering")
-
   act <- SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore
+  act[act<0] <- 0
+
+  print("Step 1. Filtering")
 
   exp <- SpaCET_obj@input$counts
   rownames(exp) <- transferSymbol(rownames(exp))
@@ -31,7 +33,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
   # normalize to TPM
   stats <- Matrix::colSums(exp)
   exp <- sweep_sparse(exp,2,stats,"/")
-  exp@x <- exp@x * 1e5
+  exp@x <- exp@x * scale.factor
 
   # transform to log space
   exp@x <- log2(exp@x + 1)
@@ -99,8 +101,10 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
 #' @title Secreted protein signaling velocity
 #' @description Calculate the signaling velocity of secreted proteins based on their activities.
 #' @param SpaCET_obj A SpaCET object.
+#' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param gene Gene symbol coding a secreted protein.
 #' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
+#' @param animated A logical indicating whether generate animated figure.
 #' @return A ggplot2 object.
 #' @details
 #' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
@@ -115,6 +119,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, k=3)
 #'
 SecAct.signaling.velocity.spotST <- function(
   SpaCET_obj,
+  scale.factor = 1e+05,
   gene,
   signalMode="both",
   animated=FALSE
@@ -124,16 +129,25 @@ SecAct.signaling.velocity.spotST <- function(
   {
     stop("SpaCET object is requried.")
   }
-
-  counts <- SpaCET_obj@input$counts
-  rownames(counts) <- transferSymbol(rownames(counts))
-  counts <- rm_duplicates(counts)
-
-  exp <- sweep(counts, 2, Matrix::colSums(counts), "/") *1e5
-  exp <- log2(exp+1)
+  if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
+  {
+    stop("Please run SecAct.activity.inference first.")
+  }
 
   act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
   act[act<0] <- 0
+
+  exp <- SpaCET_obj@input$counts
+  rownames(exp) <- transferSymbol(rownames(exp))
+  exp <- rm_duplicates(exp)
+
+  # normalize to TPM
+  stats <- Matrix::colSums(exp)
+  exp <- sweep_sparse(exp,2,stats,"/")
+  exp@x <- exp@x * scale.factor
+
+  # transform to log space
+  exp@x <- log2(exp@x + 1)
 
   weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
   act_new <- act[,colnames(weights)] # remove spot island

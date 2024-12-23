@@ -4,10 +4,12 @@
 \alias{SecAct.signaling.pattern}
 \title{Secreted protein signaling pattern}
 \usage{
-SecAct.signaling.pattern(SpaCET_obj, k = 3)
+SecAct.signaling.pattern(SpaCET_obj, scale.factor = 1e+05, k = 3)
 }
 \arguments{
 \item{SpaCET_obj}{A SpaCET object.}
+
+\item{scale.factor}{Sets the scale factor for spot-level normalization.}
 
 \item{k}{Number of patterns for NMF.}
 }

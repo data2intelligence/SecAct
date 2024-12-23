@@ -17,6 +17,8 @@ SecAct.signaling.velocity.spotST(
 \item{gene}{Gene symbol coding a secreted protein.}
 
 \item{signalMode}{Mode of signaling velocity, i.e., "receiving", "sending", and "both".}
+
+\item{scale.factor}{Sets the scale factor for spot-level normalization.}
 }
 \value{
 A ggplot2 object.
