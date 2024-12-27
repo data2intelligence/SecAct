@@ -20,10 +20,10 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer cell-cell communication (CCC) mediated by secreted proteins from scRNA-seq data. The SecAct analysis requires an scRNA-seq dataset with two distinct conditions. SecAct employs two key criteria to identify condition-specific cell-cell communication for a particular secreted protein: (1) upregulated expression of the secreted protein in the sender cell type and (2) increased signaling activity of the same secreted protein in the receiver cell type. For this demonstration, we employ an ovarian cancer (OV) scRNA-Seq <a href="https://data.mendeley.com/datasets/rc47y6m9mp/2" target="_blank">dataset</a> containing samples from both primary and metastatic sites.
+This tutorial demonstrates how to infer cell-cell communication (CCC) mediated by secreted proteins from scRNA-seq data. The SecAct analysis requires an scRNA-seq dataset with two distinct conditions. SecAct employs two key criteria to identify condition-specific cell-cell communication for a particular secreted protein: (1) upregulated expression of the secreted protein in the sender cell type; (2) increased signaling activity of the same secreted protein in the receiver cell type. For this demonstration, we employ an ovarian cancer (OV) scRNA-Seq <a href="https://data.mendeley.com/datasets/rc47y6m9mp/2" target="_blank">dataset</a> containing samples from both primary and metastatic sites.
 
 ## Prepare expression matrix
-We have preprocessed this OV scRNA-Seq dataset and saved it as a Seurat object. The information of cell-type annotations and anatomical sites are stored in the columns `MyCellType` and `Groups` of meta data from the Seurat object, respectively. Users can easily access them using the following code.
+We have preprocessed this OV scRNA-Seq dataset and saved it as a Seurat object. The information of cell-type annotations and anatomical sites are stored in the columns `MyCellType` and `Groups` of `meta.data` from the Seurat object, respectively. Users can easily access them using the following code.
 
 ``` r
 library(SecAct)
@@ -46,8 +46,8 @@ my_cols <- c(
 	'NK'='#bb8761','Tex'='#fe666d','Treg'='#E6C122','Tumor'='#A4DFF2'
 )
 
-p1 <- DimPlot(Seurat_obj, reduction = "tsne", cols = my_cols, group.by = "MyCellType")
-p2 <- DimPlot(Seurat_obj, reduction = "tsne", group.by = "Groups")
+p1 <- DimPlot(Seurat_obj, reduction = "umap", cols = my_cols, group.by = "MyCellType")
+p2 <- DimPlot(Seurat_obj, reduction = "umap", group.by = "Groups")
 
 p1+p2
 ```
@@ -58,16 +58,21 @@ p1+p2
 
 Our strategy performs three steps to infer condition-specific cell-cell communication: (1) calculating changes in secreted protein activity for each cell type between two conditions, (2) assessing changes in secreted protein expression for each cell type between two conditions, and (3) linking sender and receiver cell types.
 
-When running `SecAct.CCC.scRNAseq`, user need to claim which column in `Seurat_obj@meta.data` stores cell-type annotations. Also, claim which column stores condition information and what are case and control conditions. All SecAct results are stored in `Seurat_obj @misc $SecAct_output`. 
+When running `SecAct.CCC.scRNAseq`, user need to claim which column in `Seurat_obj@meta.data` stores cell-type annotations, and also claim which column stores condition information and what are case and control conditions. All SecAct results are stored in `Seurat_obj @misc $SecAct_output`. 
 
 ``` r
-# infer activity
+# infer cell-cell communication
 Seurat_obj <- SecAct.CCC.scRNAseq(
   Seurat_obj, 
-  cellType="MyCellType",
-  condition="Groups", 
+  cellType_meta="MyCellType",
+  condition_meta="Groups", 
   conditionCase="Metastatic", 
-  conditionControl="Primary")
+  conditionControl="Primary",
+  act_diff_cutoff=2,
+  exp_logFC_cutoff=0.2,
+  exp_fraction_case_cutoff=0.5,
+  padj_cutoff=0.01
+)
 
 # show output
 names(Seurat_obj @misc $SecAct_output)
@@ -77,7 +82,7 @@ names(Seurat_obj @misc $SecAct_output)
 ## [3] "SecretedProteinCCC"
 
 # cell-cell communication results
-head(Seurat_obj1 @misc $SecAct_output $SecretedProteinCCC [,10:12])
+head(Seurat_obj @misc $SecAct_output $SecretedProteinCCC [,10:12])
 
 ##                          sender secretedProtein   receiver sender_exp_logFC sender_exp_pv sender_exp_pv.adj receiver_act_diff
 ## Tumor_RARRES2_Treg        Tumor         RARRES2       Treg         1.048683 7.613305e-108     5.217353e-106          6.491628
@@ -101,9 +106,9 @@ head(Seurat_obj1 @misc $SecAct_output $SecretedProteinCCC [,10:12])
 We provide two types of visualization plot for cell-cell communication, i.e., heatmap and circle plot.
 
 ``` r
-SecAct.CCC.heatmap(Seurat_obj)
-SecAct.CCC.circle(Seurat_obj)
-
+SecAct.CCC.heatmap(Seurat_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellType=my_cols)
+SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols)
+ 
 ```
 
 <img src="img/OV_CCC_heatmap.png" width="45%" style="border:none" />

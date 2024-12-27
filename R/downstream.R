@@ -68,6 +68,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
   print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer signaling patterns."))
 
 
+
   print("Step 2. NMF")
 
   suppressPackageStartupMessages({
@@ -95,6 +96,27 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
   )
 
   SpaCET_obj
+}
+
+
+#' @title Pattern-associated secreted proteins
+#' @description Enumerate secreted proteins associated with each signaling pattern.
+#' @param SpaCET_obj A SpaCET object.
+#' @param n Pattern order.
+#' @return A matrix.
+#' @examples
+#' SpaCET_obj <- SecAct.pattern.gene(SpaCET_obj, n=2)
+#'
+#' @rdname SecAct.pattern.gene
+#' @export
+#'
+SecAct.pattern.gene <- function(SpaCET_obj, n)
+{
+  # extract coefficient (weight) matrix
+  weight.W <- SpaCET_obj@results$SecAct_output$pattern$weight.W
+
+  # identify secreted proteins with pattern n
+  weight.W[apply(weight.W,1,function(x) x[n]==max(x)),]
 }
 
 
@@ -438,9 +460,10 @@ SecAct.CCC.scRNAseq <- function(
   condition_meta,
   conditionCase,
   conditionControl,
+  scale.factor = 1e+05,
   act_diff_cutoff=2,
   exp_logFC_cutoff=0.2,
-  exp_fraction_case_cutoff=0.4,
+  exp_fraction_case_cutoff=0.1,
   padj_cutoff=0.01
 )
 {
@@ -451,6 +474,7 @@ SecAct.CCC.scRNAseq <- function(
     meta[meta[,condition_meta]==conditionCase,cellType_meta],
     meta[meta[,condition_meta]==conditionControl,cellType_meta]
   )
+
 
   print("Step 1: calculating changes in secreted protein activity.")
 
@@ -487,7 +511,8 @@ SecAct.CCC.scRNAseq <- function(
     bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
   }
 
-  data @misc $SecAct_output $SecretedProteinActivity <- SecAct.signaling.inference(bulk.diff)
+  data @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE)
+
 
   print("Step 2: assessing changes in secreted protein expression.")
 
@@ -497,11 +522,9 @@ SecAct.CCC.scRNAseq <- function(
     expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
 
     # normalize to TPM
-    #expr <- sweep(expr, 2, Matrix::colSums(expr), "/") * 1e5
-
     stats <- Matrix::colSums(expr)
     expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * 1e5
+    expr@x <- expr@x * scale.factor
 
     # transform to log space
     expr@x <- log2(expr@x + 1)
@@ -513,11 +536,9 @@ SecAct.CCC.scRNAseq <- function(
     expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
 
     # normalize to TPM
-    #expr <- sweep(expr, 2, Matrix::colSums(expr), "/") * 1e5
-
     stats <- Matrix::colSums(expr)
     expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * 1e5
+    expr@x <- expr@x * scale.factor
 
     # transform to log space
     expr@x <- log2(expr@x + 1)
@@ -564,7 +585,7 @@ SecAct.CCC.scRNAseq <- function(
     smy_deg_up <- smy_deg[
       smy_deg[,"exp_logFC"]>exp_logFC_cutoff&
       smy_deg[,"exp_fraction_case"]>exp_fraction_case_cutoff&
-      smy_deg[,"exp_pv.adj"]<adjp_cutoff, ]
+      smy_deg[,"exp_pv.adj"]<padj_cutoff, ]
 
     if(nrow(smy_deg_up)>0)
     {
@@ -589,7 +610,7 @@ SecAct.CCC.scRNAseq <- function(
 
     smy_act_up <- smy_act[
       smy_act[,"act_diff"]>act_diff_cutoff&
-      smy_act[,"act_pv.adj"]<adjp_cutoff, ]
+      smy_act[,"act_pv.adj"]<padj_cutoff, ]
 
     if(nrow(smy_act_up)>0)
     {
@@ -630,7 +651,7 @@ SecAct.CCC.scRNAseq <- function(
   library(metap)
   ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) sumlog(x)$p)
   ccc[,"overall_pv.adj"] <- p.adjust(ccc[,"overall_pv"], method="BH")
-  ccc <- ccc[ccc[,"overall_pv.adj"]<adjp_cutoff,]
+  ccc <- ccc[ccc[,"overall_pv.adj"]<padj_cutoff,]
 
   ccc <- ccc[order(ccc[,"overall_pv.adj"]),]
 
@@ -652,8 +673,8 @@ SecAct.CCC.scRNAseq <- function(
 SecAct.CCC.scST <- function(
     data,
     cellType_meta,
-    radius=0.02,
-    padj_cutoff=0.01
+    radius = 0.02,
+    padj_cutoff = 0.01
 )
 {
   counts <-  data@input$counts

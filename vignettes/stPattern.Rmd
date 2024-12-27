@@ -98,13 +98,6 @@ SpaCET.visualize.spatialFeature(
 If you want to identify secreted proteins with specific signaling pattern, please run the following code.
 
 ``` r
-# extract coefficient (weight) matrix
-WWW <- SpaCET_obj@results$pattern$weight.W
-
-# identify secreted proteins with pattern 3
-n <- 1
-WWW_n <- WWW[apply(WWW,1,function(x) x[n]==max(x)),]
-rownames(WWW_n)
 
 writeLines(rownames(WWW_n), "/Users/rub2/Downloads/inter_SP.csv")
 

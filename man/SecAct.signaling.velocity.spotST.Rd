@@ -6,6 +6,7 @@
 \usage{
 SecAct.signaling.velocity.spotST(
   SpaCET_obj,
+  scale.factor = 1e+05,
   gene,
   signalMode = "both",
   animated = FALSE
@@ -14,11 +15,13 @@ SecAct.signaling.velocity.spotST(
 \arguments{
 \item{SpaCET_obj}{A SpaCET object.}
 
+\item{scale.factor}{Sets the scale factor for spot-level normalization.}
+
 \item{gene}{Gene symbol coding a secreted protein.}
 
 \item{signalMode}{Mode of signaling velocity, i.e., "receiving", "sending", and "both".}
 
-\item{scale.factor}{Sets the scale factor for spot-level normalization.}
+\item{animated}{A logical indicating whether generate animated figure.}
 }
 \value{
 A ggplot2 object.

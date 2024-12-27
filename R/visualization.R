@@ -26,6 +26,7 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
 
   mat = reshape2::acast( ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
 
+  cellTypes <- sort(unique(c(rownames(mat),colnames(mat))))
   for(cellType in cellTypes)
   {
     if(cellType%in%rownames(mat)&cellType%in%colnames(mat))
