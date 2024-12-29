@@ -415,7 +415,7 @@ SecAct.CCC.scST <- function(
   exp@x <- log2(exp@x + 1)
 
 
-  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
+  nn_result <- RANN::nn2(coordinate_mat, searchtype="radius", radius=radius)
 
   neighbor_indices <- nn_result$nn.idx
   neighbor_distances <- nn_result$nn.dists
@@ -470,7 +470,7 @@ SecAct.CCC.scST <- function(
   corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
   corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
 
-  print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer signaling patterns."))
+  print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer cell-cell communication."))
 
 
   print("Step 2. CCC")
@@ -522,7 +522,7 @@ SecAct.CCC.scST <- function(
 
       posRatio <- sum(CCC_vec>0)/length(CCC_vec)
 
-      if(posRatio > 0.05)
+      if(posRatio > 0.1)
       {
         CCC1000_vec <- exp[SP, Tmat_background[,1]] * act[SP, Tmat_background[,2]]
 
@@ -551,7 +551,7 @@ SecAct.CCC.scST <- function(
 
       posRatio <- sum(CCC_vec>0)/length(CCC_vec)
 
-      if(posRatio > 0.05)
+      if(posRatio > 0.1)
       {
         CCC1000_vec <- exp[SP, Tmat_background[,2]] * act[SP, Tmat_background[,1]]
 
@@ -578,7 +578,7 @@ SecAct.CCC.scST <- function(
   }
 
   ccc[,"pv.adj"] <- p.adjust(ccc[,"pv"], method="BH")
-  ccc <- ccc[ccc[,"pv.adj"]<adjp_cutoff,]
+  ccc <- ccc[ccc[,"pv.adj"]<padj_cutoff,]
 
   ccc <- ccc[order(ccc[,"pv.adj"]),]
 
