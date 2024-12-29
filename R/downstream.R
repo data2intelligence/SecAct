@@ -63,7 +63,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
     }
   }
   corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
-  corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.1&corr[,"padj"]<0.01,])
+  corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
 
   print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer signaling patterns."))
 
@@ -368,6 +368,228 @@ SecAct.signaling.velocity.spotST <- function(
 
 }
 
+
+
+#' @title Cell-cell communication from spatial data
+#' @description Calculate cell-cell communication mediated by secreted proteins from spatial transcriptomics data.
+#' @param SpaCET_obj A SpaCET object.
+#' @param cellType_meta Column name in meta data that includes cell-type annotations.
+#' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param padj_cutoff Adjusted p value cut off.
+#' @return A Seurat object.
+#' @rdname SecAct.CCC.scST
+#' @export
+#'
+SecAct.CCC.scST <- function(
+    SpaCET_obj,
+    cellType_meta,
+    scale.factor = 1e+05,
+    radius = 0.02,
+    padj_cutoff = 0.01
+)
+{
+  if(class(SpaCET_obj)!="SpaCET")
+  {
+    stop("SpaCET object is requried.")
+  }
+  if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
+  {
+    stop("Please run SecAct.activity.inference first.")
+  }
+
+  coordinate_mat <- SpaCET_obj@input$spotCoordinates
+  cellType_vec <- SpaCET_obj@input$metaData[,cellType_meta]
+
+  print("Step 1. Filtering")
+
+  exp <- SpaCET_obj@input$counts
+  rownames(exp) <- transferSymbol(rownames(exp))
+  exp <- rm_duplicates(exp)
+
+  # normalize to TPM
+  stats <- Matrix::colSums(exp)
+  exp <- sweep_sparse(exp,2,stats,"/")
+  exp@x <- exp@x * scale.factor
+
+  # transform to log space
+  exp@x <- log2(exp@x + 1)
+
+
+  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
+
+  neighbor_indices <- nn_result$nn.idx
+  neighbor_distances <- nn_result$nn.dists
+
+  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices)) # row indices (cell index)
+  j <- as.vector(t(neighbor_indices))
+  x <- as.vector(t(neighbor_distances))
+
+  valid <- x<=radius & x>0
+  i <- i[valid]          # Keep only valid indices
+  j <- j[valid]          # Valid neighbor indices
+  x <- x[valid]          # Valid distances
+
+  # Create the sparse matrix using the 'i', 'j', and 'x' vectors
+  library(Matrix)
+  distance_mat <- sparseMatrix(i=i, j=j, x=x, dims=c(nrow(neighbor_indices), nrow(neighbor_indices)), repr="T")
+  rownames(distance_mat) <- rownames(coordinate_mat)
+  colnames(distance_mat) <- rownames(coordinate_mat)
+
+
+  weights <- distance_mat
+  weights@x <- as.numeric(weights@x>0)
+
+
+  act <- data @results $SecAct_output $SecretedProteinActivity$zscore
+  act[act<0] <- 0
+
+  act_new <- act[,colnames(weights)] # remove spot island
+  exp_new <- exp[,colnames(weights)] # remove spot island
+
+
+  exp_new_aggr <- exp_new %*% weights
+
+  corr <- data.frame()
+  for(gene in rownames(act_new))
+  {
+    act_gene <- act_new[gene,]
+
+    if(gene%in%rownames(exp_new))
+    {
+      exp_gene <- exp_new_aggr[gene,]
+
+      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
+
+      corr[gene,"r"] <- cor_res$estimate
+      corr[gene,"p"] <- cor_res$p.value
+    }else{
+      corr[gene,"r"] <- NA
+      corr[gene,"p"] <- NA
+    }
+  }
+  corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
+  corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
+
+  print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer signaling patterns."))
+
+
+  print("Step 2. CCC")
+
+  cellTypes <- unique(cellType_vec)
+
+  cellTypePair1 <- rep(cellTypes, each=length(cellTypes))
+  cellTypePair2 <- rep(cellTypes, length(cellTypes))
+
+  cellTypePair <- cbind(cellTypePair1, cellTypePair2)
+  cellTypePair <- cellTypePair[cellTypePair1>cellTypePair2,]
+  rownames(cellTypePair) <- paste0(cellTypePair[,1],"_",cellTypePair[,2])
+
+  olp <- corr_genes
+
+  ccc <- data.frame()
+  for(m in 1:nrow(cellTypePair))
+  {
+    print(m)
+    cellType1 <- cellTypePair[m,1]
+    cellType2 <- cellTypePair[m,2]
+
+    cellType1_cells <- which(cellType_vec==cellType1)
+    cellType2_cells <- which(cellType_vec==cellType2)
+
+
+    Tmat <- data.frame(i,j)
+
+    # all cell pair
+    Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
+
+    n_neighbor <- nrow(Tmat_cellTypePair)
+
+    if(n_neighbor ==0 ) next
+
+    set.seed(123)
+    Tmat_background <- data.frame(
+      i=sample(cellType1_cells, n_neighbor*1000, replace=T),
+      j=sample(cellType2_cells, n_neighbor*1000, replace=T)
+    )
+
+
+    for(SP in olp)
+    {
+      print(SP)
+
+      # exp(1) * act(2)
+      CCC_vec <- exp[SP, Tmat_cellTypePair[,1]] * act[SP, Tmat_cellTypePair[,2]]
+
+      posRatio <- sum(CCC_vec>0)/length(CCC_vec)
+
+      if(posRatio > 0.05)
+      {
+        CCC1000_vec <- exp[SP, Tmat_background[,1]] * act[SP, Tmat_background[,2]]
+
+        CCC_raw <- mean(CCC_vec)
+        CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
+
+        score <- CCC_raw/mean(CCC1000)
+        pv <- (sum(CCC1000>=CCC_raw)+1)/1001
+
+        if(pv < 0.05)
+        {
+          ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
+          ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
+          ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
+          ccc[paste0(cellType1,"_",SP,"_",cellType2),"posRatio"] <- posRatio
+          ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- score
+          ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- pv
+        }
+      }
+
+
+      if(cellType1==cellType2) next
+
+      # exp(2) * act(1)
+      CCC_vec <- exp[SP, Tmat_cellTypePair[,2]] * act[SP, Tmat_cellTypePair[,1]]
+
+      posRatio <- sum(CCC_vec>0)/length(CCC_vec)
+
+      if(posRatio > 0.05)
+      {
+        CCC1000_vec <- exp[SP, Tmat_background[,2]] * act[SP, Tmat_background[,1]]
+
+        CCC_raw <- mean(CCC_vec)
+        CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
+
+        score <- CCC_raw/mean(CCC1000)
+        pv <- (sum(CCC1000>=CCC_raw)+1)/1001
+
+        if(pv < 0.05)
+        {
+          ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender"] <- cellType2
+          ccc[paste0(cellType2,"_",SP,"_",cellType1),"secretedProtein"] <- SP
+          ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver"] <- cellType1
+          ccc[paste0(cellType2,"_",SP,"_",cellType1),"posRatio"] <- posRatio
+          ccc[paste0(cellType2,"_",SP,"_",cellType1),"score"] <- score
+          ccc[paste0(cellType2,"_",SP,"_",cellType1),"pv"] <- pv
+        }
+      }
+
+
+    }
+
+  }
+
+  ccc[,"pv.adj"] <- p.adjust(ccc[,"pv"], method="BH")
+  ccc <- ccc[ccc[,"pv.adj"]<adjp_cutoff,]
+
+  ccc <- ccc[order(ccc[,"pv.adj"]),]
+
+  SpaCET_obj @results $SecAct_output $ccc.SP <- corr
+  SpaCET_obj @results $SecAct_output $SecretedProteinCCC  <- ccc
+
+  SpaCET_obj
+}
+
+
+
 scalar1 <- function(x)
 {
   x / sqrt(sum(x^2))
@@ -419,7 +641,8 @@ transferSymbol <- function(x)
   x
 }
 
-rm_duplicates <- function(mat){
+rm_duplicates <- function(mat)
+{
   dupl <- duplicated(rownames(mat))
   if (sum(dupl) > 0){
     dupl_genes <- unique(rownames(mat)[dupl])
@@ -656,219 +879,6 @@ SecAct.CCC.scRNAseq <- function(
   ccc <- ccc[order(ccc[,"overall_pv.adj"]),]
 
   data @misc $SecAct_output $SecretedProteinCCC  <- ccc
-
-  data
-}
-
-
-#' @title Cell-cell communication from spatial data
-#' @description Calculate cell-cell communication mediated by secreted proteins from spatial transcriptomics data.
-#' @param data A SpaCET object.
-#' @param cellType_meta Column name in meta data that includes cell-type annotations.
-#' @param padj_cutoff Adjusted p value cut off.
-#' @return A Seurat object.
-#' @rdname SecAct.CCC.scST
-#' @export
-#'
-SecAct.CCC.scST <- function(
-    data,
-    cellType_meta,
-    radius = 0.02,
-    padj_cutoff = 0.01
-)
-{
-  counts <-  data@input$counts
-  meta <- data@input$spotCoordinates
-  coordinate_mat <- meta[,1:2]
-  cellType_vec <- meta[,3]
-
-  print("Step 1: ")
-
-  # extract count matrix
-  expr <- data@input$counts
-
-  # normalize to TPM
-  stats <- Matrix::colSums(expr)
-  expr <- sweep_sparse(expr,2,stats,"/")
-  expr@x <- expr@x * 1e5
-
-  # transform to log space
-  expr@x <- log2(expr@x + 1)
-
-  # normalized with the control samples
-  expr.diff <- expr - Matrix::rowSums(expr)
-
-  Sys.time()
-  data @results $SecAct_output $SecretedProteinActivity <- SecAct.signaling.inference(expr.diff, sigFilter=TRUE)
-  Sys.time()
-
-
-  print("Step 2: ")
-
-  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
-
-  neighbor_indices <- nn_result$nn.idx
-  neighbor_distances <- nn_result$nn.dists
-
-  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices)) # row indices (cell index)
-  j <- as.vector(t(neighbor_indices))
-  x <- as.vector(t(neighbor_distances))
-
-  valid <- x<=radius & x>0
-  i <- i[valid]          # Keep only valid indices
-  j <- j[valid]          # Valid neighbor indices
-  x <- x[valid]          # Valid distances
-
-  # Create the sparse matrix using the 'i', 'j', and 'x' vectors
-  library(Matrix)
-  distance_mat <- sparseMatrix(i=i, j=j, x=x, dims=c(nrow(neighbor_indices), nrow(neighbor_indices)), repr="T")
-  rownames(distance_mat) <- rownames(coordinate_mat)
-  colnames(distance_mat) <- rownames(coordinate_mat)
-
-
-  weights <- distance_mat
-  weights@x <- as.numeric(weights@x>0)
-
-  exp <- expr
-  act <- data @results $SecAct_output $SecretedProteinActivity$zscore
-  act[act<0] <- 0
-
-  act_new <- act[,colnames(weights)] # remove spot island
-  exp_new <- exp[,colnames(weights)] # remove spot island
-
-  # Option 1
-  exp_new_aggr <- exp_new %*% weights
-
-  corr <- data.frame()
-  for(gene in rownames(act))
-  {
-    act_gene <- act_new[gene,]
-
-    if(gene%in%rownames(exp))
-    {
-      exp_gene <- exp_new_aggr[gene,]
-
-      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
-
-      corr[gene,"r"] <- cor_res$estimate
-      corr[gene,"p"] <- cor_res$p.value
-    }else{
-      corr[gene,"r"] <- NA
-      corr[gene,"p"] <- NA
-    }
-  }
-  corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH"))
-  corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0&corr[,"padj"]<0.5,])
-
-  print(paste0(length(corr_genes),"/",nrow(act)," secreted proteins are filtered to infer cell-cell communication."))
-
-
-  print("Step 3: ")
-
-  cellTypes <- unique(cellType_vec)
-
-  cellTypePair1 <- rep(cellTypes, each=length(cellTypes))
-  cellTypePair2 <- rep(cellTypes, length(cellTypes))
-
-  cellTypePair <- cbind(cellTypePair1, cellTypePair2)
-  cellTypePair <- cellTypePair[cellTypePair1>cellTypePair2,]
-  rownames(cellTypePair) <- paste0(cellTypePair[,1],"_",cellTypePair[,2])
-
-  olp <- corr_genes
-
-  ccc <- data.frame()
-  for(m in 1:nrow(cellTypePair))
-  {
-    print(m)
-    cellType1 <- cellTypePair[m,1]
-    cellType2 <- cellTypePair[m,2]
-
-    cellType1_cells <- which(cellType_vec==cellType1)
-    cellType2_cells <- which(cellType_vec==cellType2)
-
-
-    Tmat <- data.frame(i,j)
-
-    # all cell pair
-    Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
-
-    n_neighbor <- nrow(Tmat_cellTypePair)
-
-    if(n_neighbor ==0 ) next
-
-    set.seed(123)
-    Tmat_background <- data.frame(
-      i=sample(cellType1_cells, n_neighbor*1000, replace=T),
-      j=sample(cellType2_cells, n_neighbor*1000, replace=T)
-    )
-
-
-    for(SP in olp)
-    {
-      print(SP)
-
-      # expr(1) * act(2)
-      CCC_vec <- expr[SP, Tmat_cellTypePair[,1]] * act[SP, Tmat_cellTypePair[,2]]
-
-      posRatio <- sum(CCC_vec>0)/length(CCC_vec)
-
-      if(posRatio <= 0.05) next
-
-      CCC1000_vec <- expr[SP, Tmat_background[,1]] * act[SP, Tmat_background[,2]]
-
-      CCC_raw <- mean(CCC_vec)
-      CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
-
-      score <- CCC_raw/mean(CCC1000)
-      pv <- (sum(CCC1000>=CCC_raw)+1)/1001
-
-      if(pv < 0.05 & posRatio > 0.05)
-      {
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"posRatio"] <- posRatio
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- score
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- pv
-      }
-
-      if(cellType1==cellType2) next
-
-      # expr(2) * act(1)
-      CCC_vec <- expr[SP, Tmat_cellTypePair[,2]] * act[SP, Tmat_cellTypePair[,1]]
-
-      posRatio <- sum(CCC_vec>0)/length(CCC_vec)
-
-      if(posRatio <= 0.05) next
-
-      CCC1000_vec <- expr[SP, Tmat_background[,2]] * act[SP, Tmat_background[,1]]
-
-      CCC_raw <- mean(CCC_vec)
-      CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
-
-      score <- CCC_raw/mean(CCC1000)
-      pv <- (sum(CCC1000>=CCC_raw)+1)/1001
-
-      if(pv < 0.05 & posRatio > 0.05)
-      {
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender"] <- cellType2
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"secretedProtein"] <- SP
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver"] <- cellType1
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"posRatio"] <- posRatio
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"score"] <- score
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"pv"] <- pv
-      }
-
-    }
-
-  }
-
-  ccc[,"pv.adj"] <- p.adjust(ccc[,"pv"], method="BH")
-  ccc <- ccc[ccc[,"pv.adj"]<adjp_cutoff,]
-
-  ccc <- ccc[order(ccc[,"pv.adj"]),]
-
-  data @results $SecAct_output $SecretedProteinCCC  <- ccc
 
   data
 }

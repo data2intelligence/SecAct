@@ -206,6 +206,8 @@ SecAct.activity.inference.ST <- function(
   # extract count matrix
   expr <- inputProfile@input$counts
   expr <- expr[Matrix::rowSums(expr)>0,]
+  rownames(expr) <- transferSymbol(rownames(expr))
+  expr <- rm_duplicates(expr)
 
   # normalize to TPM
   stats <- Matrix::colSums(expr)
