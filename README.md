@@ -18,7 +18,7 @@ additionally calculates the signaling velocities of secreted proteins
 from source to sink spots.
 
 <p align="center">
-<img src="man/figures/workflow.png" width="50%"/>
+<img src="man/figures/workflow.png" width="100%"/>
 </p>
 
 ## Installation
