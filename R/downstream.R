@@ -674,9 +674,9 @@ SecAct.CCC.scRNAseq <- function(
   conditionCase,
   conditionControl,
   scale.factor = 1e+05,
-  act_diff_cutoff = 2,
-  exp_logFC_cutoff = 0.2,
-  exp_fraction_case_cutoff = 0.1,
+  act_diff_cutoff = 1.5,
+  exp_logFC_cutoff = 0.5,
+  exp_fraction_case_cutoff = 0.4,
   padj_cutoff = 0.01
 )
 {
@@ -767,7 +767,7 @@ SecAct.CCC.scRNAseq <- function(
 
 
       smy_deg <- data.frame()
-      genes <- intersect(rownames(expr_case), rownames(data @misc $SecAct_output $SecretedProteinActivity $zscore))
+      genes <- intersect(rownames(expr_case), rownames(Seurat_obj @misc $SecAct_output $SecretedProteinActivity $zscore))
       for(gene in genes)
       {
         T_vec <- expr_case[gene,]

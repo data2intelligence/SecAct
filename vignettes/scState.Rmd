@@ -87,8 +87,8 @@ SPs <- c(SPs.1, SPs.2, SPs.3)
 # subset act matrix
 fg.mat <- act[SPs,]
 
-# visualize in heat map
-SecAct.heat.map(fg.mat)
+# visualize in heatmap
+SecAct.heatmap.plot(fg.mat)
 
 ```
 

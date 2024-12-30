@@ -4,7 +4,7 @@
 #' @param row.sorted Whether to sort rows.
 #' @param column.sorted Whether to sort columns.
 #' @param colors_cellType Colors for cell types.
-#' @return A ggplot2 object.
+#' @return A Heatmap-class object.
 #' @rdname SecAct.CCC.heatmap
 #' @export
 #'
@@ -71,7 +71,7 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
 #' @description Draw a circle plot of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
 #' @param colors_cellType Colors for cell types.
-#' @return A ggplot2 object.
+#' @return A circlize object.
 #' @rdname SecAct.CCC.circle
 #' @export
 #'
@@ -149,6 +149,9 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
 #' @description Draw a sankey plot of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
 #' @param colors_cellType Colors for cell types.
+#' @param sender Sender cell types.
+#' @param secretedProtein Secreted proteins.
+#' @param receiver Receiver cell types.
 #' @return A ggplot2 object.
 #' @rdname SecAct.CCC.sankey
 #' @export
@@ -204,16 +207,86 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
 }
 
 
-#' @title Draw a heat map
-#' @description Draw a heat map of secreted proteins.
+#' @title Cell-cell communication sankey plot
+#' @description Draw a sankey plot of cell-cell communication mediated by secreted proteins.
+#' @param data A SpaCET object or a Seurat object.
+#' @param colors_cellType Colors for cell types.
+#' @param sender Sender cell types.
+#' @param secretedProtein Secreted proteins.
+#' @param receiver Receiver cell types.
+#' @return A ggplot2 object.
+#' @rdname SecAct.CCC.dot
+#' @export
+#'
+SecAct.CCC.dot <- function(data, colors_cellType, sender=NULL, secretedProtein=NULL, receiver=NULL)
+{
+  if(class(data)[1]=="SpaCET")
+  {
+    ccc <- data @results $SecAct_output $SecretedProteinCCC
+  }
+  if(class(data)[1]=="Seurat")
+  {
+    ccc <- data @misc $SecAct_output $SecretedProteinCCC
+  }
+
+  ccc <- cbind(ccc, communication=1)
+  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
+  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
+
+  ccc_sub <- ccc[
+    ccc[,"sender"]%in%sender &
+      ccc[,"secretedProtein"]%in%secretedProtein &
+      ccc[,"receiver"]%in%receiver
+    ,]
+
+  if(class(data)[1]=="SpaCET")
+  {
+    fg.df <- ccc_sub[,c("sender","secretedProtein","receiver","ratio","pv")]
+
+    fg.df <- cbind(fg.df, s2r=paste0(fg.df[,"sender"],"->",fg.df[,"receiver"]) )
+    fg.df <- cbind(fg.df, score=fg.df[,"ratio"])
+    fg.df <- cbind(fg.df, logpv=-log10(fg.df[,"pv"]))
+  }
+  if(class(data)[1]=="Seurat")
+  {
+    fg.df <- ccc_sub[,c("sender","secretedProtein","receiver","overall_strength","overall_pv")]
+
+    fg.df <- cbind(fg.df, s2r=paste0(fg.df[,"sender"],"->",fg.df[,"receiver"]) )
+    fg.df <- cbind(fg.df, score=fg.df[,"overall_strength"])
+    fg.df <- cbind(fg.df, logpv=-log10(fg.df[,"overall_pv"]))
+  }
+
+  fg.df[["secretedProtein"]] <- factor(fg.df[["secretedProtein"]], levels=rev(secretedProtein))
+
+  ggplot(fg.df, aes(y = secretedProtein, x = s2r, color=score))+
+    geom_point(aes(size=logpv))+
+    scale_colour_gradient(low = "#fbbf45", high = "#ed0345", na.value = NA)+
+    labs(colour="Score",size="-Log10pv")+
+    xlab(" ")+
+    ylab(" ")+
+    theme_classic()+
+    theme(
+      panel.background = element_blank(),
+      panel.grid = element_blank(),
+      axis.title = element_text(colour = "black"),
+      axis.text = element_text(colour = "black"),
+      axis.text.x = element_text(angle = 90,hjust = 1,vjust = 0.5),
+      legend.position="right"
+    )
+
+}
+
+
+#' @title Draw a heatmap plot
+#' @description Draw a heatmap plot of secreted proteins.
 #' @param fg.mat A matrix of values.
 #' @param title The title for plot.
 #' @param colors Colors.
 #' @return A ggplot2 object.
-#' @rdname SecAct.heat.map
+#' @rdname SecAct.heatmap.plot
 #' @export
 #'
-SecAct.heat.map <- function(fg.mat, title=NULL, colors=c("#03c383","#aad962","#fbbf45","#ef6a32"))
+SecAct.heatmap.plot <- function(fg.mat, title=NULL, colors=c("#03c383","#aad962","#fbbf45","#ef6a32"))
 {
   fg.df <- reshape2::melt(fg.mat)
   colnames(fg.df)[3] <- "Activity"
