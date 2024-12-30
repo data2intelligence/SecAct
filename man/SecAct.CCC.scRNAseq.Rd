@@ -11,9 +11,9 @@ SecAct.CCC.scRNAseq(
   conditionCase,
   conditionControl,
   scale.factor = 1e+05,
-  act_diff_cutoff = 2,
-  exp_logFC_cutoff = 0.2,
-  exp_fraction_case_cutoff = 0.1,
+  act_diff_cutoff = 1.5,
+  exp_logFC_cutoff = 0.5,
+  exp_fraction_case_cutoff = 0.4,
   padj_cutoff = 0.01
 )
 }

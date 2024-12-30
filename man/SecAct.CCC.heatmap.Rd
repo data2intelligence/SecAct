@@ -21,7 +21,7 @@ SecAct.CCC.heatmap(
 \item{colors_cellType}{Colors for cell types.}
 }
 \value{
-A ggplot2 object.
+A Heatmap-class object.
 }
 \description{
 Draw a heatmap of cell-cell communication mediated by secreted proteins.

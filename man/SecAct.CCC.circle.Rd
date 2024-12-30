@@ -12,7 +12,7 @@ SecAct.CCC.circle(data, colors_cellType, sender = NULL, receiver = NULL)
 \item{colors_cellType}{Colors for cell types.}
 }
 \value{
-A ggplot2 object.
+A circlize object.
 }
 \description{
 Draw a circle plot of cell-cell communication mediated by secreted proteins.
