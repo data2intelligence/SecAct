@@ -375,6 +375,8 @@ SecAct.signaling.velocity.spotST <- function(
 #' @param SpaCET_obj A SpaCET object.
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param radius Radius cut off.
+#' @param ratio_cutoff Ratio cut off.
 #' @param padj_cutoff Adjusted p value cut off.
 #' @return A Seurat object.
 #' @rdname SecAct.CCC.scST
@@ -385,6 +387,7 @@ SecAct.CCC.scST <- function(
     cellType_meta,
     scale.factor = 1e+05,
     radius = 0.02,
+    ratio_cutoff = 0.2,
     padj_cutoff = 0.01
 )
 {
@@ -415,7 +418,7 @@ SecAct.CCC.scST <- function(
   exp@x <- log2(exp@x + 1)
 
 
-  nn_result <- RANN::nn2(coordinate_mat, searchtype="radius", radius=radius)
+  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
 
   neighbor_indices <- nn_result$nn.idx
   neighbor_distances <- nn_result$nn.dists
@@ -440,7 +443,7 @@ SecAct.CCC.scST <- function(
   weights@x <- as.numeric(weights@x>0)
 
 
-  act <- data @results $SecAct_output $SecretedProteinActivity$zscore
+  act <- SpaCET_obj @results $SecAct_output $SecretedProteinActivity$zscore
   act[act<0] <- 0
 
   act_new <- act[,colnames(weights)] # remove spot island
@@ -486,6 +489,7 @@ SecAct.CCC.scST <- function(
 
   olp <- corr_genes
 
+  Tmat <- data.frame(i,j)
   ccc <- data.frame()
   for(m in 1:nrow(cellTypePair))
   {
@@ -496,22 +500,21 @@ SecAct.CCC.scST <- function(
     cellType1_cells <- which(cellType_vec==cellType1)
     cellType2_cells <- which(cellType_vec==cellType2)
 
-
-    Tmat <- data.frame(i,j)
-
-    # all cell pair
+    # all neighboring cell pair
     Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
-
     n_neighbor <- nrow(Tmat_cellTypePair)
 
-    if(n_neighbor ==0 ) next
+    # ratio neighboring cells vs all cells
+    if(
+      length(unique(Tmat_cellTypePair[,1]))/length(cellType1_cells) < 0.05 &
+      length(unique(Tmat_cellTypePair[,2]))/length(cellType2_cells) < 0.05)
+    next
 
     set.seed(123)
     Tmat_background <- data.frame(
       i=sample(cellType1_cells, n_neighbor*1000, replace=T),
       j=sample(cellType2_cells, n_neighbor*1000, replace=T)
     )
-
 
     for(SP in olp)
     {
@@ -520,27 +523,22 @@ SecAct.CCC.scST <- function(
       # exp(1) * act(2)
       CCC_vec <- exp[SP, Tmat_cellTypePair[,1]] * act[SP, Tmat_cellTypePair[,2]]
 
+      # ratio interacting pairs vs neighboring pairs
       posRatio <- sum(CCC_vec>0)/length(CCC_vec)
 
-      if(posRatio > 0.1)
+      if(posRatio > ratio_cutoff)
       {
         CCC1000_vec <- exp[SP, Tmat_background[,1]] * act[SP, Tmat_background[,2]]
 
         CCC_raw <- mean(CCC_vec)
         CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
 
-        score <- CCC_raw/mean(CCC1000)
-        pv <- (sum(CCC1000>=CCC_raw)+1)/1001
-
-        if(pv < 0.05)
-        {
-          ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
-          ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
-          ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
-          ccc[paste0(cellType1,"_",SP,"_",cellType2),"posRatio"] <- posRatio
-          ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- score
-          ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- pv
-        }
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"ratio"] <- posRatio
+        #ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- CCC_raw/mean(CCC1000)
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
       }
 
 
@@ -551,31 +549,23 @@ SecAct.CCC.scST <- function(
 
       posRatio <- sum(CCC_vec>0)/length(CCC_vec)
 
-      if(posRatio > 0.1)
+      if(posRatio > ratio_cutoff)
       {
         CCC1000_vec <- exp[SP, Tmat_background[,2]] * act[SP, Tmat_background[,1]]
 
         CCC_raw <- mean(CCC_vec)
         CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
 
-        score <- CCC_raw/mean(CCC1000)
-        pv <- (sum(CCC1000>=CCC_raw)+1)/1001
-
-        if(pv < 0.05)
-        {
-          ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender"] <- cellType2
-          ccc[paste0(cellType2,"_",SP,"_",cellType1),"secretedProtein"] <- SP
-          ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver"] <- cellType1
-          ccc[paste0(cellType2,"_",SP,"_",cellType1),"posRatio"] <- posRatio
-          ccc[paste0(cellType2,"_",SP,"_",cellType1),"score"] <- score
-          ccc[paste0(cellType2,"_",SP,"_",cellType1),"pv"] <- pv
-        }
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender"] <- cellType2
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"secretedProtein"] <- SP
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver"] <- cellType1
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"ratio"] <- posRatio
+        #ccc[paste0(cellType2,"_",SP,"_",cellType1),"score"] <- CCC_raw/mean(CCC1000)
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
       }
 
-
-    }
-
-  }
+    } # SP
+  } #m
 
   ccc[,"pv.adj"] <- p.adjust(ccc[,"pv"], method="BH")
   ccc <- ccc[ccc[,"pv.adj"]<padj_cutoff,]
@@ -678,20 +668,20 @@ rm_duplicates <- function(mat)
 #' @export
 #'
 SecAct.CCC.scRNAseq <- function(
-  data,
+  Seurat_obj,
   cellType_meta,
   condition_meta,
   conditionCase,
   conditionControl,
   scale.factor = 1e+05,
-  act_diff_cutoff=2,
-  exp_logFC_cutoff=0.2,
-  exp_fraction_case_cutoff=0.1,
-  padj_cutoff=0.01
+  act_diff_cutoff = 2,
+  exp_logFC_cutoff = 0.2,
+  exp_fraction_case_cutoff = 0.1,
+  padj_cutoff = 0.01
 )
 {
-  counts <-  data@assays$RNA@counts
-  meta <- data@meta.data
+  counts <-  Seurat_obj@assays$RNA@counts
+  meta <- Seurat_obj@meta.data
 
   cellTypes <- intersect(
     meta[meta[,condition_meta]==conditionCase,cellType_meta],
@@ -701,100 +691,107 @@ SecAct.CCC.scRNAseq <- function(
 
   print("Step 1: calculating changes in secreted protein activity.")
 
-  bulk.diff <- data.frame()
-  for(cellType in cellTypes)
+  if(is.null(Seurat_obj @misc $SecAct_output $SecretedProteinActivity))
   {
-    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
-    expr <- Matrix::rowSums(expr)
-    expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
+    bulk.case <- data.frame()
+    bulk.control <- data.frame()
+    bulk.diff <- data.frame()
+    for(cellType in cellTypes)
+    {
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+      expr <- Matrix::rowSums(expr)
+      expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
 
-    # normalize to TPM
-    expr <- t(t(expr)*1e6/colSums(expr))
+      # normalize to TPM
+      expr <- t(t(expr)*1e6/colSums(expr))
 
-    # transform to log space
-    expr <- log2(expr + 1)
+      # transform to log space
+      expr <- log2(expr + 1)
 
-    expr_case <- expr
-
-
-    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
-    expr <- Matrix::rowSums(expr)
-    expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
-
-    # normalize to TPM
-    expr <- t(t(expr)*1e6/colSums(expr))
-
-    # transform to log space
-    expr <- log2(expr + 1)
-
-    expr_control <- expr
+      expr_case <- expr
 
 
-    # normalized with the control samples
-    bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+      expr <- Matrix::rowSums(expr)
+      expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
+
+      # normalize to TPM
+      expr <- t(t(expr)*1e6/colSums(expr))
+
+      # transform to log space
+      expr <- log2(expr + 1)
+
+      expr_control <- expr
+
+
+      # normalized with the control samples
+      bulk.case[rownames(expr_case),cellType] <- expr_case
+      bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
+    }
+
+    Seurat_obj @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE)
   }
-
-  data @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE)
-
 
   print("Step 2: assessing changes in secreted protein expression.")
 
-  for(cellType in cellTypes)
+  if(is.null(Seurat_obj @misc $SecAct_output $SecretedProteinExpression))
   {
-    # case
-    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
-
-    # normalize to TPM
-    stats <- Matrix::colSums(expr)
-    expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * scale.factor
-
-    # transform to log space
-    expr@x <- log2(expr@x + 1)
-
-    expr_case <- expr
-
-
-    # control
-    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
-
-    # normalize to TPM
-    stats <- Matrix::colSums(expr)
-    expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * scale.factor
-
-    # transform to log space
-    expr@x <- log2(expr@x + 1)
-
-    expr_control <- expr
-
-
-    smy_deg <- data.frame()
-    genes <- intersect(rownames(expr_case), rownames(data @misc $SecAct_output $SecretedProteinActivity $zscore))
-    for(gene in genes)
+    for(cellType in cellTypes)
     {
-      T_vec <- expr_case[gene,]
-      C_vec <- expr_control[gene,]
+      # case
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
 
-      wTest <- wilcox.test(T_vec,C_vec)
+      # normalize to TPM
+      stats <- Matrix::colSums(expr)
+      expr <- sweep_sparse(expr,2,stats,"/")
+      expr@x <- expr@x * scale.factor
 
-      smy_deg[gene,"exp_logFC"] <- mean(T_vec) - mean(C_vec)
-      smy_deg[gene,"exp_mean_all"] <- mean(c(T_vec,C_vec))
-      smy_deg[gene,"exp_mean_case"] <- mean(T_vec)
-      smy_deg[gene,"exp_mean_control"] <- mean(C_vec)
-      smy_deg[gene,"exp_fraction_case"] <- sum(T_vec>0)/length(T_vec)
-      smy_deg[gene,"exp_fraction_control"] <- sum(C_vec>0)/length(C_vec)
-      smy_deg[gene,"exp_pv"] <- wTest$p.value
-      smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
+      # transform to log space
+      expr@x <- log2(expr@x + 1)
+
+      expr_case <- expr
+
+
+      # control
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+
+      # normalize to TPM
+      stats <- Matrix::colSums(expr)
+      expr <- sweep_sparse(expr,2,stats,"/")
+      expr@x <- expr@x * scale.factor
+
+      # transform to log space
+      expr@x <- log2(expr@x + 1)
+
+      expr_control <- expr
+
+
+      smy_deg <- data.frame()
+      genes <- intersect(rownames(expr_case), rownames(data @misc $SecAct_output $SecretedProteinActivity $zscore))
+      for(gene in genes)
+      {
+        T_vec <- expr_case[gene,]
+        C_vec <- expr_control[gene,]
+
+        wTest <- wilcox.test(T_vec,C_vec)
+
+        smy_deg[gene,"exp_logFC"] <- mean(T_vec) - mean(C_vec)
+        smy_deg[gene,"exp_mean_all"] <- mean(c(T_vec,C_vec))
+        smy_deg[gene,"exp_mean_case"] <- mean(T_vec)
+        smy_deg[gene,"exp_mean_control"] <- mean(C_vec)
+        smy_deg[gene,"exp_fraction_case"] <- sum(T_vec>0)/length(T_vec)
+        smy_deg[gene,"exp_fraction_control"] <- sum(C_vec>0)/length(C_vec)
+        smy_deg[gene,"exp_pv"] <- wTest$p.value
+        smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
+      }
+      smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
+
+      smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
+      smy_deg <- smy_deg[order(smy_deg[,"exp_pv.adj"]),]
+
+      Seurat_obj @misc $SecAct_output $SecretedProteinExpression [[cellType]] <- smy_deg
     }
-    smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
-
-    smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
-    smy_deg <- smy_deg[order(smy_deg[,"exp_pv.adj"]),]
-
-    data @misc $SecAct_output $SecretedProteinExpression [[cellType]] <- smy_deg
   }
-
 
   print("Step 3: linking sender and receiver cell types.")
 
@@ -803,10 +800,11 @@ SecAct.CCC.scRNAseq <- function(
 
   for(cellType in cellTypes)
   {
-    smy_deg <- data @misc $SecAct_output $SecretedProteinExpression [[cellType]]
+    smy_deg <- Seurat_obj @misc $SecAct_output $SecretedProteinExpression [[cellType]]
 
     smy_deg_up <- smy_deg[
       smy_deg[,"exp_logFC"]>exp_logFC_cutoff&
+      #smy_deg[,"exp_mean_all"]>2&
       smy_deg[,"exp_fraction_case"]>exp_fraction_case_cutoff&
       smy_deg[,"exp_pv.adj"]<padj_cutoff, ]
 
@@ -819,7 +817,7 @@ SecAct.CCC.scRNAseq <- function(
       smy_deg_comb[paste0(cellType,"_",rownames(smy_deg_up)),"exp_pv.adj"] <- smy_deg_up[,"exp_pv.adj"]
     }
 
-    res <- data @misc $SecAct_output $SecretedProteinActivity
+    res <- Seurat_obj @misc $SecAct_output $SecretedProteinActivity
 
     smy_act <- data.frame()
     for(gene in rownames(res$zscore))
@@ -871,6 +869,7 @@ SecAct.CCC.scRNAseq <- function(
 
   ccc[,"overall_strength"] <- ccc[,"sender_exp_logFC"] * ccc[,"receiver_act_diff"]
 
+
   library(metap)
   ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) sumlog(x)$p)
   ccc[,"overall_pv.adj"] <- p.adjust(ccc[,"overall_pv"], method="BH")
@@ -878,9 +877,9 @@ SecAct.CCC.scRNAseq <- function(
 
   ccc <- ccc[order(ccc[,"overall_pv.adj"]),]
 
-  data @misc $SecAct_output $SecretedProteinCCC  <- ccc
+  Seurat_obj @misc $SecAct_output $SecretedProteinCCC  <- ccc
 
-  data
+  Seurat_obj
 }
 
 

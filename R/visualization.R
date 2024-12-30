@@ -1,5 +1,5 @@
 #' @title Cell-cell communication heatmap
-#' @description Draw a heatmap of cell-cell communicationss mediated by secreted proteins.
+#' @description Draw a heatmap of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
 #' @param row.sorted Whether to sort rows.
 #' @param column.sorted Whether to sort columns.
@@ -68,14 +68,14 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
 
 
 #' @title Cell-cell communication circle plot
-#' @description Draw a circle plot of cell-cell communicationss mediated by secreted proteins.
+#' @description Draw a circle plot of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
 #' @param colors_cellType Colors for cell types.
 #' @return A ggplot2 object.
 #' @rdname SecAct.CCC.circle
 #' @export
 #'
-SecAct.CCC.circle <- function(data, colors_cellType)
+SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
 {
   if(class(data)[1]=="SpaCET")
   {
@@ -94,6 +94,7 @@ SecAct.CCC.circle <- function(data, colors_cellType)
 
   mat = reshape2::acast( ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
 
+  cellTypes <- sort(unique(c(rownames(mat),colnames(mat))))
   for(cellType in cellTypes)
   {
     if(cellType%in%rownames(mat)&cellType%in%colnames(mat))
@@ -108,14 +109,98 @@ SecAct.CCC.circle <- function(data, colors_cellType)
 
   mat = log(mat+1)
 
-  chordDiagram(
-    mat,
-    directional = 1,
-    grid.col = colors_cellType,
-    annotationTrack = c("name", "grid"),
-    direction.type = c("diffHeight", "arrows"),
-    link.arr.type = "big.arrow"
-  )
+  if(is.null(sender)&is.null(receiver))
+  {
+    chordDiagram(
+      mat,
+      directional = 1,
+      grid.col = colors_cellType,
+      annotationTrack = c("name", "grid"),
+      direction.type = c("diffHeight", "arrows"),
+      link.arr.type = "big.arrow"
+    )
+  }else{
+    col_mat <- mat
+    for(i in 1:nrow(col_mat))
+    {
+      col_mat[i,] <- my_cols[rownames(col_mat)[i]]
+    }
+
+    if(!is.null(receiver)) col_mat[,!colnames(col_mat)%in%receiver] = "#00000000"
+    if(!is.null(sender)) col_mat[!rownames(col_mat)%in%sender,] = "#00000000"
+
+    chordDiagram(
+      mat,
+      directional = 1,
+      grid.col = my_cols,
+      col = col_mat,
+      annotationTrack = c("name", "grid"),
+      direction.type = c("diffHeight", "arrows"),
+      link.arr.type = "big.arrow"
+    )
+
+
+  }
+
+}
+
+
+#' @title Cell-cell communication sankey plot
+#' @description Draw a sankey plot of cell-cell communication mediated by secreted proteins.
+#' @param data A SpaCET object or a Seurat object.
+#' @param colors_cellType Colors for cell types.
+#' @return A ggplot2 object.
+#' @rdname SecAct.CCC.sankey
+#' @export
+#'
+SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtein=NULL, receiver=NULL)
+{
+  if(class(data)[1]=="SpaCET")
+  {
+    ccc <- data @results $SecAct_output $SecretedProteinCCC
+  }
+  if(class(data)[1]=="Seurat")
+  {
+    ccc <- data @misc $SecAct_output $SecretedProteinCCC
+  }
+
+  ccc <- cbind(ccc, communication=1)
+  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
+  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
+
+  ccc_sub <- ccc[
+    ccc[,"sender"]%in%sender &
+    ccc[,"secretedProtein"]%in%secretedProtein &
+    ccc[,"receiver"]%in%receiver
+  ,]
+
+
+  suppressPackageStartupMessages({
+    library(ggalluvial)
+    library(networkD3)
+  })
+
+
+  ccc_sub[,"sender"] <- factor(ccc_sub[,"sender"])
+  ccc_sub[,"secretedProtein"] <- factor(ccc_sub[,"secretedProtein"])
+  ccc_sub[,"receiver"] <- factor(ccc_sub[,"receiver"])
+
+
+  ccc_sub_long <- to_lodes_form(data.frame(ccc_sub),
+    key = "Demographic", value = "Group", id = "Cohort",
+    axes = 1:3)
+
+  ggplot(ccc_sub_long, aes(x = Demographic, stratum = Group, alluvium = Cohort, y = communication)) +
+    geom_alluvium(aes(fill=Group)) +
+    geom_stratum(aes(fill=Group)) +
+    scale_fill_manual(values=my_cols, na.value="grey88")+
+    geom_text(stat = "stratum", aes(label = after_stat(stratum)))+
+    theme_void()+
+    theme(
+      legend.position="none"
+    )
+
+
 }
 
 

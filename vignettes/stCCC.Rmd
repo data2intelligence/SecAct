@@ -105,9 +105,13 @@ When running `SecAct.CCC.ST`, user need to claim which column in `Seurat_obj@met
 
 ``` r
 # infer activity
-SpaCET_obj <- SecAct.CCC.ST(
-  SpaCET_obj, 
-  cellType="cellType",
+SpaCET_obj <- SecAct.CCC.scST(
+    SpaCET_obj,
+    cellType_meta = "cellType",
+    scale.factor = 1000,
+    radius = 0.02,
+    ratio_cutoff = 0.2,
+    padj_cutoff = 0.01
 )
 
 # show output

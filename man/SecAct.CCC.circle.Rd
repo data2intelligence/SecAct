@@ -4,7 +4,7 @@
 \alias{SecAct.CCC.circle}
 \title{Cell-cell communication circle plot}
 \usage{
-SecAct.CCC.circle(data, colors_cellType)
+SecAct.CCC.circle(data, colors_cellType, sender = NULL, receiver = NULL)
 }
 \arguments{
 \item{data}{A SpaCET object or a Seurat object.}
@@ -15,5 +15,5 @@ SecAct.CCC.circle(data, colors_cellType)
 A ggplot2 object.
 }
 \description{
-Draw a circle plot of cell-cell communicationss mediated by secreted proteins.
+Draw a circle plot of cell-cell communication mediated by secreted proteins.
 }

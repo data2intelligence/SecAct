@@ -68,9 +68,9 @@ Seurat_obj <- SecAct.CCC.scRNAseq(
   condition_meta="Groups", 
   conditionCase="Metastatic", 
   conditionControl="Primary",
-  act_diff_cutoff=2,
-  exp_logFC_cutoff=0.2,
-  exp_fraction_case_cutoff=0.5,
+  act_diff_cutoff=1.5,
+  exp_logFC_cutoff=0.5,
+  exp_fraction_case_cutoff=0.4,
   padj_cutoff=0.01
 )
 
@@ -108,6 +108,8 @@ We provide two types of visualization plot for cell-cell communication, i.e., he
 ``` r
 SecAct.CCC.heatmap(Seurat_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellType=my_cols)
 SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols)
+SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols, sender="Tumor")
+SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols, receiver="Tumor")
  
 ```
 

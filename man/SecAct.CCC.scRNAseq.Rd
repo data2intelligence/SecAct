@@ -5,7 +5,7 @@
 \title{Cell-cell communication from single cell data}
 \usage{
 SecAct.CCC.scRNAseq(
-  data,
+  Seurat_obj,
   cellType_meta,
   condition_meta,
   conditionCase,
@@ -18,8 +18,6 @@ SecAct.CCC.scRNAseq(
 )
 }
 \arguments{
-\item{data}{A Seurat object.}
-
 \item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
 
 \item{condition_meta}{Column name in meta data that includes condition information.}
@@ -35,6 +33,8 @@ SecAct.CCC.scRNAseq(
 \item{exp_fraction_case_cutoff}{Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.}
 
 \item{padj_cutoff}{Adjusted p value cut off.}
+
+\item{data}{A Seurat object.}
 }
 \value{
 A Seurat object.

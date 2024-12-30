@@ -24,5 +24,5 @@ SecAct.CCC.heatmap(
 A ggplot2 object.
 }
 \description{
-Draw a heatmap of cell-cell communicationss mediated by secreted proteins.
+Draw a heatmap of cell-cell communication mediated by secreted proteins.
 }

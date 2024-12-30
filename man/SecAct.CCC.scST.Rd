@@ -4,12 +4,25 @@
 \alias{SecAct.CCC.scST}
 \title{Cell-cell communication from spatial data}
 \usage{
-SecAct.CCC.scST(data, cellType_meta, radius = 0.02, padj_cutoff = 0.01)
+SecAct.CCC.scST(
+  SpaCET_obj,
+  cellType_meta,
+  scale.factor = 1e+05,
+  radius = 0.02,
+  ratio_cutoff = 0.2,
+  padj_cutoff = 0.01
+)
 }
 \arguments{
-\item{data}{A SpaCET object.}
+\item{SpaCET_obj}{A SpaCET object.}
 
 \item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
+
+\item{scale.factor}{Sets the scale factor for spot-level normalization.}
+
+\item{radius}{Radius cut off.}
+
+\item{ratio_cutoff}{Ratio cut off.}
 
 \item{padj_cutoff}{Adjusted p value cut off.}
 }
