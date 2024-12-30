@@ -184,10 +184,15 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
   })
 
 
-  ccc_sub[,"sender"] <- factor(ccc_sub[,"sender"])
+  ccc_sub[,"sender"] <- factor(
+    ccc_sub[,"sender"],
+    levels=names(sort(table(ccc_sub[,"sender"]),decreasing = T))
+    )
   ccc_sub[,"secretedProtein"] <- factor(ccc_sub[,"secretedProtein"])
-  ccc_sub[,"receiver"] <- factor(ccc_sub[,"receiver"])
-
+  ccc_sub[,"receiver"] <- factor(
+    ccc_sub[,"receiver"],
+    levels=names(sort(table(ccc_sub[,"receiver"]),decreasing = T))
+    )
 
   ccc_sub_long <- to_lodes_form(data.frame(ccc_sub),
     key = "Demographic", value = "Group", id = "Cohort",
