@@ -363,7 +363,7 @@ rm_duplicates <- function(mat)
 
     for(gene in dupl_genes){
       mat_dupl_gene <- mat_dupl[mat_dupl_names == gene,]
-      dupl_sum <- apply(mat_dupl_gene,1,sum)
+      dupl_sum <- Matrix::rowSums(mat_dupl_gene)
       max_flag <- which(dupl_sum==max(dupl_sum))
       mat[gene,] <- mat_dupl_gene[max_flag[1],] # in case two values are max
     }

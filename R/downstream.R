@@ -793,6 +793,9 @@ SecAct.CCC.scRNAseq <- function(
 )
 {
   counts <-  Seurat_obj@assays$RNA@counts
+  rownames(counts) <- transferSymbol(rownames(counts))
+  counts <- rm_duplicates(counts)
+
   meta <- Seurat_obj@meta.data
 
   cellTypes <- intersect(
