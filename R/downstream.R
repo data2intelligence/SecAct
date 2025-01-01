@@ -835,7 +835,7 @@ SecAct.CCC.scRNAseq <- function(
       bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
     }
 
-    Seurat_obj @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE)
+    Seurat_obj @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE, sigMatrix = sigMatrix)
   }
 
   print("Step 2: assessing changes in secreted protein expression.")
