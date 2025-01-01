@@ -120,6 +120,44 @@ SecAct.pattern.gene <- function(SpaCET_obj, n)
 }
 
 
+scalar1 <- function(x)
+{
+  x / sqrt(sum(x^2))
+}
+
+calWeights <- function(SpotIDs, r=3, diag0=TRUE)
+{
+  d <- matrix(Inf,ncol=length(SpotIDs),nrow=length(SpotIDs))
+  colnames(d) <- SpotIDs
+  rownames(d) <- SpotIDs
+
+  for(i in 1:ncol(d))
+  {
+    xy <- rownames(d)[i]
+    x <- as.numeric(unlist(strsplit(xy,"x")))[1]
+    y <- as.numeric(unlist(strsplit(xy,"x")))[2]
+    xm <- r-1
+    ym <- 2*(r-1)+1
+    x_y <- expand.grid((x-xm):(x+xm),(y-ym):(y+ym))
+    x_y_d <- cbind(x_y,d=sqrt( (0.5*sqrt(3)*(x_y[,1]-x))^2 + (0.5*(x_y[,2]-y))^2) )
+    rownames(x_y_d) <- paste0(x_y[,1],"x",x_y[,2])
+    x_y_d <- x_y_d[rownames(x_y_d)%in%rownames(d),]
+
+    d[xy,rownames(x_y_d)] <- x_y_d[,3]
+    d[rownames(x_y_d),xy] <- x_y_d[,3]
+  }
+
+  W <- exp(-d^2/2)
+
+  if(diag0==TRUE) diag(W) <- 0
+
+  W <- W[,colSums(W)>0] # remove spot island
+  W <- W[rowSums(W)>0,] # remove spot island
+
+  W
+}
+
+
 #' @title Secreted protein signaling velocity
 #' @description Calculate the signaling velocity of secreted proteins based on their activities.
 #' @param SpaCET_obj A SpaCET object.
@@ -369,6 +407,148 @@ SecAct.signaling.velocity.spotST <- function(
 }
 
 
+#' @title Secreted protein signaling velocity
+#' @description Calculate the signaling velocity of secreted proteins based on their activities.
+#' @param SpaCET_obj A SpaCET object.
+#' @param sender Sender cell types.
+#' @param secretedProtein Secreted proteins.
+#' @param receiver Receiver cell types.
+#' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @return A ggplot2 object.
+#' @details
+#' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
+#'
+#' @examples
+#' SecAct.signaling.velocity.scST(SpaCET_obj, gene="TGFB1", signalMode="receiving")
+#'
+#' @rdname SecAct.signaling.velocity.scST
+#' @export
+#'
+SecAct.signaling.velocity.scST <- function(
+    SpaCET_obj,
+    sender,
+    secretedProtein,
+    receiver,
+    cellType_meta,
+    scale.factor = 1e+05,
+    radius = 0.02,
+)
+{
+  if(class(SpaCET_obj)!="SpaCET")
+  {
+    stop("SpaCET object is requried.")
+  }
+  if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
+  {
+    stop("Please run SecAct.activity.inference first.")
+  }
+
+  coordinate_mat <- SpaCET_obj@input$spotCoordinates
+  cellType_vec <- SpaCET_obj@input$metaData[,cellType_meta]
+
+
+  cellType1_cells <- which(cellType_vec==sender)
+  cellType2_cells <- which(cellType_vec==receiver)
+
+
+  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
+
+  neighbor_indices <- nn_result$nn.idx
+  neighbor_distances <- nn_result$nn.dists
+
+  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices)) # row indices (cell index)
+  j <- as.vector(t(neighbor_indices))
+  x <- as.vector(t(neighbor_distances))
+
+  valid <- x<=radius & x>0
+  i <- i[valid]          # Keep only valid indices
+  j <- j[valid]          # Valid neighbor indices
+  x <- x[valid]          # Valid distances
+
+
+  exp <- SpaCET_obj@input$counts
+  rownames(exp) <- transferSymbol(rownames(exp))
+  exp <- rm_duplicates(exp)
+
+
+  act <- SpaCET_obj @results $SecAct_output $SecretedProteinActivity$zscore
+  act[act<0] <- 0
+
+
+
+  Tmat <- data.frame(i,j)
+
+  # all cell pair
+  Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
+
+
+  # expr(1) * act(2)
+  CCC_vec <- exp[secretedProtein, Tmat_cellTypePair[,1]] * act[secretedProtein, Tmat_cellTypePair[,2]]
+
+  Tmat_cellTypePair <- Tmat_cellTypePair[CCC_vec>0,]
+
+
+  fg.df <- data.frame(coordinate_mat, cellType=cellType_vec)
+
+  fg.df[!fg.df[,3]%in%c(sender,receiver),3] <- "Others"
+
+
+  startend <- data.frame(
+    sender=rownames(coordinate_mat)[Tmat_cellTypePair[,1]],
+    receiver=rownames(coordinate_mat)[Tmat_cellTypePair[,2]],
+    vec_len=1
+  )
+
+  startend <- cbind(startend, x_start=coordinate_mat[startend[,1],1] )
+  startend <- cbind(startend, y_start=coordinate_mat[startend[,1],2] )
+  startend <- cbind(startend, x_end=coordinate_mat[startend[,2],1] )
+  startend <- cbind(startend, y_end=coordinate_mat[startend[,2],2] )
+
+  x.left <- 7.8
+  x.right <- 8.2
+  y.top <- 1.35
+  y.bottom <- 1.3
+
+
+  p1 <- ggplot(fg.df, aes(x_slide_mm, y_slide_mm)) + #sdimx, sdimy
+    geom_point(aes(colour=cellType),size=0.1) +
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(0.05, "cm")), color="pink")+
+    scale_color_manual(values=my_cols)+
+    ggtitle(" ")+
+    xlab(" ")+
+    ylab(" ")+
+    theme_classic()+
+    theme(
+      plot.background = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "right"
+    )
+
+  fg.df_cut <- fg.df[
+    fg.df[,1]> x.left&
+      fg.df[,1]< x.right&
+      fg.df[,2]> y.bottom&
+      fg.df[,2]< y.top,
+  ]
+
+  startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
+
+  p2 <- ggplot(fg.df_cut, aes(x_slide_mm, y_slide_mm)) +
+    geom_point(aes(color=cellType),size=8) +
+    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut, arrow = arrow(length = unit(0.5, "cm")),color="pink",linewidth=2)+
+    scale_color_manual(values=my_cols)+
+    ggtitle(" ")+
+    xlab(" ")+
+    ylab(" ")+
+    theme_void()+
+    theme(
+      plot.background = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = "none"
+    )
+
+    p1+p2
+}
 
 #' @title Cell-cell communication from spatial data
 #' @description Calculate cell-cell communication mediated by secreted proteins from spatial transcriptomics data.
@@ -579,44 +759,6 @@ SecAct.CCC.scST <- function(
 }
 
 
-scalar1 <- function(x)
-{
-  x / sqrt(sum(x^2))
-}
-
-calWeights <- function(SpotIDs, r=3, diag0=TRUE)
-{
-  d <- matrix(Inf,ncol=length(SpotIDs),nrow=length(SpotIDs))
-  colnames(d) <- SpotIDs
-  rownames(d) <- SpotIDs
-
-  for(i in 1:ncol(d))
-  {
-    xy <- rownames(d)[i]
-    x <- as.numeric(unlist(strsplit(xy,"x")))[1]
-    y <- as.numeric(unlist(strsplit(xy,"x")))[2]
-    xm <- r-1
-    ym <- 2*(r-1)+1
-    x_y <- expand.grid((x-xm):(x+xm),(y-ym):(y+ym))
-    x_y_d <- cbind(x_y,d=sqrt( (0.5*sqrt(3)*(x_y[,1]-x))^2 + (0.5*(x_y[,2]-y))^2) )
-    rownames(x_y_d) <- paste0(x_y[,1],"x",x_y[,2])
-    x_y_d <- x_y_d[rownames(x_y_d)%in%rownames(d),]
-
-    d[xy,rownames(x_y_d)] <- x_y_d[,3]
-    d[rownames(x_y_d),xy] <- x_y_d[,3]
-  }
-
-  W <- exp(-d^2/2)
-
-  if(diag0==TRUE) diag(W) <- 0
-
-  W <- W[,colSums(W)>0] # remove spot island
-  W <- W[rowSums(W)>0,] # remove spot island
-
-  W
-}
-
-
 #' @title Cell-cell communication from single cell data
 #' @description Calculate condition-specific cell-cell communication mediated by secreted proteins from scRNA-Seq data.
 #' @param data A Seurat object.
@@ -639,9 +781,10 @@ SecAct.CCC.scRNAseq <- function(
   conditionCase,
   conditionControl,
   scale.factor = 1e+05,
-  act_diff_cutoff = 1.5,
-  exp_logFC_cutoff = 0.5,
-  exp_fraction_case_cutoff = 0.4,
+  act_diff_cutoff = 2,
+  exp_logFC_cutoff = 0.2,
+  exp_mean_all_cutoff = 2,
+  exp_fraction_case_cutoff = 0.1,
   padj_cutoff = 0.01
 )
 {
@@ -769,7 +912,7 @@ SecAct.CCC.scRNAseq <- function(
 
     smy_deg_up <- smy_deg[
       smy_deg[,"exp_logFC"]>exp_logFC_cutoff&
-      #smy_deg[,"exp_mean_all"]>2&
+      smy_deg[,"exp_mean_all"]>exp_mean_all_cutoff&
       smy_deg[,"exp_fraction_case"]>exp_fraction_case_cutoff&
       smy_deg[,"exp_pv.adj"]<padj_cutoff, ]
 
