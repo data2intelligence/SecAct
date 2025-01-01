@@ -780,13 +780,16 @@ SecAct.CCC.scRNAseq <- function(
   condition_meta,
   conditionCase,
   conditionControl,
-  scale.factor = 1e+05,
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
   exp_fraction_case_cutoff = 0.1,
   padj_cutoff = 0.01,
-  sigMatrix="SecAct"
+  scale.factor = 1e+05,
+  sigMatrix="SecAct",
+  lambda=5e+5,
+  nrand=1000,
+  sigFilter=FALSE
 )
 {
   counts <-  Seurat_obj@assays$RNA@counts
