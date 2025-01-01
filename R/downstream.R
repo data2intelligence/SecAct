@@ -431,7 +431,7 @@ SecAct.signaling.velocity.scST <- function(
     receiver,
     cellType_meta,
     scale.factor = 1e+05,
-    radius = 0.02,
+    radius = 0.02
 )
 {
   if(class(SpaCET_obj)!="SpaCET")
