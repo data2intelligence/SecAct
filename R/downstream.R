@@ -579,7 +579,6 @@ SecAct.CCC.scST <- function(
 }
 
 
-
 scalar1 <- function(x)
 {
   x / sqrt(sum(x^2))
@@ -616,40 +615,6 @@ calWeights <- function(SpotIDs, r=3, diag0=TRUE)
 
   W
 }
-
-transferSymbol <- function(x)
-{
-  alias2symbol <- read.csv(system.file("extdata", 'NCBI_20230818_gene_result_alias2symbol.csv', package = 'SecAct'),as.is=T)
-  alias2symbol[is.na(alias2symbol[,"Alias"]),"Alias"] <- "NA"
-
-  x[x%in%alias2symbol[,1]] <- alias2symbol[
-    match(
-      x[x%in%alias2symbol[,1]],
-      alias2symbol[,1]
-    ), 2]
-
-  x
-}
-
-rm_duplicates <- function(mat)
-{
-  dupl <- duplicated(rownames(mat))
-  if (sum(dupl) > 0){
-    dupl_genes <- unique(rownames(mat)[dupl])
-    mat_dupl <- mat[rownames(mat) %in% dupl_genes,,drop=F]
-    mat_dupl_names <- rownames(mat_dupl)
-    mat <- mat[!dupl,,drop=F]
-
-    for(gene in dupl_genes){
-      mat_dupl_gene <- mat_dupl[mat_dupl_names == gene,]
-      dupl_sum <- apply(mat_dupl_gene,1,sum)
-      max_flag <- which(dupl_sum==max(dupl_sum))
-      mat[gene,] <- mat_dupl_gene[max_flag[1],] # in case two values are max
-    }
-  }
-  return(mat)
-}
-
 
 
 #' @title Cell-cell communication from single cell data
