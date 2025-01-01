@@ -785,7 +785,8 @@ SecAct.CCC.scRNAseq <- function(
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
   exp_fraction_case_cutoff = 0.1,
-  padj_cutoff = 0.01
+  padj_cutoff = 0.01,
+  sigMatrix="SecAct"
 )
 {
   counts <-  Seurat_obj@assays$RNA@counts
@@ -801,8 +802,6 @@ SecAct.CCC.scRNAseq <- function(
 
   if(is.null(Seurat_obj @misc $SecAct_output $SecretedProteinActivity))
   {
-    bulk.case <- data.frame()
-    bulk.control <- data.frame()
     bulk.diff <- data.frame()
     for(cellType in cellTypes)
     {
@@ -833,7 +832,6 @@ SecAct.CCC.scRNAseq <- function(
 
 
       # normalized with the control samples
-      bulk.case[rownames(expr_case),cellType] <- expr_case
       bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
     }
 
