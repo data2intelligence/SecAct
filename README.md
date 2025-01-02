@@ -12,8 +12,8 @@ input multiple modalities of expression data, including bulk,
 single-cell, or spatial transcriptomics (ST). The outputs are the
 inferred activities of 1248 secreted proteins for each ST spot,
 individual cell, or sample. Based on the inferred activities, SecAct
-provides multiple downstream application modules (Fig. 2c). For spatial
-data, SecAct can infer the signaling pattern and signaling velocity for
+provides multiple downstream application modules. For spatial data,
+SecAct can infer the signaling pattern and signaling velocity for
 secreted proteins. The velocity represents the signaling direction and
 strength across the whole tissue slide. For single-cell data, SecAct can
 infer the intercellular communication network and signaling flow from
