@@ -10,11 +10,20 @@ navbar:
       href: reference/index.html
     - text: Tutorials
       menu:
-      - text: Infer the secreted protein activity from gene expression in bulk level
-        href: articles/bulk.html
-      - text: Infer the secreted protein activity from single-cell RNA-Seq data
-        href: articles/singleCell.html
-      - text: Infer the secreted protein activity from spatial transcriptomics data
-        href: articles/spatial.html
+      - text: Spatial transcriptomcis (ST) data
+      - text: Signaling patterns and velocities for multi-cellular ST data
+        href: articles/stPattern.html
+      - text: Intercellular communication for single-cell resolution ST data
+        href: articles/stCCC.html
+      - text: Single-cell RNA sequencing data
+      - text: Cell-cell communication mediated by secreted proteins
+        href: articles/scCCC.html
+      - text: Secreted protein signaling activity for various cell states
+        href: articles/scState.html
+      - text: Bulk RNA sequencing data
+      - text: Secreted protein activity difference between two phenotypes
+        href: articles/bulkDiff.html
+      - text: Clinical relavance of secreted proteins in a large patient cohort
+        href: articles/bulkCohort.html
     - text: News
       href: news/index.html

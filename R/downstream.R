@@ -979,6 +979,8 @@ SecAct.CCC.scRNAseq <- function(
     ccc[paste0(sender,"_",SP,"_",receiver),"receiver_act_pv.adj"] <- smy_act_comb_sub[,"act_pv.adj"]
   }
 
+  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
+
   ccc[,"overall_strength"] <- ccc[,"sender_exp_logFC"] * ccc[,"receiver_act_diff"]
 
 

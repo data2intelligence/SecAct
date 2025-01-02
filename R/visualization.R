@@ -22,7 +22,6 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
   ccc <- cbind(ccc, communication=1)
   ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
 
-  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
 
   mat = reshape2::acast( ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
 
@@ -88,8 +87,6 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
 
   ccc <- cbind(ccc, communication=1)
   ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
-
-  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
 
 
   mat = reshape2::acast( ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
@@ -169,7 +166,7 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
 
   ccc <- cbind(ccc, communication=1)
   ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
-  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
+
 
   ccc_sub <- ccc[
     ccc[,"sender"]%in%sender &
@@ -236,7 +233,6 @@ SecAct.CCC.dot <- function(data, colors_cellType, sender=NULL, secretedProtein=N
 
   ccc <- cbind(ccc, communication=1)
   ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
-  ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
 
   ccc_sub <- ccc[
     ccc[,"sender"]%in%sender &
