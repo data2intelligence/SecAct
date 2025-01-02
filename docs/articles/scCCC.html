@@ -46,12 +46,18 @@
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-    <a class="dropdown-item" href="../articles/bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
-    <a class="dropdown-item" href="../articles/singleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
-    <a class="dropdown-item" href="../articles/spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+    <h6 class="dropdown-header" data-toc-skip>Spatial transcriptomcis (ST) data</h6>
+    <a class="dropdown-item" href="../articles/stPattern.html">Signaling patterns and velocities for multi-cellular ST data</a>
+    <a class="dropdown-item" href="../articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a>
+    <h6 class="dropdown-header" data-toc-skip>Single-cell RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a>
+    <a class="dropdown-item" href="../articles/scState.html">Secreted protein signaling activity for various cell states</a>
+    <h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/bulkDiff.html">Secreted protein activity difference between two phenotypes</a>
+    <a class="dropdown-item" href="../articles/bulkCohort.html">Clinical relavance of secreted proteins in a large patient cohort</a>
   </div>
 </li>
 <li class="nav-item">
@@ -95,7 +101,7 @@ mediated by secreted proteins from scRNA-seq data. The SecAct analysis
 requires an scRNA-seq dataset with two distinct conditions. SecAct
 employs two key criteria to identify condition-specific cell-cell
 communication for a particular secreted protein: (1) upregulated
-expression of the secreted protein in the sender cell type and (2)
+expression of the secreted protein in the sender cell type; (2)
 increased signaling activity of the same secreted protein in the
 receiver cell type. For this demonstration, we employ an ovarian cancer
 (OV) scRNA-Seq
@@ -107,8 +113,8 @@ containing samples from both primary and metastatic sites.</p>
 <p>We have preprocessed this OV scRNA-Seq dataset and saved it as a
 Seurat object. The information of cell-type annotations and anatomical
 sites are stored in the columns <code>MyCellType</code> and
-<code>Groups</code> of meta data from the Seurat object, respectively.
-Users can easily access them using the following code.</p>
+<code>Groups</code> of <code>meta.data</code> from the Seurat object,
+respectively. Users can easily access them using the following code.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span>
@@ -146,17 +152,22 @@ changes in secreted protein expression for each cell type between two
 conditions, and (3) linking sender and receiver cell types.</p>
 <p>When running <code>SecAct.CCC.scRNAseq</code>, user need to claim
 which column in <code>Seurat_obj@meta.data</code> stores cell-type
-annotations. Also, claim which column stores condition information and
-what are case and control conditions. All SecAct results are stored in
-<code>Seurat_obj @misc $SecAct_output</code>.</p>
+annotations, and also claim which column stores condition information
+and what are case and control conditions. All SecAct results are stored
+in <code>Seurat_obj @misc $SecAct_output</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity</span></span>
+<code class="sourceCode R"><span><span class="co"># infer cell-cell communication</span></span>
 <span><span class="va">Seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scRNAseq.html">SecAct.CCC.scRNAseq</a></span><span class="op">(</span></span>
 <span>  <span class="va">Seurat_obj</span>, </span>
-<span>  cellType<span class="op">=</span><span class="st">"MyCellType"</span>,</span>
-<span>  condition<span class="op">=</span><span class="st">"Groups"</span>, </span>
+<span>  cellType_meta<span class="op">=</span><span class="st">"MyCellType"</span>,</span>
+<span>  condition_meta<span class="op">=</span><span class="st">"Groups"</span>, </span>
 <span>  conditionCase<span class="op">=</span><span class="st">"Metastatic"</span>, </span>
-<span>  conditionControl<span class="op">=</span><span class="st">"Primary"</span><span class="op">)</span></span>
+<span>  conditionControl<span class="op">=</span><span class="st">"Primary"</span>,</span>
+<span>  act_diff_cutoff<span class="op">=</span><span class="fl">1.5</span>,</span>
+<span>  exp_logFC_cutoff<span class="op">=</span><span class="fl">0.5</span>,</span>
+<span>  exp_fraction_case_cutoff<span class="op">=</span><span class="fl">0.4</span>,</span>
+<span>  padj_cutoff<span class="op">=</span><span class="fl">0.01</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show output</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">Seurat_obj</span> <span class="op">@</span><span class="va">misc</span> <span class="op">$</span><span class="va">SecAct_output</span><span class="op">)</span></span>
@@ -166,22 +177,7 @@ what are case and control conditions. All SecAct results are stored in
 <span><span class="co">## [3] "SecretedProteinCCC"</span></span>
 <span></span>
 <span><span class="co"># cell-cell communication results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Seurat_obj1</span> <span class="op">@</span><span class="va">misc</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinCCC</span> <span class="op">[</span>,<span class="fl">10</span><span class="op">:</span><span class="fl">12</span><span class="op">]</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">##                          sender secretedProtein   receiver sender_exp_logFC sender_exp_pv sender_exp_pv.adj receiver_act_diff</span></span>
-<span><span class="co">## Tumor_RARRES2_Treg        Tumor         RARRES2       Treg         1.048683 7.613305e-108     5.217353e-106          6.491628</span></span>
-<span><span class="co">## Tumor_RARRES2_CD8T        Tumor         RARRES2       CD8T         1.048683 7.613305e-108     5.217353e-106         14.767048</span></span>
-<span><span class="co">## Tumor_RARRES2_NK          Tumor         RARRES2         NK         1.048683 7.613305e-108     5.217353e-106          3.328219</span></span>
-<span><span class="co">## Tumor_RARRES2_Tumor       Tumor         RARRES2      Tumor         1.048683 7.613305e-108     5.217353e-106         15.759037</span></span>
-<span><span class="co">## Tumor_RARRES2_DC          Tumor         RARRES2         DC         1.048683 7.613305e-108     5.217353e-106          7.924789</span></span>
-<span><span class="co">## Tumor_RARRES2_Fibroblast  Tumor         RARRES2 Fibroblast         1.048683 7.613305e-108     5.217353e-106         12.481952</span></span>
-<span><span class="co">##                          receiver_act_pv receiver_act_pv.adj overall_strength    overall_pv overall_pv.adj</span></span>
-<span><span class="co">## Tumor_RARRES2_Treg           0.000999001         0.002912975         6.807658 1.936092e-108  2.287815e-106</span></span>
-<span><span class="co">## Tumor_RARRES2_CD8T           0.000999001         0.002468818        15.485949 1.936092e-108  2.287815e-106</span></span>
-<span><span class="co">## Tumor_RARRES2_NK             0.000999001         0.008367471         3.490246 1.936092e-108  2.287815e-106</span></span>
-<span><span class="co">## Tumor_RARRES2_Tumor          0.000999001         0.001869195        16.526231 1.936092e-108  2.287815e-106</span></span>
-<span><span class="co">## Tumor_RARRES2_DC             0.000999001         0.002308802         8.310590 1.936092e-108  2.287815e-106</span></span>
-<span><span class="co">## Tumor_RARRES2_Fibroblast     0.000999001         0.001689368        13.089607 1.936092e-108  2.287815e-106</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Seurat_obj</span> <span class="op">@</span><span class="va">misc</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinCCC</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualize-cell-cell-communication">Visualize cell-cell communication<a class="anchor" aria-label="anchor" href="#visualize-cell-cell-communication"></a>
@@ -189,9 +185,29 @@ what are case and control conditions. All SecAct results are stored in
 <p>We provide two types of visualization plot for cell-cell
 communication, i.e., heatmap and circle plot.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.heatmap.html">SecAct.CCC.heatmap</a></span><span class="op">(</span><span class="va">Seurat_obj</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/SecAct.CCC.circle.html">SecAct.CCC.circle</a></span><span class="op">(</span><span class="va">Seurat_obj</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/OV_CCC_heatmap.png" width="45%" style="border:none"><img src="img/OV_CCC_circle.png" width="45%" style="border:none"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.heatmap.html">SecAct.CCC.heatmap</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, row.sorted<span class="op">=</span><span class="cn">TRUE</span>, column.sorted<span class="op">=</span><span class="cn">TRUE</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/SecAct.CCC.circle.html">SecAct.CCC.circle</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span>
+<span> </span></code></pre></div>
+<p><img src="img/OV_heatmap.png" width="45%" style="border:none"><img src="img/OV_circlize.png" width="45%" style="border:none"></p>
+<p>User can select the cell-cell communication from
+<code>Seurat_obj @misc $SecAct_output $SecretedProteinCCC</code> to
+visualize them.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sender</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fibroblast"</span>,<span class="st">"Macrophage"</span>,<span class="st">"Endothelial"</span>,<span class="st">"CD8T"</span>,<span class="st">"Tex"</span><span class="op">)</span></span>
+<span><span class="va">receiver</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tumor"</span><span class="op">)</span></span>
+<span><span class="va">secretedProtein</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"COL18A1"</span>,<span class="st">"CST3"</span>,<span class="st">"FN1"</span>,<span class="st">"HSPG2"</span>,<span class="st">"SERPING1"</span>,<span class="st">"COL15A1"</span>,</span>
+<span><span class="st">"TGFB1"</span>,<span class="st">"HSPG2"</span>,<span class="st">"ISG15"</span>,<span class="st">"COL18A1"</span>,<span class="st">"TIMP1"</span>,<span class="st">"BGN"</span>,</span>
+<span><span class="st">"FAP"</span>,<span class="st">"THBS2"</span>,<span class="st">"SPARC"</span>,<span class="st">"COL1A1"</span>,<span class="st">"COL1A2"</span>,<span class="st">"TGFBI"</span>,</span>
+<span><span class="st">"VCAN"</span>,<span class="st">"POSTN"</span>,<span class="st">"FBN1"</span>,<span class="st">"MXRA5"</span>,<span class="st">"HTRA1"</span>,<span class="st">"BMP1"</span>,<span class="st">"FSTL1"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/SecAct.CCC.sankey.html">SecAct.CCC.sankey</a></span><span class="op">(</span></span>
+<span>  <span class="va">Seurat_obj</span>, </span>
+<span>  <span class="va">my_cols</span>, </span>
+<span>  sender<span class="op">=</span><span class="va">sender</span>, </span>
+<span>  secretedProtein<span class="op">=</span><span class="va">secretedProtein</span>, </span>
+<span>  receiver<span class="op">=</span><span class="va">receiver</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="img/OV_sankey_Tumor.png" width="70%" style="border:none; fig.align:center"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

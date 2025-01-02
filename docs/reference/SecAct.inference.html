@@ -30,9 +30,15 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-    <a class="dropdown-item" href="../articles/bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
-    <a class="dropdown-item" href="../articles/singleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
-    <a class="dropdown-item" href="../articles/spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+    <h6 class="dropdown-header" data-toc-skip>Spatial transcriptomcis (ST) data</h6>
+    <a class="dropdown-item" href="../articles/stPattern.html">Signaling patterns and velocities for multi-cellular ST data</a>
+    <a class="dropdown-item" href="../articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a>
+    <h6 class="dropdown-header" data-toc-skip>Single-cell RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a>
+    <a class="dropdown-item" href="../articles/scState.html">Secreted protein signaling activity for various cell states</a>
+    <h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/bulkDiff.html">Secreted protein activity difference between two phenotypes</a>
+    <a class="dropdown-item" href="../articles/bulkCohort.html">Clinical relavance of secreted proteins in a large patient cohort</a>
   </div>
 </li>
 <li class="nav-item">
@@ -55,7 +61,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="" class="logo" alt=""><h1>Secreted protein activity inference</h1>
-      <small class="dont-index">Source: <a href="https://github.com/data2intelligence/SecAct/blob/HEAD/R/main.R" class="external-link"><code>R/main.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/data2intelligence/SecAct/blob/HEAD/R/activity.R" class="external-link"><code>R/activity.R</code></a></small>
       <div class="d-none name"><code>SecAct.inference.Rd</code></div>
     </div>
 
@@ -65,13 +71,17 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.inference</span><span class="op">(</span><span class="va">expr</span>, SigMat <span class="op">=</span> <span class="st">"SecAct"</span>, lambda <span class="op">=</span> <span class="fl">5e+05</span>, nrand <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.inference</span><span class="op">(</span><span class="va">Y</span>, SigMat <span class="op">=</span> <span class="st">"SecAct"</span>, lambda <span class="op">=</span> <span class="fl">5e+05</span>, nrand <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>expr</dt>
+    <dl><dt>Y</dt>
 <dd><p>Gene expression matrix with gene symbol (row) x sample (column).</p></dd>
+
+
+<dt>SigMat</dt>
+<dd><p>Secreted protein signature matrix.</p></dd>
 
 
 <dt>lambda</dt>
@@ -80,10 +90,6 @@
 
 <dt>nrand</dt>
 <dd><p>Number of randomizations in the permutation test, with a default value 1000.</p></dd>
-
-
-<dt>sigMatrix</dt>
-<dd><p>Secreted protein signature matrix.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -97,15 +103,6 @@ zscore: beta/se
 pvalue: statistical significance</p>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span></span>
-<span><span class="va">exprPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/IFNG_GSE100093.diff"</span><span class="op">)</span></span>
-<span><span class="va">expr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="va">expr</span>, sep<span class="op">=</span><span class="st">"\t"</span>, check.names<span class="op">=</span><span class="cn">F</span><span class="op">)</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu">SecAct.inference</span><span class="op">(</span><span class="va">expr</span>, lambda<span class="op">=</span><span class="fl">10000</span>, nrand<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span>
-<span></span></code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

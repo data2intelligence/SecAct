@@ -52,7 +52,13 @@
     <loc>/reference/SecAct.CCC.circle.html</loc>
   </url>
   <url>
+    <loc>/reference/SecAct.CCC.dot.html</loc>
+  </url>
+  <url>
     <loc>/reference/SecAct.CCC.heatmap.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.CCC.sankey.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.CCC.scRNAseq.html</loc>
@@ -79,13 +85,22 @@
     <loc>/reference/SecAct.heat.map.html</loc>
   </url>
   <url>
+    <loc>/reference/SecAct.heatmap.plot.html</loc>
+  </url>
+  <url>
     <loc>/reference/SecAct.inference.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.lollipop.plot.html</loc>
   </url>
   <url>
+    <loc>/reference/SecAct.pattern.gene.html</loc>
+  </url>
+  <url>
     <loc>/reference/SecAct.signaling.pattern.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.signaling.velocity.scST.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.signaling.velocity.spotST.html</loc>

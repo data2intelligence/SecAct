@@ -117,3 +117,5 @@ SpaCET_obj <- SecAct.CCC.scST(
 # show output
 names(SpaCET_obj @results $SecAct_output)
 ```
+
+<img src="img/cos1.png" width="50%" style="border:none" />

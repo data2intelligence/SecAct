@@ -46,12 +46,18 @@
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
-<li class="nav-item dropdown">
+<li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-    <a class="dropdown-item" href="../articles/bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
-    <a class="dropdown-item" href="../articles/singleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
-    <a class="dropdown-item" href="../articles/spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+    <h6 class="dropdown-header" data-toc-skip>Spatial transcriptomcis (ST) data</h6>
+    <a class="dropdown-item" href="../articles/stPattern.html">Signaling patterns and velocities for multi-cellular ST data</a>
+    <a class="dropdown-item" href="../articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a>
+    <h6 class="dropdown-header" data-toc-skip>Single-cell RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a>
+    <a class="dropdown-item" href="../articles/scState.html">Secreted protein signaling activity for various cell states</a>
+    <h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/bulkDiff.html">Secreted protein activity difference between two phenotypes</a>
+    <a class="dropdown-item" href="../articles/bulkCohort.html">Clinical relavance of secreted proteins in a large patient cohort</a>
   </div>
 </li>
 <li class="nav-item">
@@ -153,7 +159,7 @@ format of matrix with spot ID (row) x coordinates (column). This 1st and
 <span><span class="va">my_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">'B'</span><span class="op">=</span><span class="st">'#C88888'</span>,<span class="st">'Erythrocyte'</span><span class="op">=</span><span class="st">'#fe666d'</span>,<span class="st">'T.alpha.beta'</span><span class="op">=</span><span class="st">'#B95FBB'</span>,<span class="st">'T.gamma.delta'</span><span class="op">=</span><span class="st">'#3288bd'</span>,</span>
 <span>    <span class="st">'NK'</span><span class="op">=</span><span class="st">'#bb8761'</span>,<span class="st">'Hepatocyte'</span><span class="op">=</span><span class="st">'#63636d'</span>,<span class="st">'Cholangiocyte'</span><span class="op">=</span><span class="st">'#de77ae'</span>,<span class="st">'Endothelial'</span><span class="op">=</span><span class="st">'#D4D915'</span>,</span>
-<span>    <span class="st">'Fibroblast'</span><span class="op">=</span><span class="st">'#66c2a5'</span>,<span class="st">'Macrophage'</span><span class="op">=</span><span class="st">'#ff9a36'</span>,<span class="st">'Tumor_core'</span><span class="op">=</span><span class="st">'#A4DFF2'</span>,<span class="st">'Tumor_boundary'</span><span class="op">=</span><span class="st">'blue'</span></span>
+<span>    <span class="st">'Fibroblast'</span><span class="op">=</span><span class="st">'#66c2a5'</span>,<span class="st">'Macrophage'</span><span class="op">=</span><span class="st">'#ff9a36'</span>,<span class="st">'Tumor_core'</span><span class="op">=</span><span class="st">'#A4DFF2'</span>,<span class="st">'Tumor_interface'</span><span class="op">=</span><span class="st">'blue'</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
@@ -192,13 +198,18 @@ what are case and control conditions. All SecAct results are stored in
 <code>Seurat_obj @misc $SecAct_output</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity</span></span>
-<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu">SecAct.CCC.ST</span><span class="op">(</span></span>
-<span>  <span class="va">SpaCET_obj</span>, </span>
-<span>  cellType<span class="op">=</span><span class="st">"cellType"</span>,</span>
+<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scST.html">SecAct.CCC.scST</a></span><span class="op">(</span></span>
+<span>    <span class="va">SpaCET_obj</span>,</span>
+<span>    cellType_meta <span class="op">=</span> <span class="st">"cellType"</span>,</span>
+<span>    scale.factor <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>    radius <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>    ratio_cutoff <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>    padj_cutoff <span class="op">=</span> <span class="fl">0.01</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show output</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span><span class="op">)</span></span></code></pre></div>
+<p><img src="img/cos1.png" width="50%" style="border:none"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

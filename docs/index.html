@@ -47,9 +47,15 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-    <a class="dropdown-item" href="articles/bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
-    <a class="dropdown-item" href="articles/singleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
-    <a class="dropdown-item" href="articles/spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+    <h6 class="dropdown-header" data-toc-skip>Spatial transcriptomcis (ST) data</h6>
+    <a class="dropdown-item" href="articles/stPattern.html">Signaling patterns and velocities for multi-cellular ST data</a>
+    <a class="dropdown-item" href="articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a>
+    <h6 class="dropdown-header" data-toc-skip>Single-cell RNA sequencing data</h6>
+    <a class="dropdown-item" href="articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a>
+    <a class="dropdown-item" href="articles/scState.html">Secreted protein signaling activity for various cell states</a>
+    <h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6>
+    <a class="dropdown-item" href="articles/bulkDiff.html">Secreted protein activity difference between two phenotypes</a>
+    <a class="dropdown-item" href="articles/bulkCohort.html">Clinical relavance of secreted proteins in a large patient cohort</a>
   </div>
 </li>
 <li class="nav-item">
@@ -81,7 +87,7 @@
 <!-- badges: end -->
 <p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics (ST). The outputs are 1248 secreted protein activities for each sample, individual cell, or ST spot, respectively. SecAct achieves this by leveraging intercellular signatures trained from 618 genome-wide spatial transcriptomics profiles across 28 tumor types. If the input are spatial transcriptomics, SecAct additionally calculates the signaling velocities of secreted proteins from source to sink spots.</p>
 <p align="center">
-<img src="reference/figures/workflow.png" width="50%"></p>
+<img src="reference/figures/workflow.png" width="100%"></p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
@@ -109,50 +115,21 @@
 </ul>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(SecAct)</span>
-<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># prepare expression matrix</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>exprPath <span class="ot">&lt;-</span> <span class="fu">file.path</span>(<span class="fu">system.file</span>(<span class="at">package=</span><span class="st">"SecAct"</span>), <span class="st">"extdata/IFNG_GSE100093.diff.gz"</span>)</span>
-<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>expr <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(exprPath, <span class="at">row.names=</span><span class="dv">1</span>, <span class="at">check.names=</span>F)</span>
-<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co"># run SecAct to infer activity; ~3 mins</span></span>
-<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">SecAct.inference</span>(expr)</span>
-<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
-<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># show activity</span></span>
-<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="fu">head</span>(res<span class="sc">$</span>zscore)</span>
-<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="do">##         Anti-IFNG.15day Anti-IFNG.57day</span></span>
-<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="do">## A1BG        27.41700606       15.560484</span></span>
-<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="do">## A2M         -1.00132544        3.703776</span></span>
-<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="do">## A2ML1       -5.70139021       -5.585635</span></span>
-<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="do">## AADACL2     -0.03412573        8.556714</span></span>
-<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="do">## ABHD15       7.91357240        3.360326</span></span>
-<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="do">## ABI3BP      -1.57170759       -4.292832</span></span>
-<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a></span>
-<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co"># show IFNG activity</span></span>
-<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>res<span class="sc">$</span>zscore[<span class="st">"IFNG"</span>,]</span>
-<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a></span>
-<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="do">## Anti-IFNG.15day Anti-IFNG.57day </span></span>
-<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="do">##       -10.76148       -30.50151 </span></span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="tutorial">Tutorial<a class="anchor" aria-label="anchor" href="#tutorial"></a>
 </h2>
-<div class="section level5">
-<h5 id="spatial-transcriptomcis-st-data">Spatial transcriptomcis (ST) data<a class="anchor" aria-label="anchor" href="#spatial-transcriptomcis-st-data"></a>
-</h5>
+<div class="section level4">
+<h4 id="spatial-transcriptomcis-st-data">Spatial transcriptomcis (ST) data<a class="anchor" aria-label="anchor" href="#spatial-transcriptomcis-st-data"></a>
+</h4>
 <ul>
 <li>
-<a href="https://data2intelligence.github.io/SecAct/articles/stLowRes.html" class="external-link">Signaling patterns and velocities for multi-cellular ST data</a><br>
+<a href="https://data2intelligence.github.io/SecAct/articles/stPattern.html" class="external-link">Signaling patterns and velocities for multi-cellular ST data</a><br>
 </li>
-<li><a href="https://data2intelligence.github.io/SecAct/articles/stHiRes.html" class="external-link">Intercellular communication for single-cell resolution ST data</a></li>
+<li><a href="https://data2intelligence.github.io/SecAct/articles/stCCC.html" class="external-link">Intercellular communication for single-cell resolution ST data</a></li>
 </ul>
 </div>
-<div class="section level5">
-<h5 id="single-cell-rna-sequencing-data">Single-cell RNA sequencing data<a class="anchor" aria-label="anchor" href="#single-cell-rna-sequencing-data"></a>
-</h5>
+<div class="section level4">
+<h4 id="single-cell-rna-sequencing-data">Single-cell RNA sequencing data<a class="anchor" aria-label="anchor" href="#single-cell-rna-sequencing-data"></a>
+</h4>
 <ul>
 <li>
 <a href="https://data2intelligence.github.io/SecAct/articles/scCCC.html" class="external-link">Cell-cell communication mediated by secreted proteins</a><br>
@@ -160,11 +137,11 @@
 <li><a href="https://data2intelligence.github.io/SecAct/articles/scState.html" class="external-link">Secreted protein signaling activity for various cell states</a></li>
 </ul>
 </div>
-<div class="section level5">
-<h5 id="bulk-rna-sequencing-data">Bulk RNA sequencing data<a class="anchor" aria-label="anchor" href="#bulk-rna-sequencing-data"></a>
-</h5>
+<div class="section level4">
+<h4 id="bulk-rna-sequencing-data">Bulk RNA sequencing data<a class="anchor" aria-label="anchor" href="#bulk-rna-sequencing-data"></a>
+</h4>
 <ul>
-<li><a href="https://data2intelligence.github.io/SecAct/articles/bulkSigDiff.html" class="external-link">Secreted protein activity difference between two phenotypes</a></li>
+<li><a href="https://data2intelligence.github.io/SecAct/articles/bulkDiff.html" class="external-link">Secreted protein activity difference between two phenotypes</a></li>
 <li><a href="https://data2intelligence.github.io/SecAct/articles/bulkCohort.html" class="external-link">Clinical relavance of secreted proteins in a large patient cohort</a></li>
 </ul>
 </div>

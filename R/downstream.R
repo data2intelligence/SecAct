@@ -419,7 +419,7 @@ SecAct.signaling.velocity.spotST <- function(
 #' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
 #'
 #' @examples
-#' SecAct.signaling.velocity.scST(SpaCET_obj, gene="TGFB1", signalMode="receiving")
+#' SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="TGFB1", receiver="Tumor_interface", cellType_meta="cellType")
 #'
 #' @rdname SecAct.signaling.velocity.scST
 #' @export
@@ -504,11 +504,6 @@ SecAct.signaling.velocity.scST <- function(
   startend <- cbind(startend, x_end=coordinate_mat[startend[,2],1] )
   startend <- cbind(startend, y_end=coordinate_mat[startend[,2],2] )
 
-  x.left <- 7.8
-  x.right <- 8.2
-  y.top <- 1.35
-  y.bottom <- 1.3
-
 
   p1 <- ggplot(fg.df, aes(x_slide_mm, y_slide_mm)) + #sdimx, sdimy
     geom_point(aes(colour=cellType),size=0.1) +
@@ -523,6 +518,11 @@ SecAct.signaling.velocity.scST <- function(
       panel.grid = element_blank(),
       legend.position = "right"
     )
+
+  x.left <- 8.25
+  x.right <- 8.38
+  y.top <- 1.4
+  y.bottom <- 1
 
   fg.df_cut <- fg.df[
     fg.df[,1]> x.left&
@@ -547,8 +547,10 @@ SecAct.signaling.velocity.scST <- function(
       legend.position = "none"
     )
 
+
     p1+p2
 }
+
 
 #' @title Cell-cell communication from spatial data
 #' @description Calculate cell-cell communication mediated by secreted proteins from spatial transcriptomics data.

@@ -30,9 +30,15 @@
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-tutorials">Tutorials</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-tutorials">
-    <a class="dropdown-item" href="../articles/bulk.html">Infer the secreted protein activity from gene expression in bulk level</a>
-    <a class="dropdown-item" href="../articles/singleCell.html">Infer the secreted protein activity from single-cell RNA-Seq data</a>
-    <a class="dropdown-item" href="../articles/spatial.html">Infer the secreted protein activity from spatial transcriptomics data</a>
+    <h6 class="dropdown-header" data-toc-skip>Spatial transcriptomcis (ST) data</h6>
+    <a class="dropdown-item" href="../articles/stPattern.html">Signaling patterns and velocities for multi-cellular ST data</a>
+    <a class="dropdown-item" href="../articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a>
+    <h6 class="dropdown-header" data-toc-skip>Single-cell RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a>
+    <a class="dropdown-item" href="../articles/scState.html">Secreted protein signaling activity for various cell states</a>
+    <h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6>
+    <a class="dropdown-item" href="../articles/bulkDiff.html">Secreted protein activity difference between two phenotypes</a>
+    <a class="dropdown-item" href="../articles/bulkCohort.html">Clinical relavance of secreted proteins in a large patient cohort</a>
   </div>
 </li>
 <li class="nav-item">
@@ -65,17 +71,36 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.CCC.scST</span><span class="op">(</span><span class="va">data</span>, <span class="va">cellType_meta</span>, radius <span class="op">=</span> <span class="fl">0.02</span>, padj_cutoff <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.CCC.scST</span><span class="op">(</span></span>
+<span>  <span class="va">SpaCET_obj</span>,</span>
+<span>  <span class="va">cellType_meta</span>,</span>
+<span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span>,</span>
+<span>  radius <span class="op">=</span> <span class="fl">0.02</span>,</span>
+<span>  ratio_cutoff <span class="op">=</span> <span class="fl">0.2</span>,</span>
+<span>  padj_cutoff <span class="op">=</span> <span class="fl">0.01</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>data</dt>
+    <dl><dt>SpaCET_obj</dt>
 <dd><p>A SpaCET object.</p></dd>
 
 
 <dt>cellType_meta</dt>
 <dd><p>Column name in meta data that includes cell-type annotations.</p></dd>
+
+
+<dt>scale.factor</dt>
+<dd><p>Sets the scale factor for spot-level normalization.</p></dd>
+
+
+<dt>radius</dt>
+<dd><p>Radius cut off.</p></dd>
+
+
+<dt>ratio_cutoff</dt>
+<dd><p>Ratio cut off.</p></dd>
 
 
 <dt>padj_cutoff</dt>

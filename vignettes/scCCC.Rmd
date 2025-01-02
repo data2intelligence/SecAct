@@ -82,22 +82,7 @@ names(Seurat_obj @misc $SecAct_output)
 ## [3] "SecretedProteinCCC"
 
 # cell-cell communication results
-head(Seurat_obj @misc $SecAct_output $SecretedProteinCCC [,10:12])
-
-##                          sender secretedProtein   receiver sender_exp_logFC sender_exp_pv sender_exp_pv.adj receiver_act_diff
-## Tumor_RARRES2_Treg        Tumor         RARRES2       Treg         1.048683 7.613305e-108     5.217353e-106          6.491628
-## Tumor_RARRES2_CD8T        Tumor         RARRES2       CD8T         1.048683 7.613305e-108     5.217353e-106         14.767048
-## Tumor_RARRES2_NK          Tumor         RARRES2         NK         1.048683 7.613305e-108     5.217353e-106          3.328219
-## Tumor_RARRES2_Tumor       Tumor         RARRES2      Tumor         1.048683 7.613305e-108     5.217353e-106         15.759037
-## Tumor_RARRES2_DC          Tumor         RARRES2         DC         1.048683 7.613305e-108     5.217353e-106          7.924789
-## Tumor_RARRES2_Fibroblast  Tumor         RARRES2 Fibroblast         1.048683 7.613305e-108     5.217353e-106         12.481952
-##                          receiver_act_pv receiver_act_pv.adj overall_strength    overall_pv overall_pv.adj
-## Tumor_RARRES2_Treg           0.000999001         0.002912975         6.807658 1.936092e-108  2.287815e-106
-## Tumor_RARRES2_CD8T           0.000999001         0.002468818        15.485949 1.936092e-108  2.287815e-106
-## Tumor_RARRES2_NK             0.000999001         0.008367471         3.490246 1.936092e-108  2.287815e-106
-## Tumor_RARRES2_Tumor          0.000999001         0.001869195        16.526231 1.936092e-108  2.287815e-106
-## Tumor_RARRES2_DC             0.000999001         0.002308802         8.310590 1.936092e-108  2.287815e-106
-## Tumor_RARRES2_Fibroblast     0.000999001         0.001689368        13.089607 1.936092e-108  2.287815e-106
+head(Seurat_obj @misc $SecAct_output $SecretedProteinCCC)
 ``` 
 
 
@@ -108,10 +93,29 @@ We provide two types of visualization plot for cell-cell communication, i.e., he
 ``` r
 SecAct.CCC.heatmap(Seurat_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellType=my_cols)
 SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols)
-SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols, sender="Tumor")
-SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols, receiver="Tumor")
  
 ```
 
-<img src="img/OV_CCC_heatmap.png" width="45%" style="border:none" />
-<img src="img/OV_CCC_circle.png" width="45%" style="border:none" />
+<img src="img/OV_heatmap.png" width="45%" style="border:none" />
+<img src="img/OV_circlize.png" width="45%" style="border:none" />
+
+User can select the cell-cell communication from `Seurat_obj @misc $SecAct_output $SecretedProteinCCC` to visualize them.
+
+``` r
+sender <- c("Fibroblast","Macrophage","Endothelial","CD8T","Tex")
+receiver <- c("Tumor")
+secretedProtein <- c("COL18A1","CST3","FN1","HSPG2","SERPING1","COL15A1",
+"TGFB1","HSPG2","ISG15","COL18A1","TIMP1","BGN",
+"FAP","THBS2","SPARC","COL1A1","COL1A2","TGFBI",
+"VCAN","POSTN","FBN1","MXRA5","HTRA1","BMP1","FSTL1")
+
+SecAct.CCC.sankey(
+  Seurat_obj, 
+  my_cols, 
+  sender=sender, 
+  secretedProtein=secretedProtein, 
+  receiver=receiver
+)
+```
+
+<img src="img/OV_sankey_Tumor.png" width="70%" style="border:none; fig.align:center" />
