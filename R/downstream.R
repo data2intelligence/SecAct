@@ -728,10 +728,10 @@ SecAct.CCC.scST <- function(
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender_count"] <- n_cellType1_cells
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver_count"] <- n_cellType2_cells
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"neighboringCellPairs"] <- n_neighbor
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"communicatingCellPairs"] <- n_communication
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender_count"] <- n_cellType1_cells
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver_count"] <- n_cellType2_cells
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"neighboringCellPairs"] <- n_neighbor
+        ccc[paste0(cellType1,"_",SP,"_",cellType2),"communicatingCellPairs"] <- n_communication
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"ratio"] <- posRatio
         #ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- CCC_raw/mean(CCC1000)
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
