@@ -38,6 +38,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
   # transform to log space
   exp@x <- log2(exp@x + 1)
 
+  ## only need SPs
   weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- exp[,colnames(weights)] # remove spot island
@@ -681,6 +682,8 @@ SecAct.CCC.scST <- function(
 
     cellType1_cells <- which(cellType_vec==cellType1)
     cellType2_cells <- which(cellType_vec==cellType2)
+    n_cellType1_cells <- length(cellType1_cells)
+    n_cellType2_cells <- length(cellType2_cells)
 
     # all neighboring cell pair
     Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
@@ -706,7 +709,8 @@ SecAct.CCC.scST <- function(
       CCC_vec <- exp[SP, Tmat_cellTypePair[,1]] * act[SP, Tmat_cellTypePair[,2]]
 
       # ratio interacting pairs vs neighboring pairs
-      posRatio <- sum(CCC_vec>0)/length(CCC_vec)
+      n_communication <- sum(CCC_vec>0)
+      posRatio <- n_communication/n_neighbor
 
       if(posRatio > ratio_cutoff)
       {
@@ -718,6 +722,10 @@ SecAct.CCC.scST <- function(
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender_count"] <- n_cellType1_cells
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver_count"] <- n_cellType2_cells
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"neighboringCellPairs"] <- n_neighbor
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"communicatingCellPairs"] <- n_communication
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"ratio"] <- posRatio
         #ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- CCC_raw/mean(CCC1000)
         ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
@@ -729,7 +737,8 @@ SecAct.CCC.scST <- function(
       # exp(2) * act(1)
       CCC_vec <- exp[SP, Tmat_cellTypePair[,2]] * act[SP, Tmat_cellTypePair[,1]]
 
-      posRatio <- sum(CCC_vec>0)/length(CCC_vec)
+      n_communication <- sum(CCC_vec>0)
+      posRatio <- n_communication/n_neighbor
 
       if(posRatio > ratio_cutoff)
       {
@@ -741,6 +750,10 @@ SecAct.CCC.scST <- function(
         ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender"] <- cellType2
         ccc[paste0(cellType2,"_",SP,"_",cellType1),"secretedProtein"] <- SP
         ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver"] <- cellType1
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender_count"] <- n_cellType2_cells
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver_count"] <- n_cellType1_cells
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"neighboringCellPairs"] <- n_neighbor
+        ccc[paste0(cellType2,"_",SP,"_",cellType1),"communicatingCellPairs"] <- n_communication
         ccc[paste0(cellType2,"_",SP,"_",cellType1),"ratio"] <- posRatio
         #ccc[paste0(cellType2,"_",SP,"_",cellType1),"score"] <- CCC_raw/mean(CCC1000)
         ccc[paste0(cellType2,"_",SP,"_",cellType1),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
