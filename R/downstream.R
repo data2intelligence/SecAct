@@ -635,25 +635,31 @@ SecAct.CCC.scST <- function(
 
   exp_new_aggr <- exp_new %*% weights
 
-  corr <- data.frame()
-  for(gene in rownames(act_new))
+  if(is.null(SpaCET_obj @results $SecAct_output $ccc.SP))
   {
-    act_gene <- act_new[gene,]
-
-    if(gene%in%rownames(exp_new))
+    corr <- data.frame()
+    for(gene in rownames(act_new))
     {
-      exp_gene <- exp_new_aggr[gene,]
+      act_gene <- act_new[gene,]
 
-      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
+      if(gene%in%rownames(exp_new))
+      {
+        exp_gene <- exp_new_aggr[gene,]
 
-      corr[gene,"r"] <- cor_res$estimate
-      corr[gene,"p"] <- cor_res$p.value
-    }else{
-      corr[gene,"r"] <- NA
-      corr[gene,"p"] <- NA
+        cor_res <- cor.test(act_gene, exp_gene, method="spearman")
+
+        corr[gene,"r"] <- cor_res$estimate
+        corr[gene,"p"] <- cor_res$p.value
+      }else{
+        corr[gene,"r"] <- NA
+        corr[gene,"p"] <- NA
+      }
     }
+    corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
+  }else{
+    SpaCET_obj @results $SecAct_output $ccc.SP -> corr
   }
-  corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
+
   corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
 
   print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer cell-cell communication."))
