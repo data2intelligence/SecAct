@@ -27,3 +27,32 @@ navbar:
         href: articles/bulkCohort.html
     - text: News
       href: news/index.html
+
+reference:
+  - title: Activity inference
+    contents:
+    - SecAct.activity.inference
+    - SecAct.activity.inference.ST
+    - SecAct.activity.inference.scRNAseq
+    - SecAct.activity.inference.scRNAseq.2
+
+  - title: Downstream application
+    contents:
+    - SecAct.signaling.pattern
+    - SecAct.signaling.pattern.gene
+    - SecAct.signaling.velocity.spotST
+    - SecAct.CCC.scST
+    - SecAct.signaling.velocity.scST
+    - SecAct.CCC.scRNAseq
+    - SecAct.coxph
+
+  - title: Visualization
+    contents:
+    - SecAct.CCC.heatmap
+    - SecAct.CCC.circle
+    - SecAct.CCC.sankey
+    - SecAct.CCC.dot
+    - SecAct.heatmap.plot
+    - SecAct.bar.plot
+    - SecAct.lollipop.plot
+    - SecAct.survival.plot

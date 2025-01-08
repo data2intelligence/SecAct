@@ -259,7 +259,7 @@ SecAct.activity.inference.ST <- function(
 #' @title Cell state activity inference from single cell data
 #' @description Calculate secreted protein signaling activity of cell states from single cell RNA-Sequencing data.
 #' @param inputProfile A Seurat object.
-#' @param cellType_meta Column name in `Seurat_obj@meta.data` that includes cell-type annotations.
+#' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param sigMatrix Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
@@ -318,55 +318,85 @@ SecAct.activity.inference.scRNAseq <- function(
 }
 
 
-sweep_sparse <- function(m, margin, stats, fun)
+#' @title Cell type activity inference between two conditions from single cell data
+#' @description Calculate the changes in secreted protein signaling activity for each cell type between two conditions from single cell RNA-Sequencing data.
+#' @param inputProfile A Seurat object.
+#' @param cellType_meta Column name in meta data that includes cell-type annotations.
+#' @param condition_meta Column name in meta data that includes condition information.
+#' @param conditionCase Case condition.
+#' @param conditionControl Control condition.
+#' @param sigMatrix Secreted protein signature matrix.
+#' @param lambda Penalty factor in the ridge regression.
+#' @param nrand Number of randomization in the permutation test, with a default value 1000.
+#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
+#' @return A Seurat object.
+#' @rdname SecAct.activity.inference.scRNAseq.2
+#' @export
+#'
+SecAct.activity.inference.scRNAseq.2 <- function(
+    inputProfile,
+    cellType_meta,
+    condition_meta,
+    conditionCase,
+    conditionControl,
+    sigMatrix="SecAct",
+    lambda=5e+5,
+    nrand=1000,
+    sigFilter=FALSE
+)
 {
-  f <- match.fun(fun)
-
-  if(margin==1)
+  if(!class(inputProfile)[1]=="Seurat")
   {
-    idx <- m@i + 1
-  }else{
-    if(class(m)[1]=="dgCMatrix")
-    {
-      idx <- rep(1:m@Dim[2], diff(m@p))
-    }else{
-      idx <- x@j + 1
-    }
+    stop("Please input a Seurat object.")
   }
 
-  m@x <- f(m@x, stats[idx])
-  m
-}
+  counts <-  inputProfile@assays$RNA@counts
+  rownames(counts) <- transferSymbol(rownames(counts))
+  counts <- rm_duplicates_sparse(counts)
 
-transferSymbol <- function(x)
-{
-  alias2symbol <- read.csv(system.file("extdata", 'NCBI_20230818_gene_result_alias2symbol.csv', package = 'SecAct'),as.is=T)
-  alias2symbol[is.na(alias2symbol[,"Alias"]),"Alias"] <- "NA"
+  meta <- inputProfile@meta.data
 
-  x[x%in%alias2symbol[,1]] <- alias2symbol[
-    match(
-      x[x%in%alias2symbol[,1]],
-      alias2symbol[,1]
-    ), 2]
+  cellTypes <- intersect(
+    meta[meta[,condition_meta]==conditionCase,cellType_meta],
+    meta[meta[,condition_meta]==conditionControl,cellType_meta]
+  )
 
-  x
-}
+  print("Step 1: calculating changes in secreted protein activity.")
 
-rm_duplicates <- function(mat)
-{
-  dupl <- duplicated(rownames(mat))
-  if (sum(dupl) > 0){
-    dupl_genes <- unique(rownames(mat)[dupl])
-    mat_dupl <- mat[rownames(mat) %in% dupl_genes,,drop=F]
-    mat_dupl_names <- rownames(mat_dupl)
-    mat <- mat[!dupl,,drop=F]
+  bulk.diff <- data.frame()
+  for(cellType in cellTypes)
+  {
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+      expr <- Matrix::rowSums(expr)
+      expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
 
-    for(gene in dupl_genes){
-      mat_dupl_gene <- mat_dupl[mat_dupl_names == gene,]
-      dupl_sum <- Matrix::rowSums(mat_dupl_gene)
-      max_flag <- which(dupl_sum==max(dupl_sum))
-      mat[gene,] <- mat_dupl_gene[max_flag[1],] # in case two values are max
-    }
+      # normalize to TPM
+      expr <- t(t(expr)*1e6/colSums(expr))
+
+      # transform to log space
+      expr <- log2(expr + 1)
+
+      expr_case <- expr
+
+
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+      expr <- Matrix::rowSums(expr)
+      expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
+
+      # normalize to TPM
+      expr <- t(t(expr)*1e6/colSums(expr))
+
+      # transform to log space
+      expr <- log2(expr + 1)
+
+      expr_control <- expr
+
+
+      # normalized with the control samples
+      bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
   }
-  return(mat)
+
+  inputProfile @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE, sigMatrix = sigMatrix)
+
+  inputProfile
 }

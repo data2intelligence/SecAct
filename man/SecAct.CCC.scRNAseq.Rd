@@ -15,11 +15,7 @@ SecAct.CCC.scRNAseq(
   exp_mean_all_cutoff = 2,
   exp_fraction_case_cutoff = 0.1,
   padj_cutoff = 0.01,
-  scale.factor = 1e+05,
-  sigMatrix = "SecAct",
-  lambda = 5e+05,
-  nrand = 1000,
-  sigFilter = FALSE
+  scale.factor = 1e+05
 )
 }
 \arguments{
@@ -38,6 +34,8 @@ SecAct.CCC.scRNAseq(
 \item{exp_fraction_case_cutoff}{Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.}
 
 \item{padj_cutoff}{Adjusted p value cut off.}
+
+\item{scale.factor}{Sets the scale factor for cell-level normalization in step2.}
 
 \item{data}{A Seurat object.}
 }

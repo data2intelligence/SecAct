@@ -20,11 +20,11 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer secreted protein signaling activity in different cell states. For this demonstration, we employ an ovarian cancer scRNA-Seq data set [<a href="https://data.mendeley.com/datasets/rc47y6m9mp/2" target="_blank">Download</a>]. Using the SecAct framework, we will estimate the signaling activity of secreted proteins for different CD4+ T cell states. 
+This tutorial demonstrates how to infer secreted protein signaling activity in different cell states. For this demonstration, we employ an ovarian cancer scRNA-Seq <a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank">study</a>. Using the SecAct framework, we will estimate the signaling activity of secreted proteins for different CD4+ T cell states. 
 
 ## Load scRNA-Seq data
 
-The scRNA-Seq data of CD4+ T cells is stored in Seurat object. Three cell states are identified, i.e., naive, central memory, and T helper 1-like. 
+The scRNA-Seq data of CD4+ T cells is stored in a Seurat object. Three cell states are annotated in this dataset, i.e., naive, central memory, and helper 1-like. 
 
 ``` r
 library(SecAct)
@@ -48,10 +48,10 @@ Seurat::DimPlot(Seurat_obj, reduction = "umap", group.by = "Annotation")
 <img src="img/OV_CD4_UMAP.png" width="60%" style="border:none" />
 
 ## Infer secreted protein activity 
-After loading single-cell data, user can input `Seurat_obj` into `SecAct.activity.inference` to infer the activities of 1248 secreted proteins for various cell types. Also, you need to claim which column in the meta matrix of Seurat object has cell type information. In this case, just assign `cellType_meta="Annotation"`. User can find the SecAct results in `Seurat_obj@misc$SecretedProteinActivity`.
+After loading scRNA-Seq data data, user can input `Seurat_obj` into `SecAct.activity.inference` to infer the activities of >1000 secreted proteins for various cell states. Also, you need to claim which column in the meta matrix of Seurat object has cell state information. In this case, the column name is "Annotation" and thus assign `cellType_meta = "Annotation"`. User can find the SecAct results in `Seurat_obj @misc $SecAct_output $SecretedProteinActivity`.
 
 ``` r
-# infer activity
+# infer activity; ~2 mins
 Seurat_obj <- SecAct.activity.inference.scRNAseq(Seurat_obj, cellType_meta="Annotation")
 
 # SecretedProteinActivity$zscore stores activity
@@ -72,10 +72,10 @@ head(act)
 
 ## Visualize activity score
 
-User can visualize any secreted proteins of interest. Here, we select the top activating secreted proteins for each cell states.
+User can visualize any secreted proteins of interest using `SecAct.heatmap.plot`. Here, we select the top active secreted proteins (SPs) for each cell states.
 
 ``` r
-# select top 10 secreted proteins (SPs)
+# select top secreted proteins
 n <- 10
 SPs.1 <- names(sort(act[,1],decreasing=T))[1:n]
 SPs.2 <- names(sort(act[,2],decreasing=T))[1:n]

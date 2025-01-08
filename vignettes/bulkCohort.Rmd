@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer the signaling activity of secreted proteins from a large cohort, and then calculate their activity relevance with clinical data. The input expression values, from either RNA sequencing or MicroArray, should be transformed by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA sequencing data.
+This tutorial demonstrates how to infer the signaling activity of secreted proteins from a large cohort, and then calculate their activity relevance with clinical data. The input expression values, from either RNA sequencing or MicroArray, should be transformed by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA-Seq data.
 
 For this demonstration, we employ an immunotherapy <a href="https://github.com/ParkerICI/prince-trial-data" target="_blank">cohort</a> of pancreatic cancer patients. Using the SecAct framework, we will identify secreted proteins associated with immunotherapy efficacy.
 
@@ -39,11 +39,15 @@ expr <- read.table(paste0(dataPath,"Pancreatic_Nivolumab_Padron2022.logTPM.gz"),
 
 ## Infer secreted protein activity
 
-We use `SecAct.activity.inference` to infer the activity of >1000 secreted proteins across samples. If your data have control samples (e.g., normal patients), you can assign them to `inputProfile_control`. If not available, just set `inputProfile_control=NULL` (default). SecAct would normalize the expression values of each gene to zero mean across all input profiles. In other words, the mean gene expression of all input profiles are regarded as control.
+We use `SecAct.activity.inference` to infer the activity of >1000 secreted proteins across patient samples. 
+
+If your data have control samples (e.g., normal patients), you can assign them to `inputProfile_control`. `SecAct` would normalize each gene's expression values with the control samples, i.e., substracting the mean gene expression of control samples.
+
+If not available, just set `inputProfile_control=NULL` (default). `SecAct` would normalize the expression values of each gene to zero mean across all input profiles. In other words, the mean gene expression of all input profiles are regarded as control.
 
 ``` r
 # infer activity; ~10 mins
-res <- SecAct.activity.inference(inputProfile=expr)
+res <- SecAct.activity.inference(inputProfile=expr, inputProfile_control=NULL)
 
 # res$zscore stores activity
 act <- res$zscore
@@ -63,7 +67,7 @@ act[1:6,1:3]
 
 ## Calculate clinical relevance
 
-We next calculate the risk score for each secreted protein by integrating their activity levels with clinical data. For clinical file, please make sure the name of the 1st and 2nd columns are "Time" and "Event", respectively.
+We next calculate the risk score z for each secreted protein by linking their activity levels with clinical data. For the clinical file, please make sure the name of the 1st and 2nd columns are "Time" and "Event", respectively. `SecAct.coxph` will conduct Cox proportional hazard (PH) regression, with gene risk scores represented as z-scores (Coef / StdErr) from the two-sided Wald test. For each endpoint analysis, clinical covariates (e.g., age, gender, stage) were considered in regression if available.
 
 ``` r
 # read clinical infomation
@@ -84,30 +88,31 @@ riskMat <- SecAct.coxph(act, clinical)
 
 head(riskMat)
 
-##            risk z     p value
-## A1BG    -2.187803 0.028683943
-## A2M     -3.372297 0.000745439
-## A2ML1    1.668025 0.095310824
-## AADACL2 -1.960305 0.049960191
-## ABHD15  -2.511890 0.012008638
-## ABI3BP  -1.679394 0.093075338
+##         risk score z     p value
+## A1BG       -2.187803 0.028683943
+## A2M        -3.372297 0.000745439
+## A2ML1       1.668025 0.095310824
+## AADACL2    -1.960305 0.049960191
+## ABHD15     -2.511890 0.012008638
+## ABI3BP     -1.679394 0.093075338
 
 ``` 
 
 ## Visualize risk score
 
-User can visualize any secreted proteins of interest. Here, we select the top high and low risk secreted proteins as examples.
+User can visualize any secreted proteins of interest using `SecAct.lollipop.plot`. Here, we select the top high and low risk secreted proteins (SPs), which are associated with unfavorable and favorable clinical outcomes, respectively.
 
 ``` r
-# select top 10 secreted proteins (SPs)
-high.SPs <- names(sort(riskMat[,"risk z"],decreasing=T))[1:10]
-low.SPs <- names(sort(riskMat[,"risk z"]))[1:10]
+# select the top secreted proteins
+n <- 10
+high.risk.SPs <- names(sort(riskMat[,"risk score z"],decreasing=T))[1:n]
+low.risk.SPs <- names(sort(riskMat[,"risk score z"]))[1:n]
 
-SPs <- c(high.SPs, low.SPs)
+SPs <- c(high.risk.SPs, low.risk.SPs)
 # user can assign any secreted proteins to SPs
 
 # generate a vector
-fg.vec <- riskMat[SPs,"risk z"]
+fg.vec <- riskMat[SPs,"risk score z"]
 
 # visualize in lollipop plot
 SecAct.lollipop.plot(fg.vec, title="Risk score z")
@@ -116,24 +121,24 @@ SecAct.lollipop.plot(fg.vec, title="Risk score z")
 
 <img src="img/bulk_RiskScore.png" width="50%" style="border:none" />
 
-A positive value means the secreted protein is associated with unfavorable (pro-tumor) outcome while a negative value means the secreted protein is associated with favorable (anti-tumor) outcome.
+A positive value means the secreted protein is associated with worse survival while a negative value means the secreted protein is associated with better survival.
 
 ## Draw survival plot
 
-User can select a secreted protein of interest to draw its survival plot using `SecAct.survival.plot`.
+User can select a secreted protein of interest to draw its survival curve using `SecAct.survival.plot`.
 
 ``` r
-# Take WNT7B as an example
+# Take secreted protein WNT7B as an example
 riskMat["WNT7B",]
 
-##       risk z      p value 
+## risk score z      p value 
 ## 3.3252642698 0.0008833476 
 
-# visualize in bar plot
+# visualize in survival plot
 SecAct.survival.plot(act, clinical, "WNT7B", x.title="Overall (Days)")
 
 ```
 
 <img src="img/bulk_Survival.png" width="50%" style="border:none" />
 
-The activity cutoff was selected by maximizing the difference between high and low patient groups.
+The activity cutoff was selected by maximizing the difference between high and low activity patient groups.

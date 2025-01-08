@@ -209,8 +209,8 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
 }
 
 
-#' @title Cell-cell communication sankey plot
-#' @description Draw a sankey plot of cell-cell communication mediated by secreted proteins.
+#' @title Cell-cell communication dot plot
+#' @description Draw a dot plot of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
 #' @param colors_cellType Colors for cell types.
 #' @param sender Sender cell types.
@@ -499,71 +499,3 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
     ylab("Percentage")
 }
 
-
-CoxPH_best_separation = function(X, Y, margin)
-{
-  # part 1: continuous regression
-  errflag = F
-
-  coxph.fit = tryCatch(
-    coxph(Y~., data=X),
-    error = function(e) errflag <<- T,
-    warning = function(w) errflag <<- T)
-
-  if(errflag) return (NA)
-
-  n_r = nrow(X)
-  n_c = ncol(X)
-
-  arr_result = summary(coxph.fit)$coef[n_c,]
-
-  if(is.na(arr_result["z"])) return (NA)
-
-  # no need to find optimal threshold
-  if(is.null(margin)) return (arr_result)
-
-  # part 2: find the optimal threshold
-  arr = X[, n_c]
-  vthres = sort(arr)
-
-  # these are missing values, not NULL not existing values
-  zscore_opt = thres_opt = NA
-
-  for(i in (margin+1):(n_r-margin))
-  {
-    X[, n_c] = as.numeric(arr >= vthres[i])
-
-    errflag = F
-    coxph.fit = tryCatch(
-      coxph(Y~., data=X),
-      error = function(e) errflag <<- T,
-      warning = function(w) errflag <<- T)
-
-    if(errflag) next
-
-    z = summary(coxph.fit)$coef[n_c, "z"]
-    if(is.na(z)) next
-
-    if (is.na(zscore_opt)){
-      zscore_opt = z
-      thres_opt= vthres[i]
-
-    }else if(arr_result['z'] > 0){
-      if(z > zscore_opt){
-        zscore_opt = z
-        thres_opt = vthres[i]
-      }
-
-    }else{ # arr_result['z'] <= 0
-      if(z < zscore_opt){
-        zscore_opt = z
-        thres_opt = vthres[i]
-      }
-    }
-  }
-
-  arr_result['thres.opt'] = thres_opt
-  arr_result['z.opt'] = zscore_opt
-
-  return (arr_result)
-}

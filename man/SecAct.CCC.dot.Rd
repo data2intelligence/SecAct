@@ -2,7 +2,7 @@
 % Please edit documentation in R/visualization.R
 \name{SecAct.CCC.dot}
 \alias{SecAct.CCC.dot}
-\title{Cell-cell communication sankey plot}
+\title{Cell-cell communication dot plot}
 \usage{
 SecAct.CCC.dot(
   data,
@@ -27,5 +27,5 @@ SecAct.CCC.dot(
 A ggplot2 object.
 }
 \description{
-Draw a sankey plot of cell-cell communication mediated by secreted proteins.
+Draw a dot plot of cell-cell communication mediated by secreted proteins.
 }
