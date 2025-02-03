@@ -104,7 +104,7 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
     library(circlize)
   })
 
-  mat = log(mat+1)
+  #mat = log(mat+1)
 
   if(is.null(sender)&is.null(receiver))
   {
@@ -114,7 +114,9 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
       grid.col = colors_cellType,
       annotationTrack = c("name", "grid"),
       direction.type = c("diffHeight", "arrows"),
-      link.arr.type = "big.arrow"
+      link.arr.type = "big.arrow",
+      link.arr.length = 0.1,
+      link.arr.width = 0.1
     )
   }else{
     col_mat <- mat

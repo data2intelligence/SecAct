@@ -99,7 +99,7 @@ head(Seurat_obj @misc $SecAct_output $SecretedProteinCCC)
 
 ## Visualize cell-cell communication
 
-We provide two types of visualization plot for cell-cell communication, i.e., heatmap and circle plot.
+We provide two types of visualization plot for cell-cell communication, i.e., heatmap and circle plot. The number in the heatmap represents the count of secreted proteins from senders to receivers.
 
 ``` r
 SecAct.CCC.heatmap(Seurat_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellType=my_cols)
@@ -109,16 +109,19 @@ SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols)
 <img src="img/OV_heatmap.png" width="45%" style="border:none" />
 <img src="img/OV_circlize.png" width="45%" style="border:none" />
 
+## Visualize secreted signaling flow
+
 User can select the cell-cell communication of interest from `Seurat_obj @misc $SecAct_output $SecretedProteinCCC` to visualize them using `SecAct.CCC.sankey`. You need to assign values to `sender`, `secretedProtein`, and `receiver`.
 
 ``` r
 sender <- c("Fibroblast","Macrophage","Endothelial","CD8T","Tex")
 
 secretedProtein <- c(
-  "COL18A1","CST3","FN1","HSPG2","SERPING1","COL15A1",
-  "TGFB1","HSPG2","ISG15","COL18A1","TIMP1","BGN",
-  "FAP","THBS2","SPARC","COL1A1","COL1A2","TGFBI",
-  "VCAN","POSTN","FBN1","MXRA5","HTRA1","BMP1","FSTL1"
+  "BGN","BMP1","COL15A1","COL18A1","COL1A1",
+  "COL1A2","CST3","FAP","FBN1","FN1",
+  "FSTL1","HSPG2","HTRA1","ISG15","MXRA5",
+  "POSTN","SERPING1","SPARC","TGFB1","TGFBI",
+  "THBS2","TIMP1","VCAN"
 )
 
 receiver <- c("Tumor")
@@ -133,4 +136,4 @@ SecAct.CCC.sankey(
 
 ```
 
-<img src="img/OV_sankey_Tumor.png" width="70%" style="border:none; fig.align:center" />
+<center><img src="img/OV_sankey_Tumor.png" width="70%" style="border:none" /></center>

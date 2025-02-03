@@ -20,43 +20,54 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to run SecAct to infer cell-cell communication (CCC) mediated by secreted proteins from single-cell resolution spatial transcriptomics (ST) data. For this demonstration, we employ a liver cancer ST <a href="https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-liver-rna-ffpe-dataset/" target="_blank">sample</a>. Due to the exceptionally large number of cells (~0.5 million) in this sample, we focus on a subset of regions containing 50,888 cells for demonstration purposes.
-
-Before running the tutorial, make sure that you have installed SecAct as well as our previous R package [SpaCET](https://github.com/data2intelligence/SpaCET/){target="_blank"}, which is an analytical framework for ST data. Here, SpaCET will be employed to create a SpaCET object to store the ST data.
+This tutorial demonstrates how to infer cell-cell communication (CCC) mediated by secreted proteins from single-cell resolution spatial transcriptomics (ST) data. For this demonstration, we employ a liver cancer ST sample from CosMx platform [<a href="https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-liver-rna-ffpe-dataset/" target="_blank">Link</a>]. Before running the tutorial, make sure that you have installed SecAct as well as our previous R package [SpaCET](https://github.com/data2intelligence/SpaCET/){target="_blank"}, which is an analytical framework for ST data. Here, SpaCET package will be used to create a SpaCET object to store the ST data.
 
 ## Read ST data to a SpaCET object
 To load data into R, user can create a SpaCET object by preparing two types of input data. 
 
-1) spatial transcriptomics count data. The spatial transcriptomics count data must be in the format of matrix with gene name (row) x spot ID (column).
-2) spatial location information. The spot coordinates should be in the format of matrix with spot ID (row) x coordinates (column). This 1st and 2nd columns represent X and Y coordinates, respectively.
+1) count data. The spatial transcriptomics count data must be in the format of matrix with gene name (row) x cell ID (column).
+2) spatial location information. The cell coordinates should be in the format of matrix with cell ID (row) x coordinates (column). The 1st and 2nd columns represent X and Y coordinates, respectively.
+3) meta data (optional). The meta data should be in the format of matrix with cell ID (row) and meta annotation (column).
 
 ``` r
 library(SecAct)
 library(SpaCET)
 
-dataPath <- file.path(system.file(package="SecAct"), "extdata/")
-load(paste0(dataPath,"/LIHC_CosMx_toy.rda"))
+# load ST data
+dataPath <- "https://hpc.nih.gov/~Jiang_Lab/SecAct_Package/LIHC_CosMx_data.rda"
+load(url(dataPath))
 
 # show count matrix
 dim(counts)
-## [1]  1000 50888
+## [1]   1000 460441
 
 # show coordinate matrix
 spotCoordinates[1:5,]
 
-##              x_slide_mm y_slide_mm       cellType
-## c_2_323_101     6.60536    3.32788     Tumor_core
-## c_2_324_367     6.83920    3.10276 Tumor_boundary
-## c_2_324_628     6.92860    3.43312     Tumor_core
-## c_2_324_924     6.82864    3.21076     Tumor_core
-## c_2_325_1167    7.57440    3.14704     Tumor_core
+##             x_slide_mm y_slide_mm
+## c_2_100_733    6.70816    9.03340
+## c_2_101_240    7.50024    8.86156
+## c_2_101_339    7.60560    8.73604
+## c_2_101_452    7.62984    9.17260
+## c_2_102_179    7.86824    8.99368
 
-# load ST data to create an SpaCET object
+# show meta information
+metaData[1:5,]
+
+##                    cellType         niche
+## c_2_100_733      Tumor_core tumor subtype
+## c_2_101_240 Tumor_interface     interface
+## c_2_101_339      Tumor_core         tumor
+## c_2_101_452      Tumor_core tumor subtype
+## c_2_102_179      Tumor_core         tumor
+
+
+# create a SpaCET object
 SpaCET_obj <- create.SpaCET.object(
-  counts=counts,
-  spotCoordinates=spotCoordinates,
-  metaData=metaData,
-  imagePath=NA,
+  counts = counts,
+  spotCoordinates = spotCoordinates,
+  metaData = metaData,
+  imagePath = NA,
   platform = "CosMx"
 )
 
@@ -64,12 +75,34 @@ SpaCET_obj <- create.SpaCET.object(
 str(SpaCET_obj)
 
 
+# filter out cells with less than 50 expressed genes
+SpaCET_obj <- SpaCET.quality.control(SpaCET_obj, min.genes=50)
+
+## [1] "Removing cells with less than 50 expressed genes."
+## [1] "16926 cells are removed."
+## [1] "443515 cells are kept."
+
+# plot the QC metrics
+SpaCET.visualize.spatialFeature(
+  SpaCET_obj, 
+  spatialType = "QualityControl", 
+  spatialFeatures=c("UMI","Gene"),
+  imageBg = TRUE,
+  pointSize = 0.1
+)
+```
+
+<img src="img/HCC_CoxMx_QC.png" width="100%" style="border:none" />
+
+The `SpaCET_obj@metaData` contains the cell type annotation from the original study. 
+
+``` r
 # show the spatial distribution of all cell types
 my_cols <- c(
-	'B'='#C88888','Erythrocyte'='#fe666d','T.alpha.beta'='#B95FBB','T.gamma.delta'='#3288bd',
-	'NK'='#bb8761','Hepatocyte'='#63636d','Cholangiocyte'='#de77ae','Endothelial'='#D4D915',
-	'Fibroblast'='#66c2a5','Macrophage'='#ff9a36','Tumor_core'='#A4DFF2','Tumor_boundary'='blue',
-	'Other'='#cccccc'
+  'B'='#C88888','Erythrocyte'='#fe666d','T.alpha.beta'='#B95FBB','T.gamma.delta'='#3288bd',
+  'NK'='#bb8761','Hepatocyte'='#63636d','Cholangiocyte'='#de77ae','Endothelial'='#D4D915',
+  'Fibroblast'='#66c2a5','Macrophage'='#ff9a36','Tumor_core'='#A4DFF2','Tumor_boundary'='blue',
+  'Other'='#cccccc'
 )
 
 SpaCET.visualize.spatialFeature(
@@ -77,32 +110,46 @@ SpaCET.visualize.spatialFeature(
   spatialType = "metaData", 
   spatialFeatures= "cellType",
   colors = my_cols,
-  pointSize = 0.6
+  pointSize = 0.1
 )
 ```
 
-<img src="img/HCC_CoxMx_cellType.png" width="60%" style="border:none" />
+<img src="img/HCC_CoxMx_cellType.png" width="55%" style="border:none" />
+
+
+## Infer secreted protein activity 
+After loading ST data, user can run `SecAct.activity.inference.ST` to infer the activities of 1248 secreted proteins for each spot. The output are stored in `SpaCET_obj @results $SecAct_output $SecretedProteinActivity`, which includes four items, (1) beta: regression coefficients; (2) se: standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value of z score from permutation test.
 
 ``` r
-# filter out cells with less than 50 expressed genes
-SpaCET_obj <- SpaCET.quality.control(SpaCET_obj, min.genes=50)
-
-# plot the QC metrics
-SpaCET.visualize.spatialFeature(
-  SpaCET_obj, 
-  spatialType = "QualityControl", 
-  spatialFeatures=c("UMI","Gene"),
-  imageBg = TRUE
+# infer activity
+SpaCET_obj <- SecAct.activity.inference.ST(
+  inputProfile = SpaCET_obj,
+  scale.factor = 1000,
+  sigFilter=TRUE
 )
-```
 
-<img src="img/HCC_CoxMx_QC.png" width="100%" style="border:none" />
+# show activity
+SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
+
+##              50x102      59x19       43x9
+## A1BG     2.52789682 -1.4066741 -0.6518619
+## A2M     -0.42257303  1.0486118  1.6322600
+## A2ML1    0.51650231 -0.1298274 -1.0206257
+## AADACL2  0.02978682  1.4617057 -0.8930522
+## ABHD15   0.16788758 -0.3654531 -0.6539588
+## ABI3BP   0.38397869  0.2679647 -0.1284023
+
+``` 
+
 
 ## Infer cell-cell communication
+After calculating the secreted protein activity, SecAct could further estimate the consensus pattern from these inferred signaling activities across the whole tissue slide. This module contains two steps.
 
-Our strategy performs three steps to infer condition-specific cell-cell communication: (1) calculating changes in secreted protein activity for each cell type between two conditions, (2) assessing changes in secreted protein expression for each cell type between two conditions, and (3) linking sender and receiver cell types.
+First, `SecAct` filters 1248 secreted proteins to identify the significant secreted proteins mediating intercellular communication in this slide. To achieve this, `SecAct` will calculate the Spearman correlation of secreted protein s signaling activity and its neighbor cells’ sum expression. The p values were adjusted by the Benjamini-Hochberg (BH) method as false discovery rate (FDR). The cutoffs are r > 0.05 and FDR < 0.01.
 
-When running `SecAct.CCC.ST`, user need to claim which column in `Seurat_obj@meta.data` stores cell-type annotations. Also, claim which column stores condition information and what are case and control conditions. All SecAct results are stored in `Seurat_obj @misc $SecAct_output`. 
+Second, We designed a computational strategy to statistically test whether a type of secreted protein s mediates the intercellular communication from cell type 1 to cell type 2. Cell-type annotations were retrieved from the original study. First, we identified all neighboring pairs of cells, where one cell was from cell type 1 and the other from cell type 2, based on spatial proximity (distance < 20 μm). Among these neighboring pairs, we identified communicating pairs of cells as those where cell type 1 expressed RNA for s (count > 0), and cell type 2 exhibited signaling activity for s (activity score > 0). We then calculated a communication score for cell type 1 → s → cell type 2, defined as the ratio of communicating pairs to total neighboring pairs. The p-value is Probability (random ratio >= real ratio), computed through 1000 randomizations adjusted by the Benjamini–Hochberg procedure. In each randomization, we randomly permuted the cell IDs within each cell type. A cell type 1 → s → cell type 2 communication is considered significant if ratio > 0.2 and FDR < 0.01.
+
+When running `SecAct.CCC.scST`, user need to claim which column in `Seurat_obj@meta.data` stores cell-type annotations. Also, claim which column stores condition information and what are case and control conditions. All SecAct results are stored in `SpaCET_obj @results $SecAct_output`. 
 
 ``` r
 # infer activity
@@ -120,3 +167,47 @@ names(SpaCET_obj @results $SecAct_output)
 ```
 
 <img src="img/cos1.png" width="50%" style="border:none" />
+
+
+
+## Visualize cell-cell communication
+
+We provide two types of visualization plot for cell-cell communication, i.e., heatmap and circle plot. The number in the heatmap represents the count of secreted proteins from senders to receivers.
+
+``` r
+SecAct.CCC.heatmap(SpaCET_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellType=my_cols)
+SecAct.CCC.circle(SpaCET_obj, colors_cellType=my_cols)
+```
+
+<img src="img/OV_heatmap.png" width="45%" style="border:none" />
+<img src="img/OV_circlize.png" width="45%" style="border:none" />
+
+
+## Visualize secreted signaling flow
+
+User can select the cell-cell communication of interest from `Seurat_obj @misc $SecAct_output $SecretedProteinCCC` to visualize them using `SecAct.CCC.sankey`. You need to assign values to `sender`, `secretedProtein`, and `receiver`.
+
+``` r
+sender <- c("Fibroblast","Macrophage","Endothelial","CD8T","Tex")
+
+secretedProtein <- c(
+  "BGN","BMP1","COL15A1","COL18A1","COL1A1",
+  "COL1A2","CST3","FAP","FBN1","FN1",
+  "FSTL1","HSPG2","HTRA1","ISG15","MXRA5",
+  "POSTN","SERPING1","SPARC","TGFB1","TGFBI",
+  "THBS2","TIMP1","VCAN"
+)
+
+receiver <- c("Tumor")
+
+SecAct.CCC.sankey(
+  Seurat_obj, 
+  colors_cellType = my_cols, 
+  sender = sender, 
+  secretedProtein = secretedProtein, 
+  receiver = receiver
+)
+
+```
+
+<center><img src="img/OV_sankey_Tumor.png" width="70%" style="border:none" /></center>
