@@ -49,7 +49,7 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
     annotation_name_side = "left"
   )
 
-  Heatmap(as.matrix(mat),
+  ht <- Heatmap(as.matrix(mat),
      name = "Count",
      col = circlize::colorRamp2(c(-50, 0,50), c("green", "white", "red")),
      row_names_side = "left",
@@ -63,6 +63,8 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
      cluster_columns = FALSE,
      cell_fun = function(j, i, x, y, width, height, fill) {grid.text(mat[i, j], x, y)}
   )
+
+  draw(ht)
 }
 
 
