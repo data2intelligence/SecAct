@@ -754,6 +754,7 @@ SecAct.CCC.scST <- function(
 #' @param condition_meta Column name in meta data that includes condition information.
 #' @param conditionCase Case condition.
 #' @param conditionControl Control condition.
+#' @param sigMatrix Secreted protein signature matrix.
 #' @param act_diff_cutoff Cut off for activity change (i.e., z score) in step 1.
 #' @param exp_logFC_cutoff Cut off for log fold change in step 2.
 #' @param exp_fraction_case_cutoff Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.
@@ -769,6 +770,7 @@ SecAct.CCC.scRNAseq <- function(
   condition_meta,
   conditionCase,
   conditionControl,
+  sigMatrix="SecAct",
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
@@ -777,6 +779,11 @@ SecAct.CCC.scRNAseq <- function(
   scale.factor = 1e+05
 )
 {
+  if(!class(Seurat_obj)[1]=="Seurat")
+  {
+    stop("Please input a Seurat object.")
+  }
+
   counts <-  Seurat_obj@assays$RNA@counts
   rownames(counts) <- transferSymbol(rownames(counts))
   counts <- rm_duplicates_sparse(counts)
@@ -788,10 +795,42 @@ SecAct.CCC.scRNAseq <- function(
     meta[meta[,condition_meta]==conditionControl,cellType_meta]
   )
 
-  if(is.null(Seurat_obj @misc $SecAct_output $SecretedProteinActivity))
+  print("Step 1: calculating changes in secreted protein activity.")
+
+  bulk.diff <- data.frame()
+  for(cellType in cellTypes)
   {
-    stop("Please run SecAct.activity.inference.scRNAseq.2 first.")
+    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+    expr <- Matrix::rowSums(expr)
+    expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
+
+    # normalize to TPM
+    expr <- t(t(expr)*1e6/colSums(expr))
+
+    # transform to log space
+    expr <- log2(expr + 1)
+
+    expr_case <- expr
+
+
+    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+    expr <- Matrix::rowSums(expr)
+    expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
+
+    # normalize to TPM
+    expr <- t(t(expr)*1e6/colSums(expr))
+
+    # transform to log space
+    expr <- log2(expr + 1)
+
+    expr_control <- expr
+
+
+    # normalized with the control samples
+    bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
   }
+
+  Seurat_obj @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE, sigMatrix = sigMatrix)
 
 
   print("Step 2: assessing changes in secreted protein expression.")
