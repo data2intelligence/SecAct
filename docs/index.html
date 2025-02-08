@@ -85,7 +85,7 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<p>SecAct is an R package desighed for inferring the intercellular activity of secreted proteins in tumors from gene expression profiles. Users can input multiple modalities of expression data, including bulk, single-cell, or spatial transcriptomics (ST). The outputs are the inferred activities of 1248 secreted proteins for each ST spot, individual cell, or sample. Based on the inferred activities, SecAct provides multiple downstream application modules. For spatial data, SecAct can infer the signaling pattern and signaling velocity for secreted proteins. The velocity represents the signaling direction and strength across the whole tissue slide. For single-cell data, SecAct can infer the intercellular communication network and signaling flow from source cells to receiver cells. For bulk data, SecAct can infer secreted protein risk scores for a large cohort linked to clinical data, and can infer secreted protein activities that are differentially regulated between two phenotypes.</p>
+<p>SecAct is an R package designed for inferring the intercellular signaling activity of secreted proteins from gene expression profiles. Users can input multiple modalities of expression data, including spatial, single-cell, or bulk transcriptomics data. The outputs are the inferred activities of 1248 secreted proteins for each ST spot, individual cell, or sample. Based on the inferred activities, SecAct provides multiple downstream application modules. For spatial data, SecAct can infer the signaling pattern and signaling velocity for secreted proteins. For single-cell data, SecAct can infer the intercellular communication network and signaling flow from source cells to receiver cells. For bulk data, SecAct can infer secreted protein risk scores for a large cohort linked to clinical data, and can infer secreted protein activities that are differentially regulated between two phenotypes.</p>
 <p align="center">
 <img src="reference/figures/workflow.png" width="100%"></p>
 <div class="section level2">
@@ -113,6 +113,22 @@
 <li>macOS Sonoma 14.5</li>
 <li>Rocky Linux 8.7 (Green Obsidian)</li>
 </ul>
+</div>
+<div class="section level2">
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h2>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># load differenrial profile</span></span>
+<span><span class="va">dataPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package <span class="op">=</span> <span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/"</span><span class="op">)</span></span>
+<span><span class="va">expr.diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>, <span class="st">"Ly86.OverExpression_vs_Vector_logFC.txt"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run SecAct to infer activity change</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span>inputProfile <span class="op">=</span> <span class="va">expr.diff</span>, is.differential <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># show results</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">zscore</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="tutorial">Tutorial<a class="anchor" aria-label="anchor" href="#tutorial"></a>

@@ -73,6 +73,9 @@
     <loc>/reference/SecAct.activity.inference.html</loc>
   </url>
   <url>
+    <loc>/reference/SecAct.activity.inference.scRNAseq.2.html</loc>
+  </url>
+  <url>
     <loc>/reference/SecAct.activity.inference.scRNAseq.html</loc>
   </url>
   <url>
@@ -95,6 +98,9 @@
   </url>
   <url>
     <loc>/reference/SecAct.pattern.gene.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.signaling.pattern.gene.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.signaling.pattern.html</loc>

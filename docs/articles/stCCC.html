@@ -96,58 +96,68 @@
 
     
     
-<p>This tutorial demonstrates how to run SecAct to infer cell-cell
-communication (CCC) mediated by secreted proteins from single-cell
-resolution spatial transcriptomics (ST) data. For this demonstration, we
-employ a liver cancer ST
-<a href="https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-liver-rna-ffpe-dataset/" target="_blank" class="external-link">sample</a>.
-Due to the exceptionally large number of cells (~0.5 million) in this
-sample, we focus on a subset of regions containing 50,888 cells for
-demonstration purposes.</p>
-<p>Before running the tutorial, make sure that you have installed SecAct
-as well as our previous R package <a href="https://github.com/data2intelligence/SpaCET/" target="_blank" class="external-link">SpaCET</a>, which is an analytical framework for ST
-data. Here, SpaCET will be employed to create a SpaCET object to store
-the ST data.</p>
+<p>This tutorial demonstrates how to infer cell-cell communication (CCC)
+mediated by secreted proteins from single-cell resolution spatial
+transcriptomics (ST) data. For this demonstration, we employ a liver
+cancer ST sample from CosMx platform
+[<a href="https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-liver-rna-ffpe-dataset/" target="_blank" class="external-link">Link</a>].
+Before running the tutorial, make sure that you have installed SecAct as
+well as our previous R package <a href="https://github.com/data2intelligence/SpaCET/" target="_blank" class="external-link">SpaCET</a>, which is an analytical framework for ST
+data. Here, SpaCET package will be used to create a SpaCET object to
+store the ST data.</p>
 <div class="section level2">
 <h2 id="read-st-data-to-a-spacet-object">Read ST data to a SpaCET object<a class="anchor" aria-label="anchor" href="#read-st-data-to-a-spacet-object"></a>
 </h2>
 <p>To load data into R, user can create a SpaCET object by preparing two
 types of input data.</p>
 <ol style="list-style-type: decimal">
-<li>spatial transcriptomics count data. The spatial transcriptomics
-count data must be in the format of matrix with gene name (row) x spot
-ID (column).</li>
-<li>spatial location information. The spot coordinates should be in the
-format of matrix with spot ID (row) x coordinates (column). This 1st and
+<li>count data. The spatial transcriptomics count data must be in the
+format of matrix with gene name (row) x cell ID (column).</li>
+<li>spatial location information. The cell coordinates should be in the
+format of matrix with cell ID (row) x coordinates (column). The 1st and
 2nd columns represent X and Y coordinates, respectively.</li>
+<li>meta data (optional). The meta data should be in the format of
+matrix with cell ID (row) and meta annotation (column).</li>
 </ol>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SpaCET" class="external-link">SpaCET</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">dataPath</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span>package<span class="op">=</span><span class="st">"SecAct"</span><span class="op">)</span>, <span class="st">"extdata/"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"/LIHC_CosMx_toy.rda"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co"># load ST data</span></span>
+<span><span class="va">dataPath</span> <span class="op">&lt;-</span> <span class="st">"https://hpc.nih.gov/~Jiang_Lab/SecAct_Package/LIHC_CosMx_data.rda"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/connections.html" class="external-link">url</a></span><span class="op">(</span><span class="va">dataPath</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show count matrix</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">counts</span><span class="op">)</span></span>
-<span><span class="co">## [1]  1000 50888</span></span>
+<span><span class="co">## [1]   1000 460441</span></span>
 <span></span>
 <span><span class="co"># show coordinate matrix</span></span>
 <span><span class="va">spotCoordinates</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="op">]</span></span>
 <span></span>
-<span><span class="co">##              x_slide_mm y_slide_mm       cellType</span></span>
-<span><span class="co">## c_2_323_101     6.60536    3.32788     Tumor_core</span></span>
-<span><span class="co">## c_2_324_367     6.83920    3.10276 Tumor_boundary</span></span>
-<span><span class="co">## c_2_324_628     6.92860    3.43312     Tumor_core</span></span>
-<span><span class="co">## c_2_324_924     6.82864    3.21076     Tumor_core</span></span>
-<span><span class="co">## c_2_325_1167    7.57440    3.14704     Tumor_core</span></span>
+<span><span class="co">##             x_slide_mm y_slide_mm</span></span>
+<span><span class="co">## c_2_100_733    6.70816    9.03340</span></span>
+<span><span class="co">## c_2_101_240    7.50024    8.86156</span></span>
+<span><span class="co">## c_2_101_339    7.60560    8.73604</span></span>
+<span><span class="co">## c_2_101_452    7.62984    9.17260</span></span>
+<span><span class="co">## c_2_102_179    7.86824    8.99368</span></span>
 <span></span>
-<span><span class="co"># load ST data to create an SpaCET object</span></span>
+<span><span class="co"># show meta information</span></span>
+<span><span class="va">metaData</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="op">]</span></span>
+<span></span>
+<span><span class="co">##                    cellType         niche</span></span>
+<span><span class="co">## c_2_100_733      Tumor_core tumor subtype</span></span>
+<span><span class="co">## c_2_101_240 Tumor_interface     interface</span></span>
+<span><span class="co">## c_2_101_339      Tumor_core         tumor</span></span>
+<span><span class="co">## c_2_101_452      Tumor_core tumor subtype</span></span>
+<span><span class="co">## c_2_102_179      Tumor_core         tumor</span></span>
+<span></span>
+<span></span>
+<span><span class="co"># create a SpaCET object</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/create.SpaCET.object.html" class="external-link">create.SpaCET.object</a></span><span class="op">(</span></span>
-<span>  counts<span class="op">=</span><span class="va">counts</span>,</span>
-<span>  spotCoordinates<span class="op">=</span><span class="va">spotCoordinates</span>,</span>
-<span>  metaData<span class="op">=</span><span class="va">metaData</span>,</span>
-<span>  imagePath<span class="op">=</span><span class="cn">NA</span>,</span>
+<span>  counts <span class="op">=</span> <span class="va">counts</span>,</span>
+<span>  spotCoordinates <span class="op">=</span> <span class="va">spotCoordinates</span>,</span>
+<span>  metaData <span class="op">=</span> <span class="va">metaData</span>,</span>
+<span>  imagePath <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  platform <span class="op">=</span> <span class="st">"CosMx"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -155,11 +165,31 @@ format of matrix with spot ID (row) x coordinates (column). This 1st and
 <span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">SpaCET_obj</span><span class="op">)</span></span>
 <span></span>
 <span></span>
-<span><span class="co"># show the spatial distribution of all cell types</span></span>
+<span><span class="co"># filter out cells with less than 50 expressed genes</span></span>
+<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.quality.control.html" class="external-link">SpaCET.quality.control</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, min.genes<span class="op">=</span><span class="fl">50</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">## [1] "Removing cells with less than 50 expressed genes."</span></span>
+<span><span class="co">## [1] "16926 cells are removed."</span></span>
+<span><span class="co">## [1] "443515 cells are kept."</span></span>
+<span></span>
+<span><span class="co"># plot the QC metrics</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
+<span>  <span class="va">SpaCET_obj</span>, </span>
+<span>  spatialType <span class="op">=</span> <span class="st">"QualityControl"</span>, </span>
+<span>  spatialFeatures<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"UMI"</span>,<span class="st">"Gene"</span><span class="op">)</span>,</span>
+<span>  imageBg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="img/HCC_CoxMx_QC.png" width="100%" style="border:none"></p>
+<p>The <code>SpaCET_obj@metaData</code> contains the cell type
+annotation from the original study.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># show the spatial distribution of all cell types</span></span>
 <span><span class="va">my_cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>    <span class="st">'B'</span><span class="op">=</span><span class="st">'#C88888'</span>,<span class="st">'Erythrocyte'</span><span class="op">=</span><span class="st">'#fe666d'</span>,<span class="st">'T.alpha.beta'</span><span class="op">=</span><span class="st">'#B95FBB'</span>,<span class="st">'T.gamma.delta'</span><span class="op">=</span><span class="st">'#3288bd'</span>,</span>
-<span>    <span class="st">'NK'</span><span class="op">=</span><span class="st">'#bb8761'</span>,<span class="st">'Hepatocyte'</span><span class="op">=</span><span class="st">'#63636d'</span>,<span class="st">'Cholangiocyte'</span><span class="op">=</span><span class="st">'#de77ae'</span>,<span class="st">'Endothelial'</span><span class="op">=</span><span class="st">'#D4D915'</span>,</span>
-<span>    <span class="st">'Fibroblast'</span><span class="op">=</span><span class="st">'#66c2a5'</span>,<span class="st">'Macrophage'</span><span class="op">=</span><span class="st">'#ff9a36'</span>,<span class="st">'Tumor_core'</span><span class="op">=</span><span class="st">'#A4DFF2'</span>,<span class="st">'Tumor_interface'</span><span class="op">=</span><span class="st">'blue'</span></span>
+<span>  <span class="st">'B'</span><span class="op">=</span><span class="st">'#C88888'</span>,<span class="st">'Erythrocyte'</span><span class="op">=</span><span class="st">'#fe666d'</span>,<span class="st">'T.alpha.beta'</span><span class="op">=</span><span class="st">'#B95FBB'</span>,<span class="st">'T.gamma.delta'</span><span class="op">=</span><span class="st">'#3288bd'</span>,</span>
+<span>  <span class="st">'NK'</span><span class="op">=</span><span class="st">'#bb8761'</span>,<span class="st">'Hepatocyte'</span><span class="op">=</span><span class="st">'#63636d'</span>,<span class="st">'Cholangiocyte'</span><span class="op">=</span><span class="st">'#de77ae'</span>,<span class="st">'Endothelial'</span><span class="op">=</span><span class="st">'#D4D915'</span>,</span>
+<span>  <span class="st">'Fibroblast'</span><span class="op">=</span><span class="st">'#66c2a5'</span>,<span class="st">'Macrophage'</span><span class="op">=</span><span class="st">'#ff9a36'</span>,<span class="st">'Tumor_core'</span><span class="op">=</span><span class="st">'#A4DFF2'</span>,<span class="st">'Tumor_boundary'</span><span class="op">=</span><span class="st">'blue'</span>,</span>
+<span>  <span class="st">'Other'</span><span class="op">=</span><span class="st">'#cccccc'</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
@@ -167,36 +197,74 @@ format of matrix with spot ID (row) x coordinates (column). This 1st and
 <span>  spatialType <span class="op">=</span> <span class="st">"metaData"</span>, </span>
 <span>  spatialFeatures<span class="op">=</span> <span class="st">"cellType"</span>,</span>
 <span>  colors <span class="op">=</span> <span class="va">my_cols</span>,</span>
-<span>  pointSize <span class="op">=</span> <span class="fl">0.6</span></span>
+<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/HCC_CoxMx_cellType.png" width="60%" style="border:none"></p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># filter out cells with less than 50 expressed genes</span></span>
-<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.quality.control.html" class="external-link">SpaCET.quality.control</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, min.genes<span class="op">=</span><span class="fl">50</span><span class="op">)</span></span>
+<p><img src="img/HCC_CoxMx_cellType.png" width="55%" style="border:none"></p>
+</div>
+<div class="section level2">
+<h2 id="infer-secreted-protein-activity">Infer secreted protein activity<a class="anchor" aria-label="anchor" href="#infer-secreted-protein-activity"></a>
+</h2>
+<p>After loading ST data, user can run
+<code>SecAct.activity.inference.ST</code> to infer the activities of
+1248 secreted proteins for each spot. The output are stored in
+<code>SpaCET_obj @results $SecAct_output $SecretedProteinActivity</code>,
+which includes four items, (1) beta: regression coefficients; (2) se:
+standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value
+of z score from permutation test.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># infer activity</span></span>
+<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span></span>
+<span>  inputProfile <span class="op">=</span> <span class="va">SpaCET_obj</span>,</span>
+<span>  scale.factor <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  sigFilter<span class="op">=</span><span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># plot the QC metrics</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
-<span>  <span class="va">SpaCET_obj</span>, </span>
-<span>  spatialType <span class="op">=</span> <span class="st">"QualityControl"</span>, </span>
-<span>  spatialFeatures<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"UMI"</span>,<span class="st">"Gene"</span><span class="op">)</span>,</span>
-<span>  imageBg <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/HCC_CoxMx_QC.png" width="100%" style="border:none"></p>
+<span><span class="co"># show activity</span></span>
+<span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co">##              50x102      59x19       43x9</span></span>
+<span><span class="co">## A1BG     2.52789682 -1.4066741 -0.6518619</span></span>
+<span><span class="co">## A2M     -0.42257303  1.0486118  1.6322600</span></span>
+<span><span class="co">## A2ML1    0.51650231 -0.1298274 -1.0206257</span></span>
+<span><span class="co">## AADACL2  0.02978682  1.4617057 -0.8930522</span></span>
+<span><span class="co">## ABHD15   0.16788758 -0.3654531 -0.6539588</span></span>
+<span><span class="co">## ABI3BP   0.38397869  0.2679647 -0.1284023</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="infer-cell-cell-communication">Infer cell-cell communication<a class="anchor" aria-label="anchor" href="#infer-cell-cell-communication"></a>
 </h2>
-<p>Our strategy performs three steps to infer condition-specific
-cell-cell communication: (1) calculating changes in secreted protein
-activity for each cell type between two conditions, (2) assessing
-changes in secreted protein expression for each cell type between two
-conditions, and (3) linking sender and receiver cell types.</p>
-<p>When running <code>SecAct.CCC.ST</code>, user need to claim which
+<p>After calculating the secreted protein activity, SecAct could further
+estimate the consensus pattern from these inferred signaling activities
+across the whole tissue slide. This module contains two steps.</p>
+<p>First, <code>SecAct</code> filters 1248 secreted proteins to identify
+the significant secreted proteins mediating intercellular communication
+in this slide. To achieve this, <code>SecAct</code> will calculate the
+Spearman correlation of secreted protein s signaling activity and its
+neighbor cells’ sum expression. The p values were adjusted by the
+Benjamini-Hochberg (BH) method as false discovery rate (FDR). The
+cutoffs are r &gt; 0.05 and FDR &lt; 0.01.</p>
+<p>Second, We designed a computational strategy to statistically test
+whether a type of secreted protein s mediates the intercellular
+communication from cell type 1 to cell type 2. Cell-type annotations
+were retrieved from the original study. First, we identified all
+neighboring pairs of cells, where one cell was from cell type 1 and the
+other from cell type 2, based on spatial proximity (distance &lt; 20
+μm). Among these neighboring pairs, we identified communicating pairs of
+cells as those where cell type 1 expressed RNA for s (count &gt; 0), and
+cell type 2 exhibited signaling activity for s (activity score &gt; 0).
+We then calculated a communication score for cell type 1 → s → cell type
+2, defined as the ratio of communicating pairs to total neighboring
+pairs. The p-value is Probability (random ratio &gt;= real ratio),
+computed through 1000 randomizations adjusted by the Benjamini–Hochberg
+procedure. In each randomization, we randomly permuted the cell IDs
+within each cell type. A cell type 1 → s → cell type 2 communication is
+considered significant if ratio &gt; 0.2 and FDR &lt; 0.01.</p>
+<p>When running <code>SecAct.CCC.scST</code>, user need to claim which
 column in <code>Seurat_obj@meta.data</code> stores cell-type
 annotations. Also, claim which column stores condition information and
 what are case and control conditions. All SecAct results are stored in
-<code>Seurat_obj @misc $SecAct_output</code>.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code>SpaCET_obj @results $SecAct_output</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scST.html">SecAct.CCC.scST</a></span><span class="op">(</span></span>
 <span>    <span class="va">SpaCET_obj</span>,</span>
@@ -210,6 +278,49 @@ what are case and control conditions. All SecAct results are stored in
 <span><span class="co"># show output</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span><span class="op">)</span></span></code></pre></div>
 <p><img src="img/cos1.png" width="50%" style="border:none"></p>
+</div>
+<div class="section level2">
+<h2 id="visualize-cell-cell-communication">Visualize cell-cell communication<a class="anchor" aria-label="anchor" href="#visualize-cell-cell-communication"></a>
+</h2>
+<p>We provide two types of visualization plot for cell-cell
+communication, i.e., heatmap and circle plot. The number in the heatmap
+represents the count of secreted proteins from senders to receivers.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.heatmap.html">SecAct.CCC.heatmap</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, row.sorted<span class="op">=</span><span class="cn">TRUE</span>, column.sorted<span class="op">=</span><span class="cn">TRUE</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span>
+<span><span class="fu"><a href="../reference/SecAct.CCC.circle.html">SecAct.CCC.circle</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span></code></pre></div>
+<p><img src="img/OV_heatmap.png" width="45%" style="border:none"><img src="img/OV_circlize.png" width="45%" style="border:none"></p>
+</div>
+<div class="section level2">
+<h2 id="visualize-secreted-signaling-flow">Visualize secreted signaling flow<a class="anchor" aria-label="anchor" href="#visualize-secreted-signaling-flow"></a>
+</h2>
+<p>User can select the cell-cell communication of interest from
+<code>Seurat_obj @misc $SecAct_output $SecretedProteinCCC</code> to
+visualize them using <code>SecAct.CCC.sankey</code>. You need to assign
+values to <code>sender</code>, <code>secretedProtein</code>, and
+<code>receiver</code>.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sender</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fibroblast"</span>,<span class="st">"Macrophage"</span>,<span class="st">"Endothelial"</span>,<span class="st">"CD8T"</span>,<span class="st">"Tex"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">secretedProtein</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  <span class="st">"BGN"</span>,<span class="st">"BMP1"</span>,<span class="st">"COL15A1"</span>,<span class="st">"COL18A1"</span>,<span class="st">"COL1A1"</span>,</span>
+<span>  <span class="st">"COL1A2"</span>,<span class="st">"CST3"</span>,<span class="st">"FAP"</span>,<span class="st">"FBN1"</span>,<span class="st">"FN1"</span>,</span>
+<span>  <span class="st">"FSTL1"</span>,<span class="st">"HSPG2"</span>,<span class="st">"HTRA1"</span>,<span class="st">"ISG15"</span>,<span class="st">"MXRA5"</span>,</span>
+<span>  <span class="st">"POSTN"</span>,<span class="st">"SERPING1"</span>,<span class="st">"SPARC"</span>,<span class="st">"TGFB1"</span>,<span class="st">"TGFBI"</span>,</span>
+<span>  <span class="st">"THBS2"</span>,<span class="st">"TIMP1"</span>,<span class="st">"VCAN"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">receiver</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tumor"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="../reference/SecAct.CCC.sankey.html">SecAct.CCC.sankey</a></span><span class="op">(</span></span>
+<span>  <span class="va">Seurat_obj</span>, </span>
+<span>  colors_cellType <span class="op">=</span> <span class="va">my_cols</span>, </span>
+<span>  sender <span class="op">=</span> <span class="va">sender</span>, </span>
+<span>  secretedProtein <span class="op">=</span> <span class="va">secretedProtein</span>, </span>
+<span>  receiver <span class="op">=</span> <span class="va">receiver</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<center>
+<img src="img/OV_sankey_Tumor.png" width="70%" style="border:none">
+</center>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

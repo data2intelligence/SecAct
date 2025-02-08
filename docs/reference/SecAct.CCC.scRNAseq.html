@@ -77,16 +77,13 @@
 <span>  <span class="va">condition_meta</span>,</span>
 <span>  <span class="va">conditionCase</span>,</span>
 <span>  <span class="va">conditionControl</span>,</span>
+<span>  sigMatrix <span class="op">=</span> <span class="st">"SecAct"</span>,</span>
 <span>  act_diff_cutoff <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  exp_logFC_cutoff <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>  exp_mean_all_cutoff <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  exp_fraction_case_cutoff <span class="op">=</span> <span class="fl">0.1</span>,</span>
 <span>  padj_cutoff <span class="op">=</span> <span class="fl">0.01</span>,</span>
-<span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span>,</span>
-<span>  sigMatrix <span class="op">=</span> <span class="st">"SecAct"</span>,</span>
-<span>  lambda <span class="op">=</span> <span class="fl">5e+05</span>,</span>
-<span>  nrand <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  sigFilter <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -108,6 +105,10 @@
 <dd><p>Control condition.</p></dd>
 
 
+<dt>sigMatrix</dt>
+<dd><p>Secreted protein signature matrix.</p></dd>
+
+
 <dt>act_diff_cutoff</dt>
 <dd><p>Cut off for activity change (i.e., z score) in step 1.</p></dd>
 
@@ -122,6 +123,10 @@
 
 <dt>padj_cutoff</dt>
 <dd><p>Adjusted p value cut off.</p></dd>
+
+
+<dt>scale.factor</dt>
+<dd><p>Sets the scale factor for cell-level normalization in step2.</p></dd>
 
 
 <dt>data</dt>

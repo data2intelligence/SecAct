@@ -102,16 +102,17 @@ Visium platform (<a href="https://www.science.org/doi/10.1126/sciadv.abg3750" ta
 modules to analyze signaling patterns and velocities across the whole
 slide. Before running the tutorial, make sure that you have installed
 SecAct as well as our previous R package <a href="https://github.com/data2intelligence/SpaCET/" target="_blank" class="external-link">SpaCET</a>, which is an analytical framework for ST
-data. Here, SpaCET will be employed to create a SpaCET object to store
-the ST data.</p>
+data. Here, SpaCET package will be used to create a SpaCET object to
+store the ST data.</p>
 <div class="section level2">
 <h2 id="read-st-data-to-a-spacet-object">Read ST data to a SpaCET object<a class="anchor" aria-label="anchor" href="#read-st-data-to-a-spacet-object"></a>
 </h2>
-<p>To load data into R, user can create an SpaCET object by using
+<p>To load data into R, user can create a SpaCET object by using
 <code>create.SpaCET.object.10X</code>. Please make sure that
 <code>visiumPath</code> points to the standard output folders of 10x
 Space Ranger. If the ST data is not from 10x/Visium, you can use
-<code>create.SpaCET.object</code> instead. Click <a href="https://data2intelligence.github.io/SpaCET/articles/oldST_PDAC.html" target="_blank" class="external-link">here</a> for more details.</p>
+<code>create.SpaCET.object</code> instead
+[<a href="https://data2intelligence.github.io/SpaCET/articles/oldST_PDAC.html" target="_blank" class="external-link">details</a>].</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SpaCET" class="external-link">SpaCET</a></span><span class="op">)</span></span>
@@ -139,11 +140,18 @@ Space Ranger. If the ST data is not from 10x/Visium, you can use
 <h2 id="infer-secreted-protein-activity">Infer secreted protein activity<a class="anchor" aria-label="anchor" href="#infer-secreted-protein-activity"></a>
 </h2>
 <p>After loading ST data, user can run
-<code>SecAct.activity.inference</code> to infer the activities of 1248
-secreted proteins for each spot.</p>
+<code>SecAct.activity.inference.ST</code> to infer the activities of
+1248 secreted proteins for each spot. The output are stored in
+<code>SpaCET_obj @results $SecAct_output $SecretedProteinActivity</code>,
+which includes four items, (1) beta: regression coefficients; (2) se:
+standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value
+of z score from permutation test.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity</span></span>
-<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span><span class="op">)</span></span>
+<span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span></span>
+<span>  inputProfile <span class="op">=</span> <span class="va">SpaCET_obj</span>,</span>
+<span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
@@ -159,18 +167,20 @@ secreted proteins for each spot.</p>
 <div class="section level2">
 <h2 id="estimate-signaling-pattern">Estimate signaling pattern<a class="anchor" aria-label="anchor" href="#estimate-signaling-pattern"></a>
 </h2>
-<p>After obtaining the secreted protein activity, SecAct could further
+<p>After calculating the secreted protein activity, SecAct could further
 estimate the consensus pattern from these inferred signaling activities
-across the whole tissue slide. This stage contains two steps.</p>
-<p>First, <code>SecAct</code> filtered 1248 secreted proteins to
-identify the secreted proteins mediating intercellular communication. To
-achieve this, <code>SecAct</code> will calculate the linear correlation
-of spots’ RNA expression and spots’ neighbors’ signaling activity. The
-cutoffs are r &gt; 0.1 and FDR &lt; 0.01.</p>
-<p>Second, <code>SecAct</code> employs non-negative matrix factorization
-(<a href="https://cran.r-project.org/web/packages/NMF/vignettes/NMF-vignette.pdf" target="_blank" class="external-link">NMF</a>) to estimate the consensus patterns. A critical
-parameter in NMF is the factorization rank k. User can assign a number
-vector to k, e.g., <code>k=2:5</code>. Then,
+across the whole tissue slide. This module contains two steps.</p>
+<p>First, <code>SecAct</code> filters 1248 secreted proteins to identify
+the significant secreted proteins mediating intercellular communication
+in this slide. To achieve this, <code>SecAct</code> will calculate the
+Spearman correlation of spots’ signaling activity and spots’ neighbors’
+RNA expression. The p values were adjusted by the Benjamini-Hochberg
+(BH) method as false discovery rate (FDR). The cutoffs are r &gt; 0.05
+and FDR &lt; 0.01.</p>
+<p>Second, <code>SecAct</code> employs Non-negative Matrix Factorization
+(<a href="https://cran.r-project.org/web/packages/NMF/vignettes/NMF-vignette.pdf" target="_blank" class="external-link">NMF</a>) to estimate the consensus signaling patterns. A
+critical parameter in NMF is the factorization rank k. User can assign a
+number vector to k, e.g., <code>k=2:5</code>. Then,
 <code>SecAct.signaling.pattern</code> would find the optimal number of
 factors determined as the point preceding the largest decrease in the
 silhouette value. This will take a while. Based on my pre-calculation,
@@ -189,28 +199,32 @@ directly run against <code>k=3</code>.</p>
 <span>    legend.position <span class="op">=</span> <span class="st">"right"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="img/HCC_visium_pattern.png" width="100%" style="border:none"></p>
-<p>If you want to identify secreted proteins with specific signaling
-pattern, please run the following code.</p>
+<p>SecAct can identify secreted proteins associated with each signaling
+pattern according to the matrix W from NMF results. For one secreted
+protein (represented by a row in W), the signaling pattern with a value
+at least twice as large as any other pattern, is designated as the
+dominant pattern for that protein.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/writeLines.html" class="external-link">writeLines</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">WWW_n</span><span class="op">)</span>, <span class="st">"/Users/rub2/Downloads/inter_SP.csv"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># show genes dominated by pattern 3</span></span>
+<span><span class="va">pattern.gene</span> <span class="op">&lt;-</span> <span class="fu">SecAct.pattern.gene</span><span class="op">(</span><span class="va">SpaCET_obj</span>, n<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pattern.gene</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="calculate-signaling-velocity">Calculate signaling velocity<a class="anchor" aria-label="anchor" href="#calculate-signaling-velocity"></a>
 </h2>
 <p>Several secreted proteins with pattern 3 are related to
-epithelial-mesenchymal transition process, such as COL1A1, IL6, TGFB1,
-and SPARC. By integrating secreted protein-coding gene expression and
+epithelial-mesenchymal transition process, such as COL1A1, TGFB1, and
+SPARC. By integrating secreted protein-coding gene expression and
 signaling activity, SecAct can also infer signaling velocity at each
 spatial spot, indicating the direction and strength of secreted
-signaling.Let’s take SPARC as an example.</p>
+signaling. Let’s take SPARC as an example.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show signaling velocity of SPARC</span></span>
 <span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, signalMode<span class="op">=</span><span class="st">"receiving"</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="img/HCC_visium_SPARC.png" width="100%" style="border:none"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show animated signaling velocity of SPARC</span></span>
-<span><span class="fu">SecAct.spatial.velocity</span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, signalMode<span class="op">=</span><span class="st">"receiving"</span>, animated<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, signalMode<span class="op">=</span><span class="st">"receiving"</span>, animated<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="img/HCC_visium_SPARC.gif" width="100%" style="border:none"></p>
 </div>
 <div class="section level2">

@@ -96,22 +96,23 @@
 
     
     
-<p>This tutorial demonstrates the process of inferring differences in
-secreted protein activity between two phenotypes, such as treatment vs
-control, tumor vs normal, or responder vs non-responder. The input
-expression values, from either RNA sequencing or MicroArray, should be
-transformed by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA
-sequencing data.</p>
+<p>This tutorial demonstrates how to infer the difference of secreted
+protein activity between two phenotypes, such as treatment vs control,
+tumor vs normal, or responder vs non-responder. The input expression
+values, from either RNA sequencing or MicroArray, should be transformed
+by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA-Seq
+data.</p>
 <p>For this demonstration, we employ a clinical
 <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE100093" target="_blank" class="external-link">cohort</a>
 of patients with discoid lupus erythematosus, who received a single dose
 of anti-IFNG antibody AMG 811. Using the SecAct framework, we will
-estimate differences in secreted protein activity between treatment and
-control groups.</p>
+estimate the differences in secreted protein activity between treatment
+and control groups.</p>
 <div class="section level2">
 <h2 id="prepare-expression-data">Prepare expression data<a class="anchor" aria-label="anchor" href="#prepare-expression-data"></a>
 </h2>
-<p>This section demonstrates how to read an expression matrix and</p>
+<p>This section shows how to read an expression matrix to R environment
+and separate them into the treatment and control patient group.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
 <span></span>
@@ -123,8 +124,8 @@ control groups.</p>
 <span><span class="va">meta</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"GSE100093.IFNG.meta"</span><span class="op">)</span>, sep<span class="op">=</span><span class="st">"\t"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># subset treatment and control group</span></span>
-<span><span class="va">expr.treatment</span> <span class="op">&lt;-</span> <span class="va">expr</span><span class="op">[</span>,<span class="va">meta</span><span class="op">[</span>,<span class="st">"Treatment"</span><span class="op">]</span><span class="op">==</span><span class="st">"Anti-IFNG"</span><span class="op">]</span></span>
-<span><span class="va">expr.control</span> <span class="op">&lt;-</span> <span class="va">expr</span><span class="op">[</span>,<span class="va">meta</span><span class="op">[</span>,<span class="st">"Treatment"</span><span class="op">]</span><span class="op">==</span><span class="st">"Control"</span><span class="op">]</span></span></code></pre></div>
+<span><span class="va">expr.treatment</span> <span class="op">&lt;-</span> <span class="va">expr</span><span class="op">[</span>, <span class="va">meta</span><span class="op">[</span>,<span class="st">"Treatment"</span><span class="op">]</span><span class="op">==</span><span class="st">"Anti-IFNG"</span><span class="op">]</span></span>
+<span><span class="va">expr.control</span> <span class="op">&lt;-</span> <span class="va">expr</span><span class="op">[</span>, <span class="va">meta</span><span class="op">[</span>,<span class="st">"Treatment"</span><span class="op">]</span><span class="op">==</span><span class="st">"Control"</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="infer-activity-difference">Infer activity difference<a class="anchor" aria-label="anchor" href="#infer-activity-difference"></a>
@@ -132,17 +133,20 @@ control groups.</p>
 <p>We input <code>expr.treatment</code> and <code>expr.control</code>
 into <code>SecAct.activity.inference</code> to infer the activity
 difference of &gt;1000 secreted proteins between treatment and control
-groups. Setting <code>is.singleSampleLevel = FALSE</code> leads SecAct
-to calculate the overall activity change between two phenotypes. You can
-also obtain the activity change for each sample in
-<code>expr.treatment</code> by
-<code>is.singleSampleLevel = TRUE</code>.</p>
+groups. <code>SecAct</code> calculates the OVERALL activity difference
+between two phenotypes with default setting
+<code>is.singleSampleLevel = FALSE</code>. You can also obtain the
+activity change for each sample in <code>expr.treatment</code> by
+setting <code>is.singleSampleLevel = TRUE</code>. Of note, if your
+samples are paired, just change the defult setting
+<code>is.paired = FALSE</code> to <code>TRUE</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity difference; ~2 mins</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>
 <span>  inputProfile <span class="op">=</span> <span class="va">expr.treatment</span>, </span>
 <span>  inputProfile_control <span class="op">=</span> <span class="va">expr.control</span>,</span>
-<span>  is.singleSampleLevel <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  is.singleSampleLevel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  is.paired <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># res$zscore stores activity difference</span></span>
@@ -157,25 +161,30 @@ also obtain the activity change for each sample in
 <span><span class="co">## A2ML1   -7.130571</span></span>
 <span><span class="co">## AADACL2  8.538400</span></span>
 <span><span class="co">## ABHD15   1.720629</span></span>
-<span><span class="co">## ABI3BP  -8.170191</span></span>
-<span></span>
-<span><span class="co"># show IFNG activity difference</span></span>
+<span><span class="co">## ABI3BP  -8.170191</span></span></code></pre></div>
+<p>A positive value means the secreted protein has high activity in the
+treatment group while a negative value means the secreted protein has
+high activity in the control group.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># show IFNG activity difference</span></span>
 <span><span class="va">act.diff</span><span class="op">[</span><span class="st">"IFNG"</span>,<span class="st">"Diff"</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co">## [1] -35.67649</span></span></code></pre></div>
-<p>We can see that IFNG activity was decreased because the treatment
-group received anti-IFNG therapy.</p>
+<p>We can see that IFNG activity was reduced as expected, consistent
+with the treatment group receiving anti-IFNG therapy.</p>
 </div>
 <div class="section level2">
 <h2 id="visualize-activity-difference">Visualize activity difference<a class="anchor" aria-label="anchor" href="#visualize-activity-difference"></a>
 </h2>
-<p>User can visualize any secreted proteins of interest. Here, we select
-the top up- and down-regulated secreted proteins between treatment and
-control as examples.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># select top 10 secreted proteins (SPs)</span></span>
-<span><span class="va">up.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">act.diff</span><span class="op">[</span>,<span class="st">"Diff"</span><span class="op">]</span>,decreasing<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
-<span><span class="va">down.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">act.diff</span><span class="op">[</span>,<span class="st">"Diff"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
+<p>User can visualize any secreted proteins of interest using
+<code>SecAct.bar.plot</code>. Here, we select the top up- and
+down-regulated secreted proteins (SPs) between treatment and control as
+examples.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># select the top secreted proteins</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
+<span><span class="va">up.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">act.diff</span><span class="op">[</span>,<span class="st">"Diff"</span><span class="op">]</span>,decreasing<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
+<span><span class="va">down.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">act.diff</span><span class="op">[</span>,<span class="st">"Diff"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
 <span></span>
 <span><span class="va">SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">up.SPs</span>, <span class="va">down.SPs</span><span class="op">)</span></span>
 <span><span class="co"># user can assign any secreted proteins to SPs</span></span>
@@ -197,14 +206,13 @@ high activity in the control group.</p>
 the expression matrix from two phenotypes, you can directly run
 <code>SecAct.activity.inference</code> with
 <code>is.differential = TRUE</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># compare two phenotypes to get differential profile</span></span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># compare two phenotypes to get a differential profile</span></span>
 <span><span class="va">expr.diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">expr.treatment</span><span class="op">)</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">rowMeans</a></span><span class="op">(</span><span class="va">expr.control</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># generate input matrix</span></span>
+<span><span class="co"># generate input profile</span></span>
 <span><span class="va">expr.diff</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">expr.diff</span>, ncol<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr.diff</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"Diff"</span></span>
-<span></span>
 <span></span>
 <span><span class="co"># Run against to differential profile</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>
@@ -216,7 +224,15 @@ the expression matrix from two phenotypes, you can directly run
 <span><span class="va">act.diff</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">zscore</span></span>
 <span></span>
 <span><span class="co"># show activity difference</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">act.diff</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">act.diff</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co">##              Diff</span></span>
+<span><span class="co">## A1BG    12.412416</span></span>
+<span><span class="co">## A2M      1.654828</span></span>
+<span><span class="co">## A2ML1   -7.130571</span></span>
+<span><span class="co">## AADACL2  8.538400</span></span>
+<span><span class="co">## ABHD15   1.720629</span></span>
+<span><span class="co">## ABI3BP  -8.170191</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

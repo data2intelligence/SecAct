@@ -100,7 +100,7 @@
 secreted proteins from a large cohort, and then calculate their activity
 relevance with clinical data. The input expression values, from either
 RNA sequencing or MicroArray, should be transformed by log2(x+1). Of
-note, x could be FPKM, RPKM, or TPM for RNA sequencing data.</p>
+note, x could be FPKM, RPKM, or TPM for RNA-Seq data.</p>
 <p>For this demonstration, we employ an immunotherapy
 <a href="https://github.com/ParkerICI/prince-trial-data" target="_blank" class="external-link">cohort</a>
 of pancreatic cancer patients. Using the SecAct framework, we will
@@ -121,16 +121,18 @@ environment.</p>
 <h2 id="infer-secreted-protein-activity">Infer secreted protein activity<a class="anchor" aria-label="anchor" href="#infer-secreted-protein-activity"></a>
 </h2>
 <p>We use <code>SecAct.activity.inference</code> to infer the activity
-of &gt;1000 secreted proteins across samples. If your data have control
-samples (e.g., normal patients), you can assign them to
-<code>inputProfile_control</code>. If not available, just set
-<code>inputProfile_control=NULL</code> (default). SecAct would normalize
-the expression values of each gene to zero mean across all input
-profiles. In other words, the mean gene expression of all input profiles
-are regarded as control.</p>
+of &gt;1000 secreted proteins across patient samples.</p>
+<p>If your data have control samples (e.g., normal patients), you can
+assign them to <code>inputProfile_control</code>. <code>SecAct</code>
+would normalize each gene’s expression values with the control samples,
+i.e., substracting the mean gene expression of control samples.</p>
+<p>If not available, just set <code>inputProfile_control=NULL</code>
+(default). <code>SecAct</code> would normalize the expression values of
+each gene to zero mean across all input profiles. In other words, the
+mean gene expression of all input profiles are regarded as control.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity; ~10 mins</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span>inputProfile<span class="op">=</span><span class="va">expr</span><span class="op">)</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span>inputProfile<span class="op">=</span><span class="va">expr</span>, inputProfile_control<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># res$zscore stores activity</span></span>
 <span><span class="va">act</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">zscore</span></span>
@@ -149,10 +151,14 @@ are regarded as control.</p>
 <div class="section level2">
 <h2 id="calculate-clinical-relevance">Calculate clinical relevance<a class="anchor" aria-label="anchor" href="#calculate-clinical-relevance"></a>
 </h2>
-<p>We next calculate the risk score for each secreted protein by
-integrating their activity levels with clinical data. For clinical file,
+<p>We next calculate the risk score z for each secreted protein by
+linking their activity levels with clinical data. For the clinical file,
 please make sure the name of the 1st and 2nd columns are “Time” and
-“Event”, respectively.</p>
+“Event”, respectively. <code>SecAct.coxph</code> will conduct Cox
+proportional hazard (PH) regression, with gene risk scores represented
+as z-scores (Coef / StdErr) from the two-sided Wald test. For each
+endpoint analysis, clinical covariates (e.g., age, gender, stage) were
+considered in regression if available.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read clinical infomation</span></span>
 <span><span class="va">clinical</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"Pancreatic_Nivolumab_Padron2022.OS_Nivo+Sotiga+Chemo"</span><span class="op">)</span><span class="op">)</span></span>
@@ -172,54 +178,57 @@ please make sure the name of the 1st and 2nd columns are “Time” and
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">##            risk z     p value</span></span>
-<span><span class="co">## A1BG    -2.187803 0.028683943</span></span>
-<span><span class="co">## A2M     -3.372297 0.000745439</span></span>
-<span><span class="co">## A2ML1    1.668025 0.095310824</span></span>
-<span><span class="co">## AADACL2 -1.960305 0.049960191</span></span>
-<span><span class="co">## ABHD15  -2.511890 0.012008638</span></span>
-<span><span class="co">## ABI3BP  -1.679394 0.093075338</span></span></code></pre></div>
+<span><span class="co">##         risk score z     p value</span></span>
+<span><span class="co">## A1BG       -2.187803 0.028683943</span></span>
+<span><span class="co">## A2M        -3.372297 0.000745439</span></span>
+<span><span class="co">## A2ML1       1.668025 0.095310824</span></span>
+<span><span class="co">## AADACL2    -1.960305 0.049960191</span></span>
+<span><span class="co">## ABHD15     -2.511890 0.012008638</span></span>
+<span><span class="co">## ABI3BP     -1.679394 0.093075338</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualize-risk-score">Visualize risk score<a class="anchor" aria-label="anchor" href="#visualize-risk-score"></a>
 </h2>
-<p>User can visualize any secreted proteins of interest. Here, we select
-the top high and low risk secreted proteins as examples.</p>
+<p>User can visualize any secreted proteins of interest using
+<code>SecAct.lollipop.plot</code>. Here, we select the top high and low
+risk secreted proteins (SPs), which are associated with unfavorable and
+favorable clinical outcomes, respectively.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># select top 10 secreted proteins (SPs)</span></span>
-<span><span class="va">high.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">[</span>,<span class="st">"risk z"</span><span class="op">]</span>,decreasing<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
-<span><span class="va">low.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">[</span>,<span class="st">"risk z"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="co"># select the top secreted proteins</span></span>
+<span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
+<span><span class="va">high.risk.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">[</span>,<span class="st">"risk score z"</span><span class="op">]</span>,decreasing<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
+<span><span class="va">low.risk.SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">[</span>,<span class="st">"risk score z"</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
 <span></span>
-<span><span class="va">SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">high.SPs</span>, <span class="va">low.SPs</span><span class="op">)</span></span>
+<span><span class="va">SPs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">high.risk.SPs</span>, <span class="va">low.risk.SPs</span><span class="op">)</span></span>
 <span><span class="co"># user can assign any secreted proteins to SPs</span></span>
 <span></span>
 <span><span class="co"># generate a vector</span></span>
-<span><span class="va">fg.vec</span> <span class="op">&lt;-</span> <span class="va">riskMat</span><span class="op">[</span><span class="va">SPs</span>,<span class="st">"risk z"</span><span class="op">]</span></span>
+<span><span class="va">fg.vec</span> <span class="op">&lt;-</span> <span class="va">riskMat</span><span class="op">[</span><span class="va">SPs</span>,<span class="st">"risk score z"</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># visualize in lollipop plot</span></span>
 <span><span class="fu"><a href="../reference/SecAct.lollipop.plot.html">SecAct.lollipop.plot</a></span><span class="op">(</span><span class="va">fg.vec</span>, title<span class="op">=</span><span class="st">"Risk score z"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="img/bulk_RiskScore.png" width="50%" style="border:none"></p>
-<p>A positive value means the secreted protein is associated with
-unfavorable (pro-tumor) outcome while a negative value means the
-secreted protein is associated with favorable (anti-tumor) outcome.</p>
+<p>A positive value means the secreted protein is associated with worse
+survival while a negative value means the secreted protein is associated
+with better survival.</p>
 </div>
 <div class="section level2">
 <h2 id="draw-survival-plot">Draw survival plot<a class="anchor" aria-label="anchor" href="#draw-survival-plot"></a>
 </h2>
 <p>User can select a secreted protein of interest to draw its survival
-plot using <code>SecAct.survival.plot</code>.</p>
+curve using <code>SecAct.survival.plot</code>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Take WNT7B as an example</span></span>
+<code class="sourceCode R"><span><span class="co"># Take secreted protein WNT7B as an example</span></span>
 <span><span class="va">riskMat</span><span class="op">[</span><span class="st">"WNT7B"</span>,<span class="op">]</span></span>
 <span></span>
-<span><span class="co">##       risk z      p value </span></span>
+<span><span class="co">## risk score z      p value </span></span>
 <span><span class="co">## 3.3252642698 0.0008833476 </span></span>
 <span></span>
-<span><span class="co"># visualize in bar plot</span></span>
+<span><span class="co"># visualize in survival plot</span></span>
 <span><span class="fu"><a href="../reference/SecAct.survival.plot.html">SecAct.survival.plot</a></span><span class="op">(</span><span class="va">act</span>, <span class="va">clinical</span>, <span class="st">"WNT7B"</span>, x.title<span class="op">=</span><span class="st">"Overall (Days)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="img/bulk_Survival.png" width="50%" style="border:none"></p>
 <p>The activity cutoff was selected by maximizing the difference between
-high and low patient groups.</p>
+high and low activity patient groups.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

@@ -98,16 +98,16 @@
     
 <p>This tutorial demonstrates how to infer secreted protein signaling
 activity in different cell states. For this demonstration, we employ an
-ovarian cancer scRNA-Seq data set
-[<a href="https://data.mendeley.com/datasets/rc47y6m9mp/2" target="_blank" class="external-link">Download</a>].
+ovarian cancer scRNA-Seq
+<a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank" class="external-link">study</a>.
 Using the SecAct framework, we will estimate the signaling activity of
 secreted proteins for different CD4+ T cell states.</p>
 <div class="section level2">
 <h2 id="load-scrna-seq-data">Load scRNA-Seq data<a class="anchor" aria-label="anchor" href="#load-scrna-seq-data"></a>
 </h2>
-<p>The scRNA-Seq data of CD4+ T cells is stored in Seurat object. Three
-cell states are identified, i.e., naive, central memory, and T helper
-1-like.</p>
+<p>The scRNA-Seq data of CD4+ T cells is stored in a Seurat object.
+Three cell states are annotated in this dataset, i.e., naive, central
+memory, and helper 1-like.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/data2intelligence/SecAct" class="external-link">SecAct</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span></span>
@@ -129,15 +129,17 @@ cell states are identified, i.e., naive, central memory, and T helper
 <div class="section level2">
 <h2 id="infer-secreted-protein-activity">Infer secreted protein activity<a class="anchor" aria-label="anchor" href="#infer-secreted-protein-activity"></a>
 </h2>
-<p>After loading single-cell data, user can input
+<p>After loading scRNA-Seq data data, user can input
 <code>Seurat_obj</code> into <code>SecAct.activity.inference</code> to
-infer the activities of 1248 secreted proteins for various cell types.
-Also, you need to claim which column in the meta matrix of Seurat object
-has cell type information. In this case, just assign
-<code>cellType_meta="Annotation"</code>. User can find the SecAct
-results in <code>Seurat_obj@misc$SecretedProteinActivity</code>.</p>
+infer the activities of &gt;1000 secreted proteins for various cell
+states. Also, you need to claim which column in the meta matrix of
+Seurat object has cell state information. In this case, the column name
+is “Annotation” and thus assign
+<code>cellType_meta = "Annotation"</code>. User can find the SecAct
+results in
+<code>Seurat_obj @misc $SecAct_output $SecretedProteinActivity</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity</span></span>
+<code class="sourceCode R"><span><span class="co"># infer activity; ~2 mins</span></span>
 <span><span class="va">Seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.scRNAseq.html">SecAct.activity.inference.scRNAseq</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, cellType_meta<span class="op">=</span><span class="st">"Annotation"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># SecretedProteinActivity$zscore stores activity</span></span>
@@ -157,10 +159,11 @@ results in <code>Seurat_obj@misc$SecretedProteinActivity</code>.</p>
 <div class="section level2">
 <h2 id="visualize-activity-score">Visualize activity score<a class="anchor" aria-label="anchor" href="#visualize-activity-score"></a>
 </h2>
-<p>User can visualize any secreted proteins of interest. Here, we select
-the top activating secreted proteins for each cell states.</p>
+<p>User can visualize any secreted proteins of interest using
+<code>SecAct.heatmap.plot</code>. Here, we select the top active
+secreted proteins (SPs) for each cell states.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># select top 10 secreted proteins (SPs)</span></span>
+<code class="sourceCode R"><span><span class="co"># select top secreted proteins</span></span>
 <span><span class="va">n</span> <span class="op">&lt;-</span> <span class="fl">10</span></span>
 <span><span class="va">SPs.1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">act</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>,decreasing<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
 <span><span class="va">SPs.2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">act</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>,decreasing<span class="op">=</span><span class="cn">T</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="va">n</span><span class="op">]</span></span>
