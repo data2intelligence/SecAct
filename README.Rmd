@@ -56,11 +56,11 @@ The R package has been installed successfully on Operating systems:
 ``` r
 library(SecAct)
 
-# load the differenrial profile
+# load differenrial profile
 dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
-expr.diff <- read.table(paste0(dataPath, "Ly86.OverExpression_vs_Vector.diff"))
+expr.diff <- read.table(paste0(dataPath, "Ly86.OverExpression_vs_Vector_logFC.txt"))
 
-# Run SecAct to infer the activity change
+# Run SecAct to infer activity change
 res <- SecAct.activity.inference(inputProfile = expr.diff, is.differential = TRUE)
 
 # show results
