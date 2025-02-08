@@ -10,6 +10,7 @@ SecAct.CCC.scRNAseq(
   condition_meta,
   conditionCase,
   conditionControl,
+  sigMatrix = "SecAct",
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
@@ -26,6 +27,8 @@ SecAct.CCC.scRNAseq(
 \item{conditionCase}{Case condition.}
 
 \item{conditionControl}{Control condition.}
+
+\item{sigMatrix}{Secreted protein signature matrix.}
 
 \item{act_diff_cutoff}{Cut off for activity change (i.e., z score) in step 1.}
 
