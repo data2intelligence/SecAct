@@ -1,1 +1,4 @@
-PKG_LIBS=/usr/local/lib/*gsl*.a
+PKG_CFLAGS = $(shell gsl-config --cflags)
+PKG_LIBS = $(shell gsl-config --libs)
+GSL_CFLAGS=-I/usr/local/Cellar/gsl/2.7.1/include
+GSL_LIBS=-L/usr/local/Cellar/gsl/2.7.1/lib -lgsl -lgslcblas

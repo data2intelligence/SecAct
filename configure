@@ -5,15 +5,25 @@ if [ ! -e "./src/Makevars" ]; then
 touch ./src/Makevars
 fi
 
-#if mac
-if [[ "$(uname -s)" == "Darwin" ]] ; then
-echo "PKG_LIBS=/usr/local/lib/*gsl*.a" > ./src/Makevars
+echo "Checking for GSL..."
 
-#if linux
-elif [[ "$(uname -s)" == "Linux" ]] ; then
-echo "PKG_LIBS=/usr/local/gsl/2.7/gcc-11.3.0/lib/*gsl*.a" > ./src/Makevars
+GSL_CFLAGS=$(gsl-config --cflags)
+GSL_LIBS=$(gsl-config --libs)
 
-else
-echo "PKG_LIBS=/to/be/determined/*gsl*.a" > ./src/Makevars
-
+if [ -z "$GSL_CFLAGS" ] || [ -z "$GSL_LIBS" ]; then
+    echo "ERROR: GSL not found. Please install GNU Scientific Library (GSL)."
+    exit 1
 fi
+
+echo "GSL found!"
+
+
+#provides the necessary compiler flags.
+echo "PKG_CFLAGS = \$(shell gsl-config --cflags)" > ./src/Makevars
+
+#links the GSL library.
+echo "PKG_LIBS = \$(shell gsl-config --libs)" >> ./src/Makevars
+
+echo "GSL_CFLAGS=${GSL_CFLAGS}" >> src/Makevars
+echo "GSL_LIBS=${GSL_LIBS}" >> src/Makevars
+
