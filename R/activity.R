@@ -64,8 +64,8 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 #' @title Secreted protein activity inference
 #' @description Infer the signaling activity of 1248 secreted proteins from gene expression profiles.
 #' @param inputProfile Gene expression matrix with gene symbol (row) x sample (column).
-#' @param is.differential A logical indicating whether inputProfile has been differential profiles against to control.
 #' @param inputProfile_control Gene expression matrix with gene symbol (row) x sample (column).
+#' @param is.differential A logical indicating whether inputProfile has been differential profiles against to control.
 #' @param is.paired A logical indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired.
 #' @param is.singleSampleLevel A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.
 #' @param sigMatrix Secreted protein signature matrix.
@@ -85,8 +85,8 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 #'
 SecAct.activity.inference <- function(
   inputProfile,
-  is.differential=FALSE,
   inputProfile_control=NULL,
+  is.differential=FALSE,
   is.paired=FALSE,
   is.singleSampleLevel=FALSE,
   sigMatrix="SecAct",

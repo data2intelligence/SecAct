@@ -44,16 +44,36 @@ to download it.
 install.packages("Path_to_the_source_code", repos = NULL, type="source")
 ```
 
+The package has been installed successfully on Operating Systems:
+
+- Red Hat Enterprise Linux 8.10 (Ootpa)
+- macOS Sequoia 15.3.1
+
+<details>
+<summary>
+How to install GNU Scientific Library (GSL)?
+</summary>
+
+If your operating system does not already have GSL installed, please
+follow one of the installation methods below, depending on your
+operating system.
+
+    # Linux (Ubuntu/Debian):
+    sudo apt-get install libgsl-dev
+
+    # Linux (Fedora/RHEL-based):
+    sudo dnf install gsl-devel
+
+    # macOS (Homebrew):
+    brew install gsl
+
+</details>
+
 ## Dependencies
 
 - C Library: GNU Scientific Library (GSL).
 - R version \>= 4.2.0.
 - R packages: Matrix, ggplot2, patchwork.
-
-The R package has been installed successfully on Operating systems:
-
-- Red Hat Enterprise Linux 8.10 (Ootpa)
-- macOS Sequoia 15.3.1
 
 ## Example
 
@@ -62,16 +82,21 @@ library(SecAct)
 
 # load differenrial profile
 dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
-expr.diff <- read.table(paste0(dataPath, "Ly86.OverExpression_vs_Vector_logFC.txt"))
+expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
 
 # Run SecAct to infer activity change
 res <- SecAct.activity.inference(inputProfile = expr.diff, is.differential = TRUE)
 
-# show results
+# show activity change
 head(res$zscore)
 ```
 
 ## Tutorial
+
+SecAct is compatible with multiple modalities of gene expression
+profiles, including spatial, single-cell, and bulk transcriptomics data.
+The following tutorials demonstrate its applications across each data
+type.
 
 #### Spatial transcriptomcis (ST) data
 
