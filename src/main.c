@@ -11,7 +11,7 @@ void hello(int *n)
   for(i=0; i < *n; i++)
   {
     Rprintf("Hello, world!\n");
- fprintf( stdout, "p = %d\n", *p);
+    fprintf( stdout, "p = %d\n", *p);
   }
 }
 */

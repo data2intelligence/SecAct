@@ -5,6 +5,7 @@ if [ ! -e "./src/Makevars" ]; then
 touch ./src/Makevars
 fi
 
+
 echo "Checking for GSL..."
 
 GSL_CFLAGS=$(gsl-config --cflags)
@@ -26,4 +27,3 @@ echo "PKG_LIBS = \$(shell gsl-config --libs)" >> ./src/Makevars
 
 echo "GSL_CFLAGS=${GSL_CFLAGS}" >> src/Makevars
 echo "GSL_LIBS=${GSL_LIBS}" >> src/Makevars
-

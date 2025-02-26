@@ -10,16 +10,17 @@ SecAct is an R package designed for inferring the intercellular
 signaling activity of secreted proteins from gene expression profiles.
 Users can input multiple modalities of expression data, including
 spatial, single-cell, or bulk transcriptomics data. The outputs are the
-inferred activities of 1248 secreted proteins for each ST spot,
-individual cell, or sample. Based on the inferred activities, SecAct
-provides multiple downstream application modules. For spatial data,
-SecAct can infer the signaling pattern and signaling velocity for
-secreted proteins. For single-cell data, SecAct can infer the
-intercellular communication network and signaling flow from source cells
-to receiver cells. For bulk data, SecAct can infer secreted protein risk
-scores for a large cohort linked to clinical data, and can infer
-secreted protein activities that are differentially regulated between
-two phenotypes.
+inferred activities of 1248 secreted proteins for each spatial spot,
+individual cell, or sample, depending on the input data type. Based on
+the inferred activities, SecAct provides multiple downstream application
+modules. For spatial data, SecAct can infer the signaling pattern and
+signaling velocity for secreted proteins. For single-cell data, SecAct
+can infer the intercellular communication network and signaling flow
+from source cells to receiver cells. For bulk data, SecAct can infer
+secreted protein risk scores for a large cohort linked to clinical data,
+and can infer secreted protein activities that are differentially
+regulated between two phenotypes. These functionalities and terms are
+explained more formally in the following tutorials.
 
 <p align="center">
 <img src="man/figures/workflow.png" width="100%"/>
@@ -51,8 +52,8 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 
 The R package has been installed successfully on Operating systems:
 
-- macOS Sonoma 15.3.1
-- Rocky Linux 8.7 (Green Obsidian)
+- Red Hat Enterprise Linux 8.10 (Ootpa)
+- macOS Sequoia 15.3.1
 
 ## Example
 
@@ -88,10 +89,10 @@ head(res$zscore)
 
 #### Bulk RNA sequencing data
 
-- [Secreted protein activity difference between two
-  phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkDiff.html)
 - [Clinical relavance of secreted proteins in a large patient
   cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
+- [Secreted protein activity difference between two
+  phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkDiff.html)
 
 ## Citation
 
