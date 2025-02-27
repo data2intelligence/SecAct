@@ -10,17 +10,17 @@ SecAct is an R package designed for inferring the intercellular
 signaling activity of secreted proteins from gene expression profiles.
 Users can input multiple modalities of expression data, including
 spatial, single-cell, or bulk transcriptomics data. The outputs are the
-inferred activities of 1248 secreted proteins for each spatial spot,
-individual cell, or sample, depending on the input data type. Based on
-the inferred activities, SecAct provides multiple downstream application
-modules. For spatial data, SecAct can infer the signaling pattern and
-signaling velocity for secreted proteins. For single-cell data, SecAct
-can infer the intercellular communication network and signaling flow
-from source cells to receiver cells. For bulk data, SecAct can infer
-secreted protein risk scores for a large cohort linked to clinical data,
-and can infer secreted protein activities that are differentially
-regulated between two phenotypes. These functionalities and terms are
-explained more formally in the following tutorials.
+inferred signaling activities of 1248 secreted proteins for each spatial
+spot, individual cell, or sample, depending on the input data type.
+Based on the inferred activities, SecAct provides multiple downstream
+application modules. For spatial data, SecAct can infer the signaling
+pattern and signaling velocity for secreted proteins. For single-cell
+data, SecAct can infer the intercellular communication network and
+signaling flow from source cells to receiver cells. For bulk data,
+SecAct can infer secreted protein risk scores for a large cohort linked
+to clinical data, and can infer secreted protein activities that are
+differentially regulated between two phenotypes. These functionalities
+and terms are explained more formally in the following tutorials.
 
 <p align="center">
 <img src="man/figures/workflow.png" width="100%"/>
@@ -73,7 +73,7 @@ operating system.
 
 - C Library: GNU Scientific Library (GSL).
 - R version \>= 4.2.0.
-- R packages: Matrix, ggplot2, patchwork.
+- R packages: Matrix, ggplot2, patchwork, survival, survminer.
 
 ## Example
 
@@ -109,15 +109,15 @@ type.
 
 - [Cell-cell communication mediated by secreted
   proteins](https://data2intelligence.github.io/SecAct/articles/scCCC.html)  
-- [Secreted protein signaling activity for various cell
+- [Secreted protein signaling activity for distinct cell
   states](https://data2intelligence.github.io/SecAct/articles/scState.html)
 
 #### Bulk RNA sequencing data
 
-- [Clinical relavance of secreted proteins in a large patient
+- [Clinical relevance of secreted proteins in a large patient
   cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
-- [Secreted protein activity difference between two
-  phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkDiff.html)
+- [Secreted protein signaling activity change between two
+  phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkChange.html)
 
 ## Citation
 

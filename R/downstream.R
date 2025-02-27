@@ -989,10 +989,10 @@ SecAct.CCC.scRNAseq <- function(
 #' @param mat Activity matrix.
 #' @param surv Survival matrix.
 #' @return A matrix.
-#' @rdname SecAct.coxph
+#' @rdname SecAct.coxph.regression
 #' @export
 #'
-SecAct.coxph <- function(mat, surv)
+SecAct.coxph.regression <- function(mat, surv)
 {
   mat <- t(mat)
 

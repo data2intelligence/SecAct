@@ -327,9 +327,11 @@ SecAct.heatmap.plot <- function(fg.mat, title=NULL, colors=c("#03c383","#aad962"
 #'
 SecAct.bar.plot <- function(fg.vec, title=NULL, colors=c("#91bfdb","#fc8d59"))
 {
+  spaceText <- max(abs(fg.vec)) * 0.015
+
   fg.df <- data.frame(gene=names(fg.vec), value=fg.vec)
   fg.df <- cbind(fg.df, dir=ifelse(fg.vec<0,"down","up"))
-  fg.df <- cbind(fg.df, y=ifelse(fg.vec<0,0.1,-0.1))
+  fg.df <- cbind(fg.df, y=ifelse(fg.vec<0,spaceText,-spaceText))
   fg.df <- cbind(fg.df, hjust=ifelse(fg.vec<0,0,1))
   fg.df[["gene"]] <- factor(fg.df[["gene"]], levels=names(sort(fg.vec)))
 
@@ -490,7 +492,7 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
 
   groups <- as.character(data[,gene]>cutoff)
 
-  library("survminer")
+  library(survminer)
   surv.df <- cbind(survival,groups)
   fit <- survfit(Surv(Time, Event) ~ groups, data = surv.df)
 

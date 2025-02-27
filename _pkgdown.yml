@@ -45,7 +45,7 @@ reference:
     - SecAct.CCC.scST
     - SecAct.signaling.velocity.scST
     - SecAct.CCC.scRNAseq
-    - SecAct.coxph
+    - SecAct.coxph.regression
 
   - title: Visualization
     contents:

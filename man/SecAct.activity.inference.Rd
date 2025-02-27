@@ -6,8 +6,8 @@
 \usage{
 SecAct.activity.inference(
   inputProfile,
-  is.differential = FALSE,
   inputProfile_control = NULL,
+  is.differential = FALSE,
   is.paired = FALSE,
   is.singleSampleLevel = FALSE,
   sigMatrix = "SecAct",
@@ -19,9 +19,9 @@ SecAct.activity.inference(
 \arguments{
 \item{inputProfile}{Gene expression matrix with gene symbol (row) x sample (column).}
 
-\item{is.differential}{A logical indicating whether inputProfile has been differential profiles against to control.}
-
 \item{inputProfile_control}{Gene expression matrix with gene symbol (row) x sample (column).}
+
+\item{is.differential}{A logical indicating whether inputProfile has been differential profiles against to control.}
 
 \item{is.paired}{A logical indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired.}
 

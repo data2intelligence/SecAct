@@ -107,6 +107,7 @@ SecAct.activity.inference <- function(
   if(is.differential)
   {
     Y <- inputProfile
+    colnames(Y) <- "Change"
   }else{
     if(is.null(inputProfile_control))
     {
@@ -121,7 +122,7 @@ SecAct.activity.inference <- function(
 
       if(is.singleSampleLevel==FALSE)
       {
-        Y <- matrix(rowMeans(Y), ncol=1, dimnames=list(rownames(Y), "Diff"))
+        Y <- matrix(rowMeans(Y), ncol=1, dimnames=list(rownames(Y), "Change"))
       }
 
     }

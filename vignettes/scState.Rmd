@@ -1,10 +1,10 @@
 ---
-title: "Secreted protein signaling activity for various cell states from scRNA-Seq data"
+title: "Secreted protein signaling activity for distinct cell states from scRNA-Seq data"
 output: rmarkdown::html_vignette
 description: >
-  Secreted protein signaling activity for various cell states from scRNA-Seq data.
+  Secreted protein signaling activity for distinct cell states from scRNA-Seq data.
 vignette: >
-  %\VignetteIndexEntry{Secreted protein signaling activity for various cell states from scRNA-Seq data}
+  %\VignetteIndexEntry{Secreted protein signaling activity for distinct cell states from scRNA-Seq data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer secreted protein signaling activity in different cell states. For this demonstration, we employ an ovarian cancer scRNA-Seq <a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank">study</a>. Using the SecAct framework, we will estimate the signaling activity of secreted proteins for different CD4+ T cell states. 
+This tutorial demonstrates how to infer secreted protein signaling activity in various cell states. For this demonstration, we employ an ovarian cancer scRNA-Seq <a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank">study</a>. Using the SecAct framework, we will estimate the signaling activity of secreted proteins for different CD4+ T cell states. 
 
 ## Load scRNA-Seq data
 
@@ -72,7 +72,7 @@ head(act)
 
 ## Visualize activity score
 
-User can visualize any secreted proteins of interest using `SecAct.heatmap.plot`. Here, we select the top active secreted proteins (SPs) for each cell states.
+User can visualize any secreted proteins of interest using `SecAct.heatmap.plot`. Here, we select the top active secreted proteins (SPs) for each cell state.
 
 ``` r
 # select top secreted proteins

@@ -1,10 +1,10 @@
 ---
-title: "Clinical relavance of secreted proteins in a large patient cohort"
+title: "Clinical relevance of secreted proteins in a large patient cohort"
 output: rmarkdown::html_vignette
 description: >
-  Clinical relavance of secreted proteins in a large patient cohort.
+  Clinical relevance of secreted proteins in a large patient cohort.
 vignette: >
-  %\VignetteIndexEntry{Clinical relavance of secreted proteins in a large patient cohort}
+  %\VignetteIndexEntry{Clinical relevance of secreted proteins in a large patient cohort}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -20,13 +20,13 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer the signaling activity of secreted proteins from a large cohort, and then calculate their activity relevance with clinical data. The input expression values, from either RNA sequencing or MicroArray, should be transformed by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA-Seq data.
+This tutorial demonstrates how to infer the signaling activity of secreted proteins from a large data cohort, and then calculate their activity relevance with clinical information. The input expression values, from either RNA sequencing or MicroArray, should be transformed by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA-Seq data.
 
-For this demonstration, we employ an immunotherapy <a href="https://github.com/ParkerICI/prince-trial-data" target="_blank">cohort</a> of pancreatic cancer patients. Using the SecAct framework, we will identify secreted proteins associated with immunotherapy efficacy.
+For this demonstration, we employ an immunotherapy <a href="https://github.com/ParkerICI/prince-trial-data" target="_blank">cohort</a> of pancreatic cancer patients. Using the SecAct framework, we will identify secreted proteins associated with clinical outcomes.
 
 ## Prepare expression data
 
-This section shows how to read an expression matrix to R environment. 
+This section shows how to read an expression matrix to the R environment. 
 
 ``` r
 library(SecAct)
@@ -39,14 +39,14 @@ expr <- read.table(paste0(dataPath,"Pancreatic_Nivolumab_Padron2022.logTPM.gz"),
 
 ## Infer secreted protein activity
 
-We use `SecAct.activity.inference` to infer the activity of >1000 secreted proteins across patient samples. 
+We use `SecAct.activity.inference` to infer the signaling activity of secreted proteins across patient samples. 
 
 If your data have control samples (e.g., normal patients), you can assign them to `inputProfile_control`. `SecAct` would normalize each gene's expression values with the control samples, i.e., substracting the mean gene expression of control samples.
 
 If not available, just set `inputProfile_control=NULL` (default). `SecAct` would normalize the expression values of each gene to zero mean across all input profiles. In other words, the mean gene expression of all input profiles are regarded as control.
 
 ``` r
-# infer activity; ~10 mins
+# infer activity; ~2 mins
 res <- SecAct.activity.inference(inputProfile=expr, inputProfile_control=NULL)
 
 # res$zscore stores activity
@@ -56,18 +56,19 @@ act <- res$zscore
 act[1:6,1:3]
 
 ##                  2          3           6
-## A1BG    -27.104244 -24.572367 -13.2677965
-## A2M       6.680395   6.097205  14.8814865
-## A2ML1     4.369943  -2.016608   5.2873155
-## AADACL2  -1.193300  -2.046660  -0.1879382
-## ABHD15  -14.441596 -12.734870  -8.2587602
-## ABI3BP   20.304553  14.203647  25.4980024
-
+## A1BG    -27.879835 -24.805532 -13.1475409
+## A2M       6.688479   5.891316  14.5120252
+## A2ML1     4.482488  -2.028074   5.5316736
+## AADACL2  -1.188018  -2.029080  -0.1938462
+## ABHD15  -14.462520 -13.212992  -8.5294933
+## ABI3BP   20.991414  14.093015  25.9819458
 ``` 
+
+The inferred protein activity is a relative measure. A positive value indicates high activity in the corresponding patients, while a negative value signifies low activity.
 
 ## Calculate clinical relevance
 
-We next calculate the risk score z for each secreted protein by linking their activity levels with clinical data. For the clinical file, please make sure the name of the 1st and 2nd columns are "Time" and "Event", respectively. `SecAct.coxph` will conduct Cox proportional hazard (PH) regression, with gene risk scores represented as z-scores (Coef / StdErr) from the two-sided Wald test. For each endpoint analysis, clinical covariates (e.g., age, gender, stage) were considered in regression if available.
+We next calculate the signaling risk score z for each secreted protein by linking their activity levels with clinical data. For the clinical file, please make sure the name of the 1st and 2nd columns are "Time" and "Event", respectively. `SecAct.coxph.regression` will conduct Cox proportional hazard (PH) regression, with risk scores represented as z-scores (Coef / StdErr) from the two-sided Wald test. For each endpoint analysis, clinical covariates (e.g., age, gender, stage) were considered in regression if available.
 
 ``` r
 # read clinical infomation
@@ -84,7 +85,7 @@ head(clinical)
 ## 25  264     1  66      1    1
 
 # compute risk score
-riskMat <- SecAct.coxph(act, clinical)
+riskMat <- SecAct.coxph.regression(act, clinical)
 
 head(riskMat)
 
@@ -98,9 +99,11 @@ head(riskMat)
 
 ``` 
 
+For the risk score, a positive value means the secreted protein is associated with poorer survival while a negative value means the secreted protein is associated with better survival.
+
 ## Visualize risk score
 
-User can visualize any secreted proteins of interest using `SecAct.lollipop.plot`. Here, we select the top high and low risk secreted proteins (SPs), which are associated with unfavorable and favorable clinical outcomes, respectively.
+User can visualize any secreted proteins of interest using `SecAct.lollipop.plot`. Here, we select the top high and low risk secreted proteins (SPs), which are associated with poorer and better survival, respectively.
 
 ``` r
 # select the top secreted proteins
@@ -121,11 +124,9 @@ SecAct.lollipop.plot(fg.vec, title="Risk score z")
 
 <img src="img/bulk_RiskScore.png" width="50%" style="border:none" />
 
-A positive value means the secreted protein is associated with worse survival while a negative value means the secreted protein is associated with better survival.
-
 ## Draw survival plot
 
-User can select a secreted protein of interest to draw its survival curve using `SecAct.survival.plot`.
+User can select a secreted protein of interest to draw its survival curve using `SecAct.survival.plot`. The activity cutoff was selected by maximizing the difference between high and low activity patient groups.
 
 ``` r
 # Take secreted protein WNT7B as an example
@@ -141,4 +142,3 @@ SecAct.survival.plot(act, clinical, "WNT7B", x.title="Overall (Days)")
 
 <img src="img/bulk_Survival.png" width="50%" style="border:none" />
 
-The activity cutoff was selected by maximizing the difference between high and low activity patient groups.

@@ -10,6 +10,9 @@
     <loc>/articles/bulk.html</loc>
   </url>
   <url>
+    <loc>/articles/bulkChange.html</loc>
+  </url>
+  <url>
     <loc>/articles/bulkCohort.html</loc>
   </url>
   <url>
@@ -83,6 +86,9 @@
   </url>
   <url>
     <loc>/reference/SecAct.coxph.html</loc>
+  </url>
+  <url>
+    <loc>/reference/SecAct.coxph.regression.html</loc>
   </url>
   <url>
     <loc>/reference/SecAct.heat.map.html</loc>
