@@ -12,7 +12,7 @@ GSL_CFLAGS=$(gsl-config --cflags)
 GSL_LIBS=$(gsl-config --libs)
 
 if [ -z "$GSL_CFLAGS" ] || [ -z "$GSL_LIBS" ]; then
-    echo "ERROR: GSL not found. Please install GNU Scientific Library (GSL)."
+    echo "ERROR: GSL not found. Please install GNU Scientific Library (GSL). You can find the solution within the Installation part of SecAct Readme Page."
     exit 1
 fi
 

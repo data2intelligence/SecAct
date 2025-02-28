@@ -107,7 +107,8 @@ SecAct.activity.inference <- function(
   if(is.differential)
   {
     Y <- inputProfile
-    colnames(Y) <- "Change"
+    if(ncol(Y)==1) colnames(Y) <- "Change"
+
   }else{
     if(is.null(inputProfile_control))
     {

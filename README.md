@@ -80,23 +80,26 @@ operating system.
 ``` r
 library(SecAct)
 
-# load differenrial profile
 dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
 expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
+act.change <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE)
 
-# Run SecAct to infer activity change
-res <- SecAct.activity.inference(inputProfile = expr.diff, is.differential = TRUE)
+head(act.change$zscore)
 
-# show activity change
-head(res$zscore)
+##            Change
+## A1BG     7.588670
+## A2M     15.974063
+## A2ML1    3.303167
+## AADACL2 -1.789684
+## ABHD15  -5.353521
+## ABI3BP  18.785484
 ```
 
 ## Tutorial
 
-SecAct is compatible with multiple modalities of gene expression
-profiles, including spatial, single-cell, and bulk transcriptomics data.
-The following tutorials demonstrate its applications across each data
-type.
+SecAct is applicable to multiple modalities of gene expression profiles,
+including spatial, single-cell, and bulk transcriptomics data. The
+following tutorials demonstrate its applications across each data type.
 
 #### Spatial transcriptomcis (ST) data
 
