@@ -18,6 +18,6 @@ A matrix.
 Enumerate secreted proteins associated with each signaling pattern.
 }
 \examples{
-SpaCET_obj <- SecAct.pattern.gene(SpaCET_obj, n=2)
+SpaCET_obj <- SecAct.pattern.gene(SpaCET_obj, n=3)
 
 }

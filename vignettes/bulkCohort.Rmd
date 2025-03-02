@@ -68,7 +68,7 @@ The inferred protein activity is a relative measure. A positive value indicates 
 
 ## Calculate clinical relevance
 
-We next calculate the signaling risk score z for each secreted protein by linking their activity levels with clinical data. For the clinical file, please make sure the name of the 1st and 2nd columns are "Time" and "Event", respectively. `SecAct.coxph.regression` will conduct Cox proportional hazard (PH) regression, with risk scores represented as z-scores (Coef / StdErr) from the two-sided Wald test. For each endpoint analysis, clinical covariates (e.g., age, gender, stage) were considered in regression if available.
+We next calculate the signaling risk score z for each secreted protein by linking their activity levels with clinical data. For the clinical file, please make sure the name of the 1st and 2nd columns are "Time" and "Event", respectively. `SecAct.coxph.regression` will conduct Cox proportional hazard (PH) regression, with risk scores represented as z-scores (Coef / StdErr) from the two-sided Wald test. Of note, clinical covariates (e.g., age, gender, stage) would also be considered in regression if available.
 
 ``` r
 # read clinical infomation
@@ -99,7 +99,7 @@ head(riskMat)
 
 ``` 
 
-For the risk score, a positive value means the secreted protein is associated with poorer survival while a negative value means the secreted protein is associated with better survival.
+For the risk score z, a positive value means the secreted protein is associated with poorer survival while a negative value means the secreted protein is associated with better survival.
 
 ## Visualize risk score
 

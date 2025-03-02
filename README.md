@@ -73,7 +73,8 @@ operating system.
 
 - C Library: GNU Scientific Library (GSL).
 - R version \>= 4.2.0.
-- R packages: Matrix, ggplot2, patchwork, survival, survminer.
+- R packages: Matrix, ggplot2, patchwork, NMF, circlize, ComplexHeatmap,
+  ggalluvial, networkD3, survival, survminer.
 
 ## Example
 
@@ -82,9 +83,9 @@ library(SecAct)
 
 dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
 expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
-act.change <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE)
+res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE)
 
-head(act.change$zscore)
+head(res$zscore)
 
 ##            Change
 ## A1BG     7.588670

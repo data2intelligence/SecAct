@@ -8,7 +8,7 @@ SecAct.signaling.velocity.spotST(
   SpaCET_obj,
   scale.factor = 1e+05,
   gene,
-  signalMode = "both",
+  signalMode = "receiving",
   animated = FALSE
 )
 }

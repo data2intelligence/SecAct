@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer secreted protein activities of each spot for a liver cancer spatial transcriptomics (ST) sample from Visium platform ([Paper](https://www.science.org/doi/10.1126/sciadv.abg3750){target="_blank"}). Each spot is 55 µm in diameter covering [1-10 cells](https://kb.10xgenomics.com/hc/en-us/articles/360035487952-How-many-cells-are-captured-in-a-single-spot){target="_blank"}. Further, SecAct provides additional modules to analyze signaling patterns and velocities across the whole slide. Before running the tutorial, make sure that you have installed SecAct as well as our previous R package [SpaCET](https://github.com/data2intelligence/SpaCET/){target="_blank"}, which is an analytical framework for ST data. Here, SpaCET package will be used to create a SpaCET object to store the ST data.
+This tutorial demonstrates how to infer secreted protein activities of each spot for a liver cancer spatial transcriptomics (ST) sample from Visium platform ([Paper](https://www.thno.org/v12p4163.htm){target="_blank"}). Each spot is 55 µm in diameter covering [1-10 cells](https://kb.10xgenomics.com/hc/en-us/articles/360035487952-How-many-cells-are-captured-in-a-single-spot){target="_blank"}. Further, SecAct provides additional modules to analyze the signaling patterns and velocities across the whole slide. Before running the tutorial, make sure that you have installed SecAct as well as our previous R package [SpaCET](https://github.com/data2intelligence/SpaCET/){target="_blank"}. Here, SpaCET will be used to create a SpaCET object to store the ST data.
 
 ## Read ST data to a SpaCET object
 To load data into R, user can create a SpaCET object by using `create.SpaCET.object.10X`. Please make sure that `visiumPath` points to the standard output folders of 10x Space Ranger. If the ST data is not from 10x/Visium, you can use `create.SpaCET.object` instead [<a href="https://data2intelligence.github.io/SpaCET/articles/oldST_PDAC.html" target="_blank">details</a>].
@@ -33,7 +33,7 @@ library(SpaCET)
 dataPath <- file.path(system.file(package="SecAct"), "extdata/")
 
 # load ST data to create an SpaCET object
-visiumPath <- paste0(dataPath,"Visium_HCC_1L/")
+visiumPath <- paste0(dataPath,"Visium_HCC/")
 SpaCET_obj <- create.SpaCET.object.10X(visiumPath = visiumPath)
 
 # filter out spots with less than 1000 expressed genes
@@ -64,13 +64,13 @@ SpaCET_obj <- SecAct.activity.inference.ST(
 # show activity
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
 
-##              50x102      59x19       43x9
-## A1BG     2.52789682 -1.4066741 -0.6518619
-## A2M     -0.42257303  1.0486118  1.6322600
-## A2ML1    0.51650231 -0.1298274 -1.0206257
-## AADACL2  0.02978682  1.4617057 -0.8930522
-## ABHD15   0.16788758 -0.3654531 -0.6539588
-## ABI3BP   0.38397869  0.2679647 -0.1284023
+##           50x102      3x43     14x94
+## A1BG    4.179847  2.193798 -1.082260
+## A2M     1.990219  7.513577  2.520423
+## A2ML1   0.838544  0.298118  3.453744
+## AADACL2 1.790729 -3.226144  2.709726
+## ABHD15  3.224051 -1.534522  2.073572
+## ABI3BP  1.588963  6.592146 13.925150
 
 ``` 
 
@@ -79,7 +79,7 @@ After calculating the secreted protein activity, SecAct could further estimate t
 
 First, `SecAct` filters 1248 secreted proteins to identify the significant secreted proteins mediating intercellular communication in this slide. To achieve this, `SecAct` will calculate the Spearman correlation of spots' signaling activity and spots' neighbors' RNA expression. The p values were adjusted by the Benjamini-Hochberg (BH) method as false discovery rate (FDR). The cutoffs are r > 0.05 and FDR < 0.01.
 
-Second, `SecAct` employs Non-negative Matrix Factorization ([NMF](https://cran.r-project.org/web/packages/NMF/vignettes/NMF-vignette.pdf){target="_blank"}) to estimate the consensus signaling patterns. A critical parameter in NMF is the factorization rank k. User can assign a number vector to k, e.g., `k=2:5`. Then, `SecAct.signaling.pattern` would find the optimal number of factors determined as the point preceding the largest decrease in the silhouette value. This will take a while. Based on my pre-calculation, `k=3` is the optimal number of factors. To save time, we directly run against `k=3`.
+Second, `SecAct` employs Non-negative Matrix Factorization ([NMF](https://cran.r-project.org/web/packages/NMF/vignettes/NMF-vignette.pdf){target="_blank"}) to estimate the consensus signaling patterns. A critical parameter in NMF is the factorization rank `k`. User can assign a number vector to `k`, e.g., `k=2:5`. Then, `SecAct.signaling.pattern` would find the optimal number of factors determined as the point preceding the largest decrease in the silhouette value. This will take a while. Based on our pre-calculation, `k=3` is the optimal number of factors. To save time, we directly run against `k=3`.
 
 ``` r
 # estimate signaling pattern
@@ -91,7 +91,8 @@ SpaCET.visualize.spatialFeature(
 	spatialType = "SignalingPattern", 
 	spatialFeatures = "All", 
 	imageBg = FALSE,
-	legend.position = "right"
+	legend.position = "none",
+	colors=c("#03c383","#fbbf45","#ef6a32")
 )
 
 ``` 
@@ -99,11 +100,13 @@ SpaCET.visualize.spatialFeature(
 <img src="img/HCC_visium_pattern.png" width="100%" style="border:none" />
 
 
-SecAct can identify secreted proteins associated with each signaling pattern according to the matrix W from NMF results. For one secreted protein (represented by a row in W), the signaling pattern with a value at least twice as large as any other pattern, is designated as the dominant pattern for that protein.
+Further, `SecAct` can identify secreted proteins associated with each signaling pattern according to the matrix W from NMF results. For one secreted protein (represented by a row in W), the signaling pattern with a value at least twice as large as any other pattern, is designated as the dominant pattern for that protein.
 
 ``` r
-# show genes dominated by pattern 3
-pattern.gene <- SecAct.pattern.gene(SpaCET_obj, n=3)
+# identify secreted proteins dominated by pattern 3
+pattern.gene <- SecAct.signaling.pattern.gene(SpaCET_obj, n=3)
+
+# show these genes
 head(pattern.gene)
 
 ``` 
@@ -113,16 +116,16 @@ head(pattern.gene)
 Several secreted proteins with pattern 3 are related to epithelial-mesenchymal transition process, such as COL1A1, TGFB1, and SPARC. By integrating secreted protein-coding gene expression and signaling activity, SecAct can also infer signaling velocity at each spatial spot, indicating the direction and strength of secreted signaling. Let's take SPARC as an example.
 
 ``` r
-# show signaling velocity of SPARC
-SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", signalMode="receiving") 
+# show SPARC signaling velocity 
+SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC") 
 
 ``` 
 
 <img src="img/HCC_visium_SPARC.png" width="100%" style="border:none" />
 
 ``` r
-# show animated signaling velocity of SPARC
-SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", signalMode="receiving", animated=TRUE) 
+# show animated SPARC signaling velocity
+SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", animated=TRUE) 
 
 ``` 
 
@@ -130,7 +133,7 @@ SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", signalMode="receivi
 
 ## Deconvolve ST data
 
-For the current ST data, user also can run our previous R package `SpaCET` to estimate the cell lineages for each spot. Click [here](https://data2intelligence.github.io/SpaCET/articles/visium_BC.html){target="_blank"} for more details.
+For the current ST data, user also can run our previous R package `SpaCET` to estimate the cell lineages for each spot. Click [here](https://data2intelligence.github.io/SpaCET/articles/visium_BC.html){target="_blank"} for more details. Based on the deconvolution results, we can see the interface region consists of fibroblasts, macrophages, and endothelial cells.
 
 ``` r
 # deconvolve ST data
@@ -156,4 +159,26 @@ SpaCET.visualize.spatialFeature(
 
 <img src="img/HCC_visium_deconvolve.png" width="100%" style="border:none" />
 
-Based on the deconvolution results, we can see the interface region consists of fibroblasts, macrophages, and endothelial cells.
+
+
+
+## Calculate hallmark score
+User also can run `SpaCET.GeneSetScore` to estimate the hallmark scores for each spot. Click [here](https://data2intelligence.github.io/SpaCET/articles/GeneSetScore.html){target="_blank"} for more details. You can see that Pattern 3 is correlated with epithelial-mesenchymal transition (EMT).
+
+``` r
+# run gene set calculation
+SpaCET_obj <- SpaCET.GeneSetScore(SpaCET_obj, GeneSets="Hallmark")
+
+# visualize EMT
+SpaCET.visualize.spatialFeature(
+  SpaCET_obj, 
+  spatialType = "GeneSetScore", 
+  spatialFeatures = "HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION",
+  legend.position = "right",
+  imageBg=TRUE,
+  pointSize=1.2
+)
+
+``` 
+
+<img src="img/HCC_visium_EMT.png" width="100%" style="border:none" />

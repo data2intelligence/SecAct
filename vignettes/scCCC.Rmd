@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This tutorial demonstrates how to infer secreted protein-mediated cell-cell communication (CCC) from scRNA-seq data. The SecAct analysis requires an scRNA-seq dataset with two distinct conditions. SecAct employs two key criteria to identify condition-specific cell-cell communication for a particular secreted protein: (1) upregulated expression of the secreted protein in the sender cell type; (2) increased signaling activity of the same secreted protein in the receiver cell type. For this demonstration, we employ an ovarian cancer (OV) scRNA-Seq <a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank">study</a> containing samples from both primary and metastatic sites.
+This tutorial demonstrates how to infer secreted protein-mediated cell-cell communication (CCC) from scRNA-seq data. This analysis requires an scRNA-seq dataset with two distinct conditions. SecAct employs two key criteria to identify condition-specific cell-cell communication mediated by a particular secreted protein: (1) upregulated gene expression of the secreted protein in one cell type (defined the source cell type), and (2) increased signaling activity of the same secreted protein in another cell type (defined the receiver cell type). For this demonstration, we employ an ovarian cancer (OV) scRNA-Seq <a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank">study</a> containing samples from both primary and metastatic sites.
 
 ## Prepare expression matrix
 The OV scRNA-Seq data is stored in a Seurat object. The information of cell-type annotations and anatomical sites are stored in the columns `MyCellType` and `Groups` of `meta.data` from this Seurat object, respectively. Users can easily access them using the following code.
@@ -57,39 +57,25 @@ p1+p2
 
 ## Infer cell-cell communication
 
-Our strategy performs three steps to infer condition-specific cell-cell communication: (1) calculating changes in secreted protein signaling activity for each cell type between two conditions, (2) assessing changes in secreted protein expression for each cell type between two conditions, and (3) linking sender and receiver cell types.
+`SecAct` performs three steps to infer condition-specific cell-cell communication mediated by secreted proteins: (1) assessing changes in secreted protein expression for each cell type (defined the source cell type) between two conditions, (2) calculating changes in secreted protein activity for each cell type (defined the receiver cell type) between two conditions, and (3) linking source and receiver cell types.
 
-When running `SecAct.CCC.scRNAseq`, user need to assign the `cellType_meta` and `condition_meta` with the column names of cell-type annotation and condition information in `Seurat_obj@meta.data`, respectively. Also, claim what case and control conditions are by `conditionCase` and `conditionControl`. All `SecAct` results are stored in `Seurat_obj @misc $SecAct_output`.
+When running `SecAct.CCC.scRNAseq`, user need to assign the `cellType_meta` and `condition_meta` with the column names of cell-type annotation and condition information in `Seurat_obj@meta.data`, respectively. Also, claim what case and control conditions are by `conditionCase` and `conditionControl`. User can find the SecAct results in `Seurat_obj @misc $SecAct_output`.
 
 ``` r
-# step 1
-Seurat_obj <- SecAct.activity.inference.scRNAseq.2(
-  Seurat_obj, 
-  cellType_meta="MyCellType",
-  condition_meta="Groups", 
-  conditionCase="Metastatic", 
-  conditionControl="Primary"
-)
-
-# steps 2 and 3
+# infer activity; ~5 mins
 Seurat_obj <- SecAct.CCC.scRNAseq(
   Seurat_obj, 
   cellType_meta="MyCellType",
   condition_meta="Groups", 
   conditionCase="Metastatic", 
-  conditionControl="Primary",
-  act_diff_cutoff=2,
-  exp_logFC_cutoff=0.2,
-  exp_mean_all_cutoff=2,
-  exp_fraction_case_cutoff=0.1,
-  padj_cutoff=0.01
+  conditionControl="Primary"
 )  
-  
+
 # show output
 names(Seurat_obj @misc $SecAct_output)
 
-## [1] "SecretedProteinActivity"
-## [2] "SecretedProteinExpression"
+## [1] "SecretedProteinExpression"
+## [2] "SecretedProteinActivity"
 ## [3] "SecretedProteinCCC"
 
 # cell-cell communication results

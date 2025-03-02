@@ -48,7 +48,7 @@ Seurat::DimPlot(Seurat_obj, reduction = "umap", group.by = "Annotation")
 <img src="img/OV_CD4_UMAP.png" width="60%" style="border:none" />
 
 ## Infer secreted protein activity 
-After loading scRNA-Seq data data, user can input `Seurat_obj` into `SecAct.activity.inference` to infer the activities of >1000 secreted proteins for various cell states. Also, you need to claim which column in the meta matrix of Seurat object has cell state information. In this case, the column name is "Annotation" and thus assign `cellType_meta = "Annotation"`. User can find the SecAct results in `Seurat_obj @misc $SecAct_output $SecretedProteinActivity`.
+After loading scRNA-Seq data data, user can input `Seurat_obj` into `SecAct.activity.inference` to infer the signaling activities of secreted proteins for various cell states. Also, you need to claim which column in the meta matrix of Seurat object has cell state information. In this case, the column name is "Annotation" and thus assign `cellType_meta = "Annotation"`. User can find the SecAct results in `Seurat_obj @misc $SecAct_output $SecretedProteinActivity`.
 
 ``` r
 # infer activity; ~2 mins
@@ -69,6 +69,8 @@ head(act)
 ## ABI3BP          -0.7084864  1.5764300  -2.08041961
 
 ```
+
+The inferred protein activity is a relative measure. A positive value indicates high activity in the corresponding cell states, while a negative value signifies low activity.
 
 ## Visualize activity score
 

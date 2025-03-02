@@ -81,7 +81,16 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
   {
     NMF_res <- nmf(act_nneg, k, seed=123456)
   }else{
-    estim.r <- nmf(act_nneg, k, nrun=10, seed=123456)
+    estim.r <- nmf(act_nneg, k, nrun=30, seed=123456)
+    v <- estim.r$measures$silhouette.consensus
+
+    v_diff <- v[1:(length(v)-1)]-v[2:length(v)]
+    maxN <- which( v_diff == max(v_diff) ) +1
+    k <- k[maxN]
+
+    print(paste0("The optimal number of factors k = ", k))
+
+    NMF_res <- nmf(act_nneg, k, seed=123456)
   }
 
   weight.W <- NMF_res@fit@W
@@ -106,7 +115,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
 #' @param n Pattern order.
 #' @return A matrix.
 #' @examples
-#' SpaCET_obj <- SecAct.pattern.gene(SpaCET_obj, n=2)
+#' SpaCET_obj <- SecAct.pattern.gene(SpaCET_obj, n=3)
 #'
 #' @rdname SecAct.signaling.pattern.gene
 #' @export
@@ -120,7 +129,8 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
   temp[,-n] <- 2*temp[,-n] # in case one column
 
   # identify secreted proteins with pattern n
-  weight.W[apply(temp,1,function(x) x[n]==max(x)),]
+  res <- weight.W[apply(temp,1,function(x) x[n]==max(x)),]
+  res[order(res[,3],decreasing = TRUE),]
 }
 
 
@@ -147,7 +157,7 @@ SecAct.signaling.velocity.spotST <- function(
   SpaCET_obj,
   scale.factor = 1e+05,
   gene,
-  signalMode="both",
+  signalMode="receiving",
   animated=FALSE
 )
 {
@@ -795,7 +805,75 @@ SecAct.CCC.scRNAseq <- function(
     meta[meta[,condition_meta]==conditionControl,cellType_meta]
   )
 
-  print("Step 1: calculating changes in secreted protein activity.")
+
+  print("Step 1: assessing changes in secreted protein expression.")
+
+  if(sigMatrix=="SecAct")
+  {
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
+    X <- read.table(Xfile,sep="\t",check.names=F)
+  }else{
+    X <- read.table(sigMatrix,sep="\t",check.names=F)
+  }
+
+  for(cellType in cellTypes)
+  {
+    # case
+    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+
+    # normalize to TPM
+    stats <- Matrix::colSums(expr)
+    expr <- sweep_sparse(expr,2,stats,"/")
+    expr@x <- expr@x * scale.factor
+
+    # transform to log space
+    expr@x <- log2(expr@x + 1)
+
+    expr_case <- expr
+
+
+    # control
+    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+
+    # normalize to TPM
+    stats <- Matrix::colSums(expr)
+    expr <- sweep_sparse(expr,2,stats,"/")
+    expr@x <- expr@x * scale.factor
+
+    # transform to log space
+    expr@x <- log2(expr@x + 1)
+
+    expr_control <- expr
+
+
+    smy_deg <- data.frame()
+    genes <- intersect(rownames(expr_case), colnames(X))
+    for(gene in genes)
+    {
+      T_vec <- expr_case[gene,]
+      C_vec <- expr_control[gene,]
+
+      wTest <- wilcox.test(T_vec,C_vec)
+
+      smy_deg[gene,"exp_logFC"] <- mean(T_vec) - mean(C_vec)
+      smy_deg[gene,"exp_mean_all"] <- mean(c(T_vec,C_vec))
+      smy_deg[gene,"exp_mean_case"] <- mean(T_vec)
+      smy_deg[gene,"exp_mean_control"] <- mean(C_vec)
+      smy_deg[gene,"exp_fraction_case"] <- sum(T_vec>0)/length(T_vec)
+      smy_deg[gene,"exp_fraction_control"] <- sum(C_vec>0)/length(C_vec)
+      smy_deg[gene,"exp_pv"] <- wTest$p.value
+      smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
+    }
+    smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
+
+    smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
+    smy_deg <- smy_deg[order(smy_deg[,"exp_pv.adj"]),]
+
+    Seurat_obj @misc $SecAct_output $SecretedProteinExpression [[cellType]] <- smy_deg
+  }
+
+
+  print("Step 2: calculating changes in secreted protein activity.")
 
   bulk.diff <- data.frame()
   for(cellType in cellTypes)
@@ -833,66 +911,7 @@ SecAct.CCC.scRNAseq <- function(
   Seurat_obj @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE, sigMatrix = sigMatrix)
 
 
-  print("Step 2: assessing changes in secreted protein expression.")
-
-  for(cellType in cellTypes)
-  {
-    # case
-    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
-
-    # normalize to TPM
-    stats <- Matrix::colSums(expr)
-    expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * scale.factor
-
-    # transform to log space
-    expr@x <- log2(expr@x + 1)
-
-    expr_case <- expr
-
-
-    # control
-    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
-
-    # normalize to TPM
-    stats <- Matrix::colSums(expr)
-    expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * scale.factor
-
-    # transform to log space
-    expr@x <- log2(expr@x + 1)
-
-    expr_control <- expr
-
-
-    smy_deg <- data.frame()
-    genes <- intersect(rownames(expr_case), rownames(Seurat_obj @misc $SecAct_output $SecretedProteinActivity $zscore))
-    for(gene in genes)
-    {
-      T_vec <- expr_case[gene,]
-      C_vec <- expr_control[gene,]
-
-      wTest <- wilcox.test(T_vec,C_vec)
-
-      smy_deg[gene,"exp_logFC"] <- mean(T_vec) - mean(C_vec)
-      smy_deg[gene,"exp_mean_all"] <- mean(c(T_vec,C_vec))
-      smy_deg[gene,"exp_mean_case"] <- mean(T_vec)
-      smy_deg[gene,"exp_mean_control"] <- mean(C_vec)
-      smy_deg[gene,"exp_fraction_case"] <- sum(T_vec>0)/length(T_vec)
-      smy_deg[gene,"exp_fraction_control"] <- sum(C_vec>0)/length(C_vec)
-      smy_deg[gene,"exp_pv"] <- wTest$p.value
-      smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
-    }
-    smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
-
-    smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
-    smy_deg <- smy_deg[order(smy_deg[,"exp_pv.adj"]),]
-
-    Seurat_obj @misc $SecAct_output $SecretedProteinExpression [[cellType]] <- smy_deg
-  }
-
-
-  print("Step 3: linking sender and receiver cell types.")
+  print("Step 3: linking source and receiver cell types.")
 
   smy_deg_comb <- data.frame()
   smy_act_comb <- data.frame()
