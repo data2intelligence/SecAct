@@ -395,7 +395,7 @@ SecAct.signaling.velocity.spotST <- function(
 #' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
 #'
 #' @examples
-#' SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="TGFB1", receiver="Tumor_interface", cellType_meta="cellType")
+#' SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="THBS2", receiver="Tumor_boundary", cellType_meta="cellType")
 #'
 #' @rdname SecAct.signaling.velocity.scST
 #' @export
@@ -481,7 +481,7 @@ SecAct.signaling.velocity.scST <- function(
   startend <- cbind(startend, y_end=coordinate_mat[startend[,2],2] )
 
 
-  p1 <- ggplot(fg.df, aes(x_slide_mm, y_slide_mm)) + #sdimx, sdimy
+  ggplot(fg.df, aes(x_slide_mm, y_slide_mm)) + #sdimx, sdimy
     geom_point(aes(colour=cellType),size=0.1) +
     geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,
                  arrow = arrow(length = unit(0.3, "cm")), color="#ff0099")+
@@ -496,37 +496,37 @@ SecAct.signaling.velocity.scST <- function(
       legend.position = "right"
     )
 
-  x.left <- 8.29
-  x.right <- 8.366
-  y.top <- 1.4
-  y.bottom <- 1.1
-
-  fg.df_cut <- fg.df[
-    fg.df[,1]> x.left&
-      fg.df[,1]< x.right&
-      fg.df[,2]> y.bottom&
-      fg.df[,2]< y.top,
-  ]
-
-  startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
-
-  ggplot(fg.df_cut, aes(x_slide_mm, y_slide_mm)) +
-    geom_point(aes(color=cellType),size=8) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut,
-                 arrow = arrow(length = unit(0.7, "cm")),color="#ff0099",linewidth=4)+
-    scale_color_manual(values=my_cols)+
-    ggtitle(" ")+
-    xlab(" ")+
-    ylab(" ")+
-    theme_void()+
-    theme(
-      plot.background = element_blank(),
-      panel.grid = element_blank(),
-      legend.position = "none"
-    )
-
-
-    p1+p2
+  #x.left <- 8.29
+  #x.right <- 8.366
+  #y.top <- 1.4
+  #y.bottom <- 1.1
+  #
+  #fg.df_cut <- fg.df[
+  #  fg.df[,1]> x.left&
+  #    fg.df[,1]< x.right&
+  #    fg.df[,2]> y.bottom&
+  #    fg.df[,2]< y.top,
+  #]
+  #
+  #startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
+  #
+  #p2 <- ggplot(fg.df_cut, aes(x_slide_mm, y_slide_mm)) +
+  #  geom_point(aes(color=cellType),size=8) +
+  #  geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut,
+  #               arrow = arrow(length = unit(0.7, "cm")),color="#ff0099",linewidth=4)+
+  #  scale_color_manual(values=my_cols)+
+  #  ggtitle(" ")+
+  #  xlab(" ")+
+  #  ylab(" ")+
+  #  theme_void()+
+  #  theme(
+  #    plot.background = element_blank(),
+  #    panel.grid = element_blank(),
+  #    legend.position = "none"
+  #  )
+  #
+  #
+  #  p1+p2
 }
 
 

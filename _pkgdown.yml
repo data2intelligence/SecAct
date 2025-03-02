@@ -37,7 +37,6 @@ reference:
     - SecAct.activity.inference
     - SecAct.activity.inference.ST
     - SecAct.activity.inference.scRNAseq
-    - SecAct.activity.inference.scRNAseq.2
 
   - title: Downstream application
     contents:

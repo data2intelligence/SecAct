@@ -104,14 +104,13 @@ transcriptomics (ST) data. For this demonstration, we employ a liver
 cancer ST sample from CosMx platform
 [<a href="https://nanostring.com/products/cosmx-spatial-molecular-imager/ffpe-dataset/human-liver-rna-ffpe-dataset/" target="_blank" class="external-link">Link</a>].
 Before running the tutorial, make sure that you have installed SecAct as
-well as our previous R package <a href="https://github.com/data2intelligence/SpaCET/" target="_blank" class="external-link">SpaCET</a>, which is an analytical framework for ST
-data. Here, SpaCET package will be used to create a SpaCET object to
-store the ST data.</p>
+well as our previous R package <a href="https://github.com/data2intelligence/SpaCET/" target="_blank" class="external-link">SpaCET</a>. Here, SpaCET will be used to create a SpaCET
+object to store the ST data.</p>
 <div class="section level2">
 <h2 id="read-st-data-to-a-spacet-object">Read ST data to a SpaCET object<a class="anchor" aria-label="anchor" href="#read-st-data-to-a-spacet-object"></a>
 </h2>
-<p>To load data into R, user can create a SpaCET object by preparing two
-types of input data.</p>
+<p>To load data into R, user can create a SpaCET object by preparing
+three types of input data.</p>
 <ol style="list-style-type: decimal">
 <li>count data. The spatial transcriptomics count data must be in the
 format of matrix with gene name (row) x cell ID (column).</li>
@@ -207,8 +206,8 @@ annotation from the original study.</p>
 <h2 id="infer-secreted-protein-activity">Infer secreted protein activity<a class="anchor" aria-label="anchor" href="#infer-secreted-protein-activity"></a>
 </h2>
 <p>After loading ST data, user can run
-<code>SecAct.activity.inference.ST</code> to infer the activities of
-1248 secreted proteins for each spot. The output are stored in
+<code>SecAct.activity.inference.ST</code> to infer the signaling
+activities of secreted proteins for each spot. The output are stored in
 <code>SpaCET_obj @results $SecAct_output $SecretedProteinActivity</code>,
 which includes four items, (1) beta: regression coefficients; (2) se:
 standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value
@@ -224,13 +223,13 @@ of z score from permutation test.</p>
 <span><span class="co"># show activity</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co">##              50x102      59x19       43x9</span></span>
-<span><span class="co">## A1BG     2.52789682 -1.4066741 -0.6518619</span></span>
-<span><span class="co">## A2M     -0.42257303  1.0486118  1.6322600</span></span>
-<span><span class="co">## A2ML1    0.51650231 -0.1298274 -1.0206257</span></span>
-<span><span class="co">## AADACL2  0.02978682  1.4617057 -0.8930522</span></span>
-<span><span class="co">## ABHD15   0.16788758 -0.3654531 -0.6539588</span></span>
-<span><span class="co">## ABI3BP   0.38397869  0.2679647 -0.1284023</span></span></code></pre></div>
+<span><span class="co">##        c_2_100_733 c_2_101_240 c_2_101_339</span></span>
+<span><span class="co">## ACE     -2.6108455   -4.567062  -4.6543737</span></span>
+<span><span class="co">## ADGRE5  -0.6088185   -4.872711  -5.2642456</span></span>
+<span><span class="co">## ADGRF1   0.9180645    3.529136   3.5651975</span></span>
+<span><span class="co">## ADGRG1   0.2462677    5.180391   4.8956442</span></span>
+<span><span class="co">## ADIPOQ   0.9923366   -3.456214  -4.7621093</span></span>
+<span><span class="co">## ALCAM    2.7917693    2.157889   0.7981345</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="infer-cell-cell-communication">Infer cell-cell communication<a class="anchor" aria-label="anchor" href="#infer-cell-cell-communication"></a>
@@ -261,13 +260,8 @@ computed through 1000 randomizations adjusted by the Benjamini–Hochberg
 procedure. In each randomization, we randomly permuted the cell IDs
 within each cell type. A cell type 1 → s → cell type 2 communication is
 considered significant if ratio &gt; 0.2 and FDR &lt; 0.01.</p>
-<p>When running <code>SecAct.CCC.scST</code>, user need to claim which
-column in <code>Seurat_obj@meta.data</code> stores cell-type
-annotations. Also, claim which column stores condition information and
-what are case and control conditions. All SecAct results are stored in
-<code>SpaCET_obj @results $SecAct_output</code>.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity</span></span>
+<code class="sourceCode R"><span><span class="co"># infer CCC</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scST.html">SecAct.CCC.scST</a></span><span class="op">(</span></span>
 <span>    <span class="va">SpaCET_obj</span>,</span>
 <span>    cellType_meta <span class="op">=</span> <span class="st">"cellType"</span>,</span>
@@ -278,8 +272,7 @@ what are case and control conditions. All SecAct results are stored in
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show output</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/cos1.png" width="50%" style="border:none"></p>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinCCC</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="visualize-cell-cell-communication">Visualize cell-cell communication<a class="anchor" aria-label="anchor" href="#visualize-cell-cell-communication"></a>
@@ -290,39 +283,46 @@ represents the count of secreted proteins from senders to receivers.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.heatmap.html">SecAct.CCC.heatmap</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, row.sorted<span class="op">=</span><span class="cn">TRUE</span>, column.sorted<span class="op">=</span><span class="cn">TRUE</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/SecAct.CCC.circle.html">SecAct.CCC.circle</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/OV_heatmap.png" width="45%" style="border:none"><img src="img/OV_circlize.png" width="45%" style="border:none"></p>
-</div>
-<div class="section level2">
-<h2 id="visualize-secreted-signaling-flow">Visualize secreted signaling flow<a class="anchor" aria-label="anchor" href="#visualize-secreted-signaling-flow"></a>
-</h2>
+<p><img src="img/HCC_CoxMx_heatmap.png" width="50%" style="border:none"><img src="img/HCC_CoxMx_circlize.png" width="45%" style="border:none"></p>
 <p>User can select the cell-cell communication of interest from
-<code>Seurat_obj @misc $SecAct_output $SecretedProteinCCC</code> to
-visualize them using <code>SecAct.CCC.sankey</code>. You need to assign
+<code>SpaCET_obj @results $SecAct_output $SecretedProteinCCC</code> to
+visualize them using <code>SecAct.CCC.dot</code>. You need to assign
 values to <code>sender</code>, <code>secretedProtein</code>, and
 <code>receiver</code>.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sender</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fibroblast"</span>,<span class="st">"Macrophage"</span>,<span class="st">"Endothelial"</span>,<span class="st">"CD8T"</span>,<span class="st">"Tex"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">cellTypes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tumor_boundary"</span>,<span class="st">"Fibroblast"</span>,<span class="st">"Macrophage"</span>,<span class="st">"Endothelial"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">secretedProtein</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
-<span>  <span class="st">"BGN"</span>,<span class="st">"BMP1"</span>,<span class="st">"COL15A1"</span>,<span class="st">"COL18A1"</span>,<span class="st">"COL1A1"</span>,</span>
-<span>  <span class="st">"COL1A2"</span>,<span class="st">"CST3"</span>,<span class="st">"FAP"</span>,<span class="st">"FBN1"</span>,<span class="st">"FN1"</span>,</span>
-<span>  <span class="st">"FSTL1"</span>,<span class="st">"HSPG2"</span>,<span class="st">"HTRA1"</span>,<span class="st">"ISG15"</span>,<span class="st">"MXRA5"</span>,</span>
-<span>  <span class="st">"POSTN"</span>,<span class="st">"SERPING1"</span>,<span class="st">"SPARC"</span>,<span class="st">"TGFB1"</span>,<span class="st">"TGFBI"</span>,</span>
-<span>  <span class="st">"THBS2"</span>,<span class="st">"TIMP1"</span>,<span class="st">"VCAN"</span></span>
+<span>  <span class="st">"BGN"</span>,<span class="st">"COL1A1"</span>,<span class="st">"COL1A2"</span>,<span class="st">"DCN"</span>,<span class="st">"IGFBP5"</span>,</span>
+<span>  <span class="st">"LGALS1"</span>,<span class="st">"LGALS9"</span>,<span class="st">"LYZ"</span>,<span class="st">"LUM"</span>,<span class="st">"MGP"</span>,</span>
+<span>  <span class="st">"SPP1"</span>,<span class="st">"THBS1"</span>,<span class="st">"THBS2"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">receiver</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Tumor"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="../reference/SecAct.CCC.sankey.html">SecAct.CCC.sankey</a></span><span class="op">(</span></span>
-<span>  <span class="va">Seurat_obj</span>, </span>
-<span>  colors_cellType <span class="op">=</span> <span class="va">my_cols</span>, </span>
-<span>  sender <span class="op">=</span> <span class="va">sender</span>, </span>
-<span>  secretedProtein <span class="op">=</span> <span class="va">secretedProtein</span>, </span>
-<span>  receiver <span class="op">=</span> <span class="va">receiver</span></span>
+<span><span class="fu"><a href="../reference/SecAct.CCC.dot.html">SecAct.CCC.dot</a></span><span class="op">(</span></span>
+<span>  <span class="va">SpaCET_obj</span>, </span>
+<span>  colors_cellType<span class="op">=</span><span class="va">my_cols</span>, </span>
+<span>  sender<span class="op">=</span><span class="va">cellTypes</span>, </span>
+<span>  secretedProtein<span class="op">=</span><span class="va">secretedProtein</span>, </span>
+<span>  receiver<span class="op">=</span><span class="va">cellTypes</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<center>
-<img src="img/OV_sankey_Tumor.png" width="70%" style="border:none">
-</center>
+<p><img src="img/HCC_CoxMx_dot.png" width="60%" style="border:none"></p>
+</div>
+<div class="section level2">
+<h2 id="visualize-signaling-velocity">Visualize signaling velocity<a class="anchor" aria-label="anchor" href="#visualize-signaling-velocity"></a>
+</h2>
+<p>User can select the cell-cell communication of interest from
+<code>SpaCET_obj @results $SecAct_output $SecretedProteinCCC</code> to
+visualize them using <code>SecAct.signaling.velocity.scST</code>. You
+need to assign values to <code>sender</code>,
+<code>secretedProtein</code>, and <code>receiver</code>.</p>
+<pre><code><span><span class="fu"><a href="../reference/SecAct.signaling.velocity.scST.html">SecAct.signaling.velocity.scST</a></span><span class="op">(</span></span>
+<span>  <span class="va">SpaCET_obj</span>, </span>
+<span>  sender<span class="op">=</span><span class="st">"Fibroblast"</span>, </span>
+<span>  secretedProtein<span class="op">=</span><span class="st">"THBS2"</span>, </span>
+<span>  receiver<span class="op">=</span><span class="st">"Tumor_boundary"</span>, </span>
+<span>  cellType_meta<span class="op">=</span><span class="st">"cellType"</span></span>
+<span><span class="op">)</span></span></code></pre>
+<p><img src="img/HCC_CoxMx_velocity.png" width="60%" style="border:none"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

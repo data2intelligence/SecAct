@@ -133,7 +133,7 @@ memory, and helper 1-like.</p>
 </h2>
 <p>After loading scRNA-Seq data data, user can input
 <code>Seurat_obj</code> into <code>SecAct.activity.inference</code> to
-infer the activities of &gt;1000 secreted proteins for various cell
+infer the signaling activities of secreted proteins for various cell
 states. Also, you need to claim which column in the meta matrix of
 Seurat object has cell state information. In this case, the column name
 is “Annotation” and thus assign
@@ -157,6 +157,9 @@ results in
 <span><span class="co">## AADACL2          2.2806474 -3.1300577   3.23410538</span></span>
 <span><span class="co">## ABHD15           0.2801044  0.1688928  -0.55981830</span></span>
 <span><span class="co">## ABI3BP          -0.7084864  1.5764300  -2.08041961</span></span></code></pre></div>
+<p>The inferred protein activity is a relative measure. A positive value
+indicates high activity in the corresponding cell states, while a
+negative value signifies low activity.</p>
 </div>
 <div class="section level2">
 <h2 id="visualize-activity-score">Visualize activity score<a class="anchor" aria-label="anchor" href="#visualize-activity-score"></a>

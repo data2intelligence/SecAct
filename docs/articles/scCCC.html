@@ -99,14 +99,14 @@
     
     
 <p>This tutorial demonstrates how to infer secreted protein-mediated
-cell-cell communication (CCC) from scRNA-seq data. The SecAct analysis
+cell-cell communication (CCC) from scRNA-seq data. This analysis
 requires an scRNA-seq dataset with two distinct conditions. SecAct
 employs two key criteria to identify condition-specific cell-cell
-communication for a particular secreted protein: (1) upregulated
-expression of the secreted protein in the sender cell type; (2)
-increased signaling activity of the same secreted protein in the
-receiver cell type. For this demonstration, we employ an ovarian cancer
-(OV) scRNA-Seq
+communication mediated by a particular secreted protein: (1) upregulated
+gene expression of the secreted protein in one cell type (defined the
+source cell type), and (2) increased signaling activity of the same
+secreted protein in another cell type (defined the receiver cell type).
+For this demonstration, we employ an ovarian cancer (OV) scRNA-Seq
 <a href="https://www.nature.com/articles/s43018-023-00599-8" target="_blank" class="external-link">study</a>
 containing samples from both primary and metastatic sites.</p>
 <div class="section level2">
@@ -147,48 +147,35 @@ easily access them using the following code.</p>
 <div class="section level2">
 <h2 id="infer-cell-cell-communication">Infer cell-cell communication<a class="anchor" aria-label="anchor" href="#infer-cell-cell-communication"></a>
 </h2>
-<p>Our strategy performs three steps to infer condition-specific
-cell-cell communication: (1) calculating changes in secreted protein
-signaling activity for each cell type between two conditions, (2)
-assessing changes in secreted protein expression for each cell type
-between two conditions, and (3) linking sender and receiver cell
+<p><code>SecAct</code> performs three steps to infer condition-specific
+cell-cell communication mediated by secreted proteins: (1) assessing
+changes in secreted protein expression for each cell type (defined the
+source cell type) between two conditions, (2) calculating changes in
+secreted protein activity for each cell type (defined the receiver cell
+type) between two conditions, and (3) linking source and receiver cell
 types.</p>
 <p>When running <code>SecAct.CCC.scRNAseq</code>, user need to assign
 the <code>cellType_meta</code> and <code>condition_meta</code> with the
 column names of cell-type annotation and condition information in
 <code>Seurat_obj@meta.data</code>, respectively. Also, claim what case
 and control conditions are by <code>conditionCase</code> and
-<code>conditionControl</code>. All <code>SecAct</code> results are
-stored in <code>Seurat_obj @misc $SecAct_output</code>.</p>
+<code>conditionControl</code>. User can find the SecAct results in
+<code>Seurat_obj @misc $SecAct_output</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># step 1</span></span>
-<span><span class="va">Seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.scRNAseq.2.html">SecAct.activity.inference.scRNAseq.2</a></span><span class="op">(</span></span>
-<span>  <span class="va">Seurat_obj</span>, </span>
-<span>  cellType_meta<span class="op">=</span><span class="st">"MyCellType"</span>,</span>
-<span>  condition_meta<span class="op">=</span><span class="st">"Groups"</span>, </span>
-<span>  conditionCase<span class="op">=</span><span class="st">"Metastatic"</span>, </span>
-<span>  conditionControl<span class="op">=</span><span class="st">"Primary"</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># steps 2 and 3</span></span>
+<code class="sourceCode R"><span><span class="co"># infer activity; ~5 mins</span></span>
 <span><span class="va">Seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scRNAseq.html">SecAct.CCC.scRNAseq</a></span><span class="op">(</span></span>
 <span>  <span class="va">Seurat_obj</span>, </span>
 <span>  cellType_meta<span class="op">=</span><span class="st">"MyCellType"</span>,</span>
 <span>  condition_meta<span class="op">=</span><span class="st">"Groups"</span>, </span>
 <span>  conditionCase<span class="op">=</span><span class="st">"Metastatic"</span>, </span>
-<span>  conditionControl<span class="op">=</span><span class="st">"Primary"</span>,</span>
-<span>  act_diff_cutoff<span class="op">=</span><span class="fl">2</span>,</span>
-<span>  exp_logFC_cutoff<span class="op">=</span><span class="fl">0.2</span>,</span>
-<span>  exp_mean_all_cutoff<span class="op">=</span><span class="fl">2</span>,</span>
-<span>  exp_fraction_case_cutoff<span class="op">=</span><span class="fl">0.1</span>,</span>
-<span>  padj_cutoff<span class="op">=</span><span class="fl">0.01</span></span>
+<span>  conditionControl<span class="op">=</span><span class="st">"Primary"</span></span>
 <span><span class="op">)</span>  </span>
-<span>  </span>
+<span></span>
 <span><span class="co"># show output</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">Seurat_obj</span> <span class="op">@</span><span class="va">misc</span> <span class="op">$</span><span class="va">SecAct_output</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co">## [1] "SecretedProteinActivity"</span></span>
-<span><span class="co">## [2] "SecretedProteinExpression"</span></span>
+<span><span class="co">## [1] "SecretedProteinExpression"</span></span>
+<span><span class="co">## [2] "SecretedProteinActivity"</span></span>
 <span><span class="co">## [3] "SecretedProteinCCC"</span></span>
 <span></span>
 <span><span class="co"># cell-cell communication results</span></span>

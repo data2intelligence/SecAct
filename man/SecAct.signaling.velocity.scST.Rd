@@ -35,6 +35,6 @@ Calculate the signaling velocity of secreted proteins based on their activities.
 The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
 }
 \examples{
-SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="TGFB1", receiver="Tumor_interface", cellType_meta="cellType")
+SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="THBS2", receiver="Tumor_boundary", cellType_meta="cellType")
 
 }

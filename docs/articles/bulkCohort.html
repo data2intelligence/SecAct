@@ -162,9 +162,9 @@ protein by linking their activity levels with clinical data. For the
 clinical file, please make sure the name of the 1st and 2nd columns are
 “Time” and “Event”, respectively. <code>SecAct.coxph.regression</code>
 will conduct Cox proportional hazard (PH) regression, with risk scores
-represented as z-scores (Coef / StdErr) from the two-sided Wald test.
-For each endpoint analysis, clinical covariates (e.g., age, gender,
-stage) were considered in regression if available.</p>
+represented as z-scores (Coef / StdErr) from the two-sided Wald test. Of
+note, clinical covariates (e.g., age, gender, stage) would also be
+considered in regression if available.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read clinical infomation</span></span>
 <span><span class="va">clinical</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"Pancreatic_Nivolumab_Padron2022.OS_Nivo+Sotiga+Chemo"</span><span class="op">)</span><span class="op">)</span></span>
@@ -191,7 +191,7 @@ stage) were considered in regression if available.</p>
 <span><span class="co">## AADACL2    -1.960305 0.049960191</span></span>
 <span><span class="co">## ABHD15     -2.511890 0.012008638</span></span>
 <span><span class="co">## ABI3BP     -1.679394 0.093075338</span></span></code></pre></div>
-<p>For the risk score, a positive value means the secreted protein is
+<p>For the risk score z, a positive value means the secreted protein is
 associated with poorer survival while a negative value means the
 secreted protein is associated with better survival.</p>
 </div>
