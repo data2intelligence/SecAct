@@ -213,12 +213,14 @@ which includes four items, (1) beta: regression coefficients; (2) se:
 standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value
 of z score from permutation test.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity</span></span>
+<code class="sourceCode R"><span><span class="co"># infer activity; 60 minutes</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span></span>
 <span>  inputProfile <span class="op">=</span> <span class="va">SpaCET_obj</span>,</span>
 <span>  scale.factor <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  sigFilter<span class="op">=</span><span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
+<span><span class="co"># The running times mentioned here and onwards were obtained</span></span>
+<span><span class="co"># from our HPC with 20 cores and 200 GB of memory.</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>

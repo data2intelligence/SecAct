@@ -121,12 +121,14 @@ SpaCET.visualize.spatialFeature(
 After loading ST data, user can run `SecAct.activity.inference.ST` to infer the signaling activities of secreted proteins for each spot. The output are stored in `SpaCET_obj @results $SecAct_output $SecretedProteinActivity`, which includes four items, (1) beta: regression coefficients; (2) se: standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value of z score from permutation test.
 
 ``` r
-# infer activity
+# infer activity; 60 minutes
 SpaCET_obj <- SecAct.activity.inference.ST(
   inputProfile = SpaCET_obj,
   scale.factor = 1000,
   sigFilter=TRUE
 )
+# The running times mentioned here and onwards were obtained
+# from our HPC with 20 cores and 200 GB of memory.
 
 # show activity
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
