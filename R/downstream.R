@@ -82,7 +82,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
     NMF_res <- nmf(act_nneg, k, seed=123456)
   }else{
     estim.r <- nmf(act_nneg, k, nrun=30, seed=123456)
-    v <- estim.r$measures$silhouette.consensus
+    v <- estim.r$measures$silhouette.coef
 
     v_diff <- v[1:(length(v)-1)]-v[2:length(v)]
     maxN <- which( v_diff == max(v_diff) ) +1
