@@ -16,5 +16,13 @@ Imports:
     ggplot2,
     reshape2,
     patchwork,
+    NMF,
+    gganimate,
     metap,
+    circlize,
+    ggalluvial,
+    networkD3,
+    survival,
     survminer
+biocViews:
+    ComplexHeatmap

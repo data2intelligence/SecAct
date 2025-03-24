@@ -73,8 +73,9 @@ operating system.
 
 - C Library: GNU Scientific Library (GSL).
 - R version \>= 4.2.0.
-- R packages: Matrix, ggplot2, patchwork, NMF, circlize, ComplexHeatmap,
-  ggalluvial, networkD3, survival, survminer.
+- R packages: Matrix, ggplot2, reshape2, patchwork, NMF, gganimate,
+  metap, circlize, ComplexHeatmap, ggalluvial, networkD3, survival,
+  survminer.
 
 ## Example
 
