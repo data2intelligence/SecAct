@@ -26,5 +26,3 @@ echo "PKG_LIBS = \$(shell gsl-config --libs)" >> ./src/Makevars
 
 echo "GSL_CFLAGS=${GSL_CFLAGS}" >> src/Makevars
 echo "GSL_LIBS=${GSL_LIBS}" >> src/Makevars
-
-chmod +x configure
