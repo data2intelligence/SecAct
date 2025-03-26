@@ -33,7 +33,7 @@ To load data into R, user can create a SpaCET object by preparing three types of
 library(SecAct)
 library(SpaCET)
 
-# download data from https://zenodo.org/records/15006880/files/LIHC_CosMx_data.rda
+# download data from https://hpc.nih.gov/~Jiang_Lab/SecAct_Package/LIHC_CosMx_data.rda
 # load CosMx data
 load("LIHC_CosMx_data.rda")
 

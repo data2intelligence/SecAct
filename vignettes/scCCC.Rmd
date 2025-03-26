@@ -29,7 +29,7 @@ The OV scRNA-Seq data is stored in a Seurat object. The information of cell-type
 library(SecAct)
 library(Seurat)
 
-# download data from https://zenodo.org/records/15006880/files/OV_scRNAseq_Seurat.rds
+# download data from https://hpc.nih.gov/~Jiang_Lab/SecAct_Package/OV_scRNAseq_Seurat.rds
 # load scRNA-Seq data
 Seurat_obj <- readRDS("OV_scRNAseq_Seurat.rds")
 
