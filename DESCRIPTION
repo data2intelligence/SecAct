@@ -17,12 +17,9 @@ Imports:
     reshape2,
     patchwork,
     NMF,
-    gganimate,
-    metap,
     circlize,
     ggalluvial,
     networkD3,
-    survival,
-    survminer
+    survival
 biocViews:
     ComplexHeatmap
