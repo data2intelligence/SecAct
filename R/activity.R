@@ -144,7 +144,19 @@ SecAct.activity.inference <- function(
 
   if(sigFilter==TRUE)
   {
-    X <- X[,colnames(X)%in%row.names(Y)]
+    #X <- X[,colnames(X)%in%row.names(Y)]
+
+    # Step 1: clean column names
+    new_colnames <- sapply(colnames(X), function(x) {
+      parts <- strsplit(x, "\\|")[[1]]
+      remaining <- setdiff(parts, row.names(Y) )
+      if (length(remaining) == 0) return(NA)  # mark for removal
+      paste(remaining, collapse = "|")
+    })
+
+    # Step 2: filter columns
+    X <- X[, !is.na(new_colnames), drop = FALSE]
+    colnames(X) <- new_colnames[!is.na(new_colnames)]
   }
 
   olp <- intersect(row.names(Y),row.names(X))
