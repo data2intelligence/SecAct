@@ -19,7 +19,7 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 {
     if(SigMat=="SecAct")
     {
-      Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
+      Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3_1k_vst_condition_logUMI_cellType_0.9.tsv.gz")
       X <- read.table(Xfile,sep="\t",check.names=F)
     }else{
       X <- read.table(SigMat,sep="\t",check.names=F)
@@ -37,23 +37,28 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
     m <- ncol(Y)
 
     res <- .C("ridgeReg",
-              X=as.double(t(X)),
-              Y=as.double(t(Y)),
-              as.integer(n),
-              as.integer(p),
-              as.integer(m),
-              as.double(lambda),
-              as.double(nrand),
-              beta=double(p*m),
-              se=double(p*m),
-              zscore=double(p*m),
-              pvalue=double(p*m)
+      X=as.double(t(X)),
+      Y=as.double(t(Y)),
+      as.integer(n),
+      as.integer(p),
+      as.integer(m),
+      as.double(lambda),
+      as.double(nrand),
+      beta=double(p*m),
+      se=double(p*m),
+      zscore=double(p*m),
+      pvalue=double(p*m)
     )
 
     beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
     se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
     zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
     pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
+
+    beta <- expand_rows(beta)
+    se <- expand_rows(se)
+    zscore <- expand_rows(zscore)
+    pvalue <- expand_rows(pvalue)
 
     res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
 
@@ -131,7 +136,7 @@ SecAct.activity.inference <- function(
 
   if(sigMatrix=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3_1k_vst_condition_logUMI_cellType_0.9.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(sigMatrix,sep="\t",check.names=F)
@@ -167,13 +172,19 @@ SecAct.activity.inference <- function(
     pvalue=double(p*m)
   )
 
-  list(
-    beta = matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y))),
-    se = matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y))),
-    zscore = matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y))),
-    pvalue = matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  )
+  beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
+  se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
+  zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
+  pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
 
+  beta <- expand_rows(beta)
+  se <- expand_rows(se)
+  zscore <- expand_rows(zscore)
+  pvalue <- expand_rows(pvalue)
+
+  res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
+
+  res
 }
 
 
