@@ -812,8 +812,10 @@ SecAct.CCC.scRNAseq <- function(
   {
     Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
+    X <- expand_rows(X)
   }else{
     X <- read.table(sigMatrix,sep="\t",check.names=F)
+    X <- expand_rows(X)
   }
 
   for(cellType in cellTypes)
