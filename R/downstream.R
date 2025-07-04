@@ -808,16 +808,6 @@ SecAct.CCC.scRNAseq <- function(
 
   print("Step 1: assessing changes in secreted protein expression.")
 
-  if(sigMatrix=="SecAct")
-  {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
-    X <- read.table(Xfile,sep="\t",check.names=F)
-    X <- t(expand_rows(t(X)))
-  }else{
-    X <- read.table(sigMatrix,sep="\t",check.names=F)
-    X <- t(expand_rows(t(X)))
-  }
-
   for(cellType in cellTypes)
   {
     # case
