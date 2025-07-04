@@ -146,17 +146,29 @@ SecAct.activity.inference <- function(
   {
     #X <- X[,colnames(X)%in%row.names(Y)]
 
-    # Step 1: clean column names
-    new_colnames <- sapply(colnames(X), function(x) {
-      parts <- strsplit(x, "\\|")[[1]]
-      remaining <- setdiff(parts, row.names(Y) )
-      if (length(remaining) == 0) return(NA)  # mark for removal
-      paste(remaining, collapse = "|")
+    mat <- X
+    vec2 <- row.names(Y)
+
+    # Process column names
+    keep_idx <- sapply(colnames(mat), function(x) {
+      any(strsplit(x, "\\|")[[1]] %in% vec2)
     })
 
-    # Step 2: filter columns
-    X <- X[, !is.na(new_colnames), drop = FALSE]
-    colnames(X) <- new_colnames[!is.na(new_colnames)]
+    new_colnames <- sapply(colnames(mat)[keep_idx], function(x) {
+      parts <- strsplit(x, "\\|")[[1]]
+      matched <- intersect(parts, vec2)
+      if (length(matched) > 0) {
+        paste(matched, collapse = "|")
+      } else {
+        NA  # shouldn't happen due to filter
+      }
+    })
+
+    # Final matrix
+    mat_clean <- mat[, keep_idx, drop = FALSE]
+    colnames(mat_clean) <- new_colnames
+
+    X <- mat_clean
   }
 
   olp <- intersect(row.names(Y),row.names(X))
