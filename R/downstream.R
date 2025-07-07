@@ -810,7 +810,7 @@ SecAct.CCC.scRNAseq <- function(
 
   if(sigMatrix=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(sigMatrix,sep="\t",check.names=F)

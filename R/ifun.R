@@ -76,7 +76,6 @@ rm_duplicates_sparse <- function(mat)
   return(mat)
 }
 
-
 scalar1 <- function(x)
 {
   x / sqrt(sum(x^2))
@@ -183,7 +182,8 @@ CoxPH_best_separation = function(X, Y, margin)
   return (arr_result)
 }
 
-expand_rows <- function(mat) {
+expand_rows <- function(mat)
+{
   new_rows <- lapply(1:nrow(mat), function(i) {
     names <- strsplit(rownames(mat)[i], "\\|")[[1]]
     do.call(rbind, replicate(length(names), mat[i, , drop = FALSE], simplify = FALSE)) |>

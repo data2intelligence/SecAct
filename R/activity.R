@@ -19,7 +19,7 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 {
     if(SigMat=="SecAct")
     {
-      Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType_0.9.tsv.gz")
+      Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
       X <- read.table(Xfile,sep="\t",check.names=F)
     }else{
       X <- read.table(SigMat,sep="\t",check.names=F)
@@ -74,6 +74,7 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 #' @param is.paired A logical indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired.
 #' @param is.singleSampleLevel A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.
 #' @param sigMatrix Secreted protein signature matrix.
+#' @param is.group.sig A logical indicating whether to group similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
@@ -95,6 +96,7 @@ SecAct.activity.inference <- function(
   is.paired=FALSE,
   is.singleSampleLevel=FALSE,
   sigMatrix="SecAct",
+  is.group.sig=TRUE,
   lambda=5e+5,
   nrand=1000,
   sigFilter=FALSE
@@ -136,11 +138,31 @@ SecAct.activity.inference <- function(
 
   if(sigMatrix=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType_0.9.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(sigMatrix,sep="\t",check.names=F)
   }
+
+  if(is.group.sig==TRUE)
+  {
+
+    dis <- as.dist(1-cor(X,method="pearson"))
+    hc <- hclust(dis,method="complete")
+
+    group_labels <- cutree(hc, h = 1 - 0.9)
+    newsig <- data.frame()
+
+    for(j in unique(group_labels))
+    {
+      geneGroups <- names(group_labels)[group_labels==j]
+
+      newsig[rownames(mat),paste0(geneGroups,collapse="|")] <- rowMeans(mat[,geneGroups,drop=F])
+    }
+
+    X <- newsig
+  }
+
 
   if(sigFilter==TRUE)
   {
@@ -217,6 +239,7 @@ SecAct.activity.inference <- function(
 #' @param inputProfile A SpaCET object.
 #' @param inputProfile_control A SpaCET object.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param is.group.sig A logical indicating whether to group similar signatures.
 #' @param sigMatrix Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
@@ -230,6 +253,7 @@ SecAct.activity.inference.ST <- function(
     inputProfile_control = NULL,
     scale.factor = 1e+05,
     sigMatrix="SecAct",
+    is.group.sig=TRUE,
     lambda=5e+5,
     nrand=1000,
     sigFilter=FALSE
@@ -282,6 +306,7 @@ SecAct.activity.inference.ST <- function(
     inputProfile = expr.diff,
     is.differential = TRUE,
     sigMatrix = sigMatrix,
+    is.group.sig = is.group.sig,
     lambda = lambda,
     nrand = nrand,
     sigFilter = sigFilter
@@ -298,6 +323,7 @@ SecAct.activity.inference.ST <- function(
 #' @param inputProfile A Seurat object.
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param sigMatrix Secreted protein signature matrix.
+#' @param is.group.sig A logical indicating whether to group similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
@@ -309,6 +335,7 @@ SecAct.activity.inference.scRNAseq <- function(
     inputProfile,
     cellType_meta,
     sigMatrix="SecAct",
+    is.group.sig=TRUE,
     lambda=5e+5,
     nrand=1000,
     sigFilter=FALSE
@@ -344,6 +371,7 @@ SecAct.activity.inference.scRNAseq <- function(
     inputProfile = expr.diff,
     is.differential = TRUE,
     sigMatrix = sigMatrix,
+    is.group.sig = is.group.sig,
     lambda = lambda,
     nrand = nrand,
     sigFilter = sigFilter
