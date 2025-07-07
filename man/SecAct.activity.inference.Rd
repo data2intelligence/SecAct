@@ -11,6 +11,7 @@ SecAct.activity.inference(
   is.paired = FALSE,
   is.singleSampleLevel = FALSE,
   sigMatrix = "SecAct",
+  is.group.sig = TRUE,
   lambda = 5e+05,
   nrand = 1000,
   sigFilter = FALSE
@@ -28,6 +29,8 @@ SecAct.activity.inference(
 \item{is.singleSampleLevel}{A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.}
 
 \item{sigMatrix}{Secreted protein signature matrix.}
+
+\item{is.group.sig}{A logical indicating whether to group similar signatures.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 

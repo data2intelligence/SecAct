@@ -157,7 +157,7 @@ SecAct.activity.inference <- function(
     {
       geneGroups <- names(group_labels)[group_labels==j]
 
-      newsig[rownames(mat),paste0(geneGroups,collapse="|")] <- rowMeans(mat[,geneGroups,drop=F])
+      newsig[rownames(X),paste0(geneGroups,collapse="|")] <- rowMeans(X[,geneGroups,drop=F])
     }
 
     X <- newsig

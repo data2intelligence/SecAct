@@ -9,6 +9,7 @@ SecAct.activity.inference.ST(
   inputProfile_control = NULL,
   scale.factor = 1e+05,
   sigMatrix = "SecAct",
+  is.group.sig = TRUE,
   lambda = 5e+05,
   nrand = 1000,
   sigFilter = FALSE
@@ -22,6 +23,8 @@ SecAct.activity.inference.ST(
 \item{scale.factor}{Sets the scale factor for spot-level normalization.}
 
 \item{sigMatrix}{Secreted protein signature matrix.}
+
+\item{is.group.sig}{A logical indicating whether to group similar signatures.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 

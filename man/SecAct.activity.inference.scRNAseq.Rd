@@ -8,6 +8,7 @@ SecAct.activity.inference.scRNAseq(
   inputProfile,
   cellType_meta,
   sigMatrix = "SecAct",
+  is.group.sig = TRUE,
   lambda = 5e+05,
   nrand = 1000,
   sigFilter = FALSE
@@ -19,6 +20,8 @@ SecAct.activity.inference.scRNAseq(
 \item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
 
 \item{sigMatrix}{Secreted protein signature matrix.}
+
+\item{is.group.sig}{A logical indicating whether to group similar signatures.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 
