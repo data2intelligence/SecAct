@@ -84,7 +84,7 @@ library(SecAct)
 
 dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
 expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
-res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE)
+res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE) # ~2 mins
 
 head(res$zscore)
 ```
@@ -118,7 +118,7 @@ following tutorials demonstrate its applications across each data type.
 
 ## Citation
 
-Beibei Ru, Lanqi Gong, Emily Yang, Kenneth Aldape, Lalage Wakefield,
-Peng Jiang. Inference of secreted protein activities in intercellular
-communication.
+Beibei Ru, Lanqi Gong, Emily Yang, Seongyong Park, George Zaki, Kenneth
+Aldape, Lalage Wakefield, Peng Jiang. Inference of secreted protein
+activities in intercellular communication.
 \[<a href="https://github.com/data2intelligence/SecAct" target="_blank">Link</a>\]
