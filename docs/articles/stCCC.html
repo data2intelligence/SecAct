@@ -213,7 +213,7 @@ which includes four items, (1) beta: regression coefficients; (2) se:
 standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value
 of z score from permutation test.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity; 60 minutes</span></span>
+<code class="sourceCode R"><span><span class="co"># infer activity; ~1 hrs</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span></span>
 <span>  inputProfile <span class="op">=</span> <span class="va">SpaCET_obj</span>,</span>
 <span>  scale.factor <span class="op">=</span> <span class="fl">1000</span>,</span>
@@ -255,7 +255,7 @@ procedure. In each randomization, we randomly permuted the cell IDs
 within each cell type. A cell type 1 → s → cell type 2 communication is
 considered significant if ratio &gt; 0.2 and FDR &lt; 0.01.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer CCC; 60 minutes</span></span>
+<code class="sourceCode R"><span><span class="co"># infer CCC; ~1 hrs</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scST.html">SecAct.CCC.scST</a></span><span class="op">(</span></span>
 <span>    <span class="va">SpaCET_obj</span>,</span>
 <span>    cellType_meta <span class="op">=</span> <span class="st">"cellType"</span>,</span>
