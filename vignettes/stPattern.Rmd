@@ -66,14 +66,6 @@ SpaCET_obj <- SecAct.activity.inference.ST(
 # show activity
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
 
-##           50x102      3x43     14x94
-## A1BG    4.179847  2.193798 -1.082260
-## A2M     1.990219  7.513577  2.520423
-## A2ML1   0.838544  0.298118  3.453744
-## AADACL2 1.790729 -3.226144  2.709726
-## ABHD15  3.224051 -1.534522  2.073572
-## ABI3BP  1.588963  6.592146 13.925150
-
 ``` 
 
 ## Estimate signaling pattern

@@ -87,14 +87,6 @@ expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
 res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE)
 
 head(res$zscore)
-
-##            Change
-## A1BG     7.588670
-## A2M     15.974063
-## A2ML1    3.303167
-## AADACL2 -1.789684
-## ABHD15  -5.353521
-## ABI3BP  18.785484
 ```
 
 ## Tutorial

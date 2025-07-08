@@ -223,15 +223,7 @@ of z score from permutation test.</p>
 <span><span class="co"># from our HPC with 20 cores and 200 GB of memory.</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
-<span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co">##        c_2_100_733 c_2_101_240 c_2_101_339</span></span>
-<span><span class="co">## ACE     -2.6108455   -4.567062  -4.6543737</span></span>
-<span><span class="co">## ADGRE5  -0.6088185   -4.872711  -5.2642456</span></span>
-<span><span class="co">## ADGRF1   0.9180645    3.529136   3.5651975</span></span>
-<span><span class="co">## ADGRG1   0.2462677    5.180391   4.8956442</span></span>
-<span><span class="co">## ADIPOQ   0.9923366   -3.456214  -4.7621093</span></span>
-<span><span class="co">## ALCAM    2.7917693    2.157889   0.7981345</span></span></code></pre></div>
+<span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="infer-cell-cell-communication">Infer cell-cell communication<a class="anchor" aria-label="anchor" href="#infer-cell-cell-communication"></a>
@@ -263,7 +255,7 @@ procedure. In each randomization, we randomly permuted the cell IDs
 within each cell type. A cell type 1 → s → cell type 2 communication is
 considered significant if ratio &gt; 0.2 and FDR &lt; 0.01.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer CCC</span></span>
+<code class="sourceCode R"><span><span class="co"># infer CCC; 60 minutes</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scST.html">SecAct.CCC.scST</a></span><span class="op">(</span></span>
 <span>    <span class="va">SpaCET_obj</span>,</span>
 <span>    cellType_meta <span class="op">=</span> <span class="st">"cellType"</span>,</span>

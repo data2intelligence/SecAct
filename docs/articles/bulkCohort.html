@@ -141,15 +141,7 @@ mean gene expression of all input profiles are regarded as control.</p>
 <span><span class="va">act</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">zscore</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
-<span><span class="va">act</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co">##                  2          3           6</span></span>
-<span><span class="co">## A1BG    -27.879835 -24.805532 -13.1475409</span></span>
-<span><span class="co">## A2M       6.688479   5.891316  14.5120252</span></span>
-<span><span class="co">## A2ML1     4.482488  -2.028074   5.5316736</span></span>
-<span><span class="co">## AADACL2  -1.188018  -2.029080  -0.1938462</span></span>
-<span><span class="co">## ABHD15  -14.462520 -13.212992  -8.5294933</span></span>
-<span><span class="co">## ABI3BP   20.991414  14.093015  25.9819458</span></span></code></pre></div>
+<span><span class="va">act</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
 <p>The inferred protein activity is a relative measure. A positive value
 indicates high activity in the corresponding patients, while a negative
 value signifies low activity.</p>
@@ -182,15 +174,7 @@ considered in regression if available.</p>
 <span><span class="co"># compute risk score</span></span>
 <span><span class="va">riskMat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.coxph.regression.html">SecAct.coxph.regression</a></span><span class="op">(</span><span class="va">act</span>, <span class="va">clinical</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co">##         risk score z     p value</span></span>
-<span><span class="co">## A1BG       -2.187803 0.028683943</span></span>
-<span><span class="co">## A2M        -3.372297 0.000745439</span></span>
-<span><span class="co">## A2ML1       1.668025 0.095310824</span></span>
-<span><span class="co">## AADACL2    -1.960305 0.049960191</span></span>
-<span><span class="co">## ABHD15     -2.511890 0.012008638</span></span>
-<span><span class="co">## ABI3BP     -1.679394 0.093075338</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">riskMat</span><span class="op">)</span></span></code></pre></div>
 <p>For the risk score z, a positive value means the secreted protein is
 associated with poorer survival while a negative value means the
 secreted protein is associated with better survival.</p>
@@ -230,7 +214,7 @@ patient groups.</p>
 <span><span class="va">riskMat</span><span class="op">[</span><span class="st">"WNT7B"</span>,<span class="op">]</span></span>
 <span></span>
 <span><span class="co">## risk score z      p value </span></span>
-<span><span class="co">## 3.3252642698 0.0008833476 </span></span>
+<span><span class="co">## 3.4410021822 0.0005795639 </span></span>
 <span></span>
 <span><span class="co"># visualize in survival plot</span></span>
 <span><span class="fu"><a href="../reference/SecAct.survival.plot.html">SecAct.survival.plot</a></span><span class="op">(</span><span class="va">act</span>, <span class="va">clinical</span>, <span class="st">"WNT7B"</span>, x.title<span class="op">=</span><span class="st">"Overall (Days)"</span><span class="op">)</span></span></code></pre></div>

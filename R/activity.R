@@ -228,6 +228,11 @@ SecAct.activity.inference <- function(
   zscore <- expand_rows(zscore)
   pvalue <- expand_rows(pvalue)
 
+  beta <- beta[sort(rownames(beta)),,drop=F]
+  se <- se[sort(rownames(beta)),,drop=F]
+  zscore <- zscore[sort(rownames(beta)),,drop=F]
+  pvalue <- pvalue[sort(rownames(beta)),,drop=F]
+
   res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
 
   res

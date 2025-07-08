@@ -60,14 +60,6 @@ act <- Seurat_obj @misc $SecAct_output $SecretedProteinActivity$zscore
 # show activity
 head(act)
 
-##         CD4_central_memory  CD4_naive CD4_Th1_like
-## A1BG            -0.5224152 -2.5877798   5.04170281
-## A2M             -1.8165372  1.0789818  -0.08903819
-## A2ML1            4.6669228 -3.4408384   1.41266953
-## AADACL2          2.2806474 -3.1300577   3.23410538
-## ABHD15           0.2801044  0.1688928  -0.55981830
-## ABI3BP          -0.7084864  1.5764300  -2.08041961
-
 ```
 
 The inferred protein activity is a relative measure. A positive value indicates high activity in the corresponding cell states, while a negative value signifies low activity.

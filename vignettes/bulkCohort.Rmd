@@ -55,13 +55,6 @@ act <- res$zscore
 # show activity
 act[1:6,1:3]
 
-##                  2          3           6
-## A1BG    -27.879835 -24.805532 -13.1475409
-## A2M       6.688479   5.891316  14.5120252
-## A2ML1     4.482488  -2.028074   5.5316736
-## AADACL2  -1.188018  -2.029080  -0.1938462
-## ABHD15  -14.462520 -13.212992  -8.5294933
-## ABI3BP   20.991414  14.093015  25.9819458
 ``` 
 
 The inferred protein activity is a relative measure. A positive value indicates high activity in the corresponding patients, while a negative value signifies low activity.
@@ -88,14 +81,6 @@ head(clinical)
 riskMat <- SecAct.coxph.regression(act, clinical)
 
 head(riskMat)
-
-##         risk score z     p value
-## A1BG       -2.187803 0.028683943
-## A2M        -3.372297 0.000745439
-## A2ML1       1.668025 0.095310824
-## AADACL2    -1.960305 0.049960191
-## ABHD15     -2.511890 0.012008638
-## ABI3BP     -1.679394 0.093075338
 
 ``` 
 
@@ -133,7 +118,7 @@ User can select a secreted protein of interest to draw its survival curve using 
 riskMat["WNT7B",]
 
 ## risk score z      p value 
-## 3.3252642698 0.0008833476 
+## 3.4410021822 0.0005795639 
 
 # visualize in survival plot
 SecAct.survival.plot(act, clinical, "WNT7B", x.title="Overall (Days)")
