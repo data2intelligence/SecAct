@@ -231,13 +231,13 @@ of z score from permutation test.</p>
 <p>After calculating the secreted protein activity, SecAct could further
 estimate the consensus pattern from these inferred signaling activities
 across the whole tissue slide. This module contains two steps.</p>
-<p>First, <code>SecAct</code> filters 1248 secreted proteins to identify
-the significant secreted proteins mediating intercellular communication
-in this slide. To achieve this, <code>SecAct</code> will calculate the
-Spearman correlation of secreted protein s signaling activity and its
-neighbor cells’ sum expression. The p values were adjusted by the
-Benjamini-Hochberg (BH) method as false discovery rate (FDR). The
-cutoffs are r &gt; 0.05 and FDR &lt; 0.01.</p>
+<p>First, <code>SecAct</code> filters &gt;1,000 secreted proteins to
+identify the significant secreted proteins mediating intercellular
+communication in this slide. To achieve this, <code>SecAct</code> will
+calculate the Spearman correlation of secreted protein s signaling
+activity and its neighbor cells’ sum expression. The p values were
+adjusted by the Benjamini-Hochberg (BH) method as false discovery rate
+(FDR). The cutoffs are r &gt; 0.05 and FDR &lt; 0.01.</p>
 <p>Second, We designed a computational strategy to statistically test
 whether a type of secreted protein s mediates the intercellular
 communication from cell type 1 to cell type 2. Cell-type annotations
