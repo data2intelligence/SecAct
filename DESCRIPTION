@@ -2,7 +2,7 @@ Package: SecAct
 Version: 1.0.0
 Title: Secreted Signaling Activity Inference
 Description: Inferring secreted protein activities at bulk, single-cell, and spatial levels
-Authors@R: c(person(given = "Beibei",family = "Ru", role = c("aut", "cre"), email = "beibei.ru@nih.gov"),person(given = "Peng",family = "Jiang", role = c("aut"), email = "peng.jiang@nih.gov"))
+Authors@R: c(person(given = "Beibei",family = "Ru", role = c("aut", "cre"), email = "beibei.ru@nih.gov"))
 License: file LICENSE
 URL: https://github.com/data2intelligence/SecAct
 BugReports: https://github.com/data2intelligence/SecAct/issues
