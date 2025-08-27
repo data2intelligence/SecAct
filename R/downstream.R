@@ -794,7 +794,7 @@ SecAct.CCC.scRNAseq <- function(
     stop("Please input a Seurat object.")
   }
 
-  if(class(Seurat_obj@assays$Spatial)=="Assay5")
+  if(class(Seurat_obj@assays$RNA)=="Assay5")
   {
     counts <- Seurat_obj@assays$RNA@layers$counts
     colnames(counts) <- rownames(Seurat_obj@assays$RNA@cells)
