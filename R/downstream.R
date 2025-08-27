@@ -794,7 +794,15 @@ SecAct.CCC.scRNAseq <- function(
     stop("Please input a Seurat object.")
   }
 
-  counts <-  Seurat_obj@assays$RNA@counts
+  if(class(Seurat_obj@assays$Spatial)=="Assay5")
+  {
+    counts <- Seurat_obj@assays$RNA@layers$counts
+    colnames(counts) <- rownames(Seurat_obj@assays$RNA@cells)
+    rownames(counts) <- rownames(Seurat_obj@assays$RNA@features)
+  }else{
+    counts <-  Seurat_obj@assays$RNA@counts
+  }
+
   rownames(counts) <- transferSymbol(rownames(counts))
   counts <- rm_duplicates_sparse(counts)
 
