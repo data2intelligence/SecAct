@@ -873,6 +873,7 @@ SecAct.CCC.scRNAseq <- function(
       smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
     }
     smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
+    smy_deg[smy_deg[,"exp_pv"]==0,"exp_pv"] <- .Machine$double.xmin
 
     smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
     smy_deg <- smy_deg[order(smy_deg[,"exp_pv.adj"]),]
