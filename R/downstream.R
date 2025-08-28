@@ -873,7 +873,6 @@ SecAct.CCC.scRNAseq <- function(
       smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
     }
     smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
-    smy_deg[smy_deg[,"exp_pv"]==0,"exp_pv"] <- .Machine$double.xmin
 
     smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
     smy_deg <- smy_deg[order(smy_deg[,"exp_pv.adj"]),]
@@ -1000,6 +999,8 @@ SecAct.CCC.scRNAseq <- function(
 
 
   library(metap)
+  ccc[ccc[,"sender_exp_pv"]==0,"sender_exp_pv"] <- .Machine$double.xmin # sumlog requires non-zero
+
   ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) sumlog(x)$p)
   ccc[,"overall_pv.adj"] <- p.adjust(ccc[,"overall_pv"], method="BH")
   ccc <- ccc[ccc[,"overall_pv.adj"]<padj_cutoff,]
