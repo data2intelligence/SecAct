@@ -19,10 +19,5 @@ Useful links:
 \author{
 \strong{Maintainer}: Beibei Ru \email{beibei.ru@nih.gov}
 
-Authors:
-\itemize{
-  \item Peng Jiang \email{peng.jiang@nih.gov}
-}
-
 }
 \keyword{internal}

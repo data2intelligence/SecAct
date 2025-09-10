@@ -808,10 +808,15 @@ SecAct.CCC.scRNAseq <- function(
 
   meta <- Seurat_obj@meta.data
 
-  cellTypes <- intersect(
-    meta[meta[,condition_meta]==conditionCase,cellType_meta],
-    meta[meta[,condition_meta]==conditionControl,cellType_meta]
-  )
+  if(is.null(condition_meta))
+  {
+    cellTypes <- unique(meta[,cellType_meta])
+  }else{
+    cellTypes <- intersect(
+      meta[meta[,condition_meta]==conditionCase,cellType_meta],
+      meta[meta[,condition_meta]==conditionControl,cellType_meta]
+    )
+  }
 
 
   print("Step 1: assessing changes in secreted protein expression.")
@@ -827,7 +832,13 @@ SecAct.CCC.scRNAseq <- function(
   for(cellType in cellTypes)
   {
     # case
-    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+    if(is.null(condition_meta))
+    {
+      expr <- counts[,meta[,cellType_meta]==cellType]
+    }else{
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+    }
+    if(ncol(expr)<30) next
 
     # normalize to TPM
     stats <- Matrix::colSums(expr)
@@ -841,7 +852,12 @@ SecAct.CCC.scRNAseq <- function(
 
 
     # control
-    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+    if(is.null(condition_meta))
+    {
+      expr <- counts[,meta[,cellType_meta]!=cellType]
+    }else{
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+    }
 
     # normalize to TPM
     stats <- Matrix::colSums(expr)
@@ -853,25 +869,43 @@ SecAct.CCC.scRNAseq <- function(
 
     expr_control <- expr
 
-
-    smy_deg <- data.frame()
     genes <- intersect(rownames(expr_case), unlist(strsplit(colnames(X),"|",fixed=T)))
-    for(gene in genes)
-    {
-      T_vec <- expr_case[gene,]
-      C_vec <- expr_control[gene,]
+    cat(length(genes))
 
-      wTest <- wilcox.test(T_vec,C_vec)
+    case_mat <- expr_case[genes, , drop = FALSE]
+    control_mat <- expr_control[genes, , drop = FALSE]
+    cat(dim(case_mat))
 
-      smy_deg[gene,"exp_logFC"] <- mean(T_vec) - mean(C_vec)
-      smy_deg[gene,"exp_mean_all"] <- mean(c(T_vec,C_vec))
-      smy_deg[gene,"exp_mean_case"] <- mean(T_vec)
-      smy_deg[gene,"exp_mean_control"] <- mean(C_vec)
-      smy_deg[gene,"exp_fraction_case"] <- sum(T_vec>0)/length(T_vec)
-      smy_deg[gene,"exp_fraction_control"] <- sum(C_vec>0)/length(C_vec)
-      smy_deg[gene,"exp_pv"] <- wTest$p.value
-      smy_deg[gene,"exp_pv.adj"] <- wTest$p.value
-    }
+    # Compute summary statistics
+    exp_mean_case     <- Matrix::rowMeans(case_mat)
+    exp_mean_control  <- Matrix::rowMeans(control_mat)
+    exp_mean_all      <- (exp_mean_case * ncol(case_mat) + exp_mean_control * ncol(control_mat)) / (ncol(case_mat) + ncol(control_mat))
+    exp_logFC         <- exp_mean_case - exp_mean_control
+
+    exp_fraction_case    <- Matrix::rowMeans(case_mat > 0)
+    exp_fraction_control <- Matrix::rowMeans(control_mat > 0)
+
+    # Wilcoxon tests row-wise
+    pvals <- mapply(
+      function(tc, cc) wilcox.test(tc, cc)$p.value,
+      split(case_mat, row(case_mat)),
+      split(control_mat, row(control_mat))
+    )
+
+    # Assemble into one data frame
+    smy_deg <- data.frame(
+      exp_logFC = exp_logFC,
+      exp_mean_all = exp_mean_all,
+      exp_mean_case = exp_mean_case,
+      exp_mean_control = exp_mean_control,
+      exp_fraction_case = exp_fraction_case,
+      exp_fraction_control = exp_fraction_control,
+      exp_pv = pvals
+    )
+
+    # Assign rownames
+    rownames(smy_deg) <- genes
+
     smy_deg <- smy_deg[smy_deg[,"exp_mean_all"]>0,]
 
     smy_deg[,"exp_pv.adj"] <- p.adjust(smy_deg[,"exp_pv"], method="BH")
@@ -886,7 +920,15 @@ SecAct.CCC.scRNAseq <- function(
   bulk.diff <- data.frame()
   for(cellType in cellTypes)
   {
-    expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+    # case
+    if(is.null(condition_meta))
+    {
+      expr <- counts[,meta[,cellType_meta]==cellType]
+    }else{
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+    }
+    if(ncol(expr)<30) next
+
     expr <- Matrix::rowSums(expr)
     expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
 
@@ -899,7 +941,14 @@ SecAct.CCC.scRNAseq <- function(
     expr_case <- expr
 
 
-    expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+    # control
+    if(is.null(condition_meta))
+    {
+      expr <- counts[,meta[,cellType_meta]!=cellType]
+    }else{
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+    }
+
     expr <- Matrix::rowSums(expr)
     expr <- matrix(expr,ncol=1,dimnames = list(names(expr),"bulk"))
 
@@ -924,6 +973,7 @@ SecAct.CCC.scRNAseq <- function(
   smy_deg_comb <- data.frame()
   smy_act_comb <- data.frame()
 
+  cellTypes <- names(Seurat_obj @misc $SecAct_output $SecretedProteinExpression)
   for(cellType in cellTypes)
   {
     smy_deg <- Seurat_obj @misc $SecAct_output $SecretedProteinExpression [[cellType]]
