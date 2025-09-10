@@ -870,11 +870,9 @@ SecAct.CCC.scRNAseq <- function(
     expr_control <- expr
 
     genes <- intersect(rownames(expr_case), unlist(strsplit(colnames(X),"|",fixed=T)))
-    cat(length(genes))
 
     case_mat <- expr_case[genes, , drop = FALSE]
     control_mat <- expr_control[genes, , drop = FALSE]
-    cat(dim(case_mat))
 
     # Compute summary statistics
     exp_mean_case     <- Matrix::rowMeans(case_mat)
