@@ -30,7 +30,7 @@ SecAct.activity.inference(
 
 \item{sigMatrix}{Secreted protein signature matrix.}
 
-\item{is.group.sig}{A logical indicating whether to group similar signatures.}
+\item{is.group.sig}{A logical indicating whether group similar signatures.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 

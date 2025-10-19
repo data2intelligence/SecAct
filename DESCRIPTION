@@ -7,7 +7,7 @@ License: file LICENSE
 URL: https://github.com/data2intelligence/SecAct
 BugReports: https://github.com/data2intelligence/SecAct/issues
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.3
 Depends:
     R (>= 3.5.0)
 SystemRequirements: GNU Scientific Library (GSL)
