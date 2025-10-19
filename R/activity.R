@@ -65,6 +65,20 @@ SecAct.inference2 <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
   zscore <- (beta-aver)/aver_sq
 
   pvalue <- (pvalue+1)/(nrand+1)
+
+  rownames(beta) <- colnames(X)
+  colnames(beta) <- colnames(Y)
+
+  rownames(aver_sq) <- colnames(X)
+  colnames(aver_sq) <- colnames(Y)
+
+  rownames(zscore) <- colnames(X)
+  colnames(zscore) <- colnames(Y)
+
+  rownames(pvalue) <- colnames(X)
+  colnames(pvalue) <- colnames(Y)
+
+
   res <- list(beta=beta, se=aver_sq, zscore=zscore, pvalue=pvalue)
 
 
