@@ -140,6 +140,7 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 #' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param gene Gene symbol coding a secreted protein.
 #' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
+#' @param contourMap A logical indicating whether transform as contour map.
 #' @param animated A logical indicating whether generate animated figure.
 #' @return A ggplot2 object.
 #' @details
@@ -158,6 +159,7 @@ SecAct.signaling.velocity.spotST <- function(
   scale.factor = 1e+05,
   gene,
   signalMode="receiving",
+  contourMap=FALSE,
   animated=FALSE
 )
 {
@@ -331,7 +333,7 @@ SecAct.signaling.velocity.spotST <- function(
   fig.df[fig.df[,3]>5,3] <- 5
 
   p1 <- ggplot(fig.df,aes(x=x,y=y))+
-    annotation_custom(image$grob)+
+    #annotation_custom(image$grob)+
     geom_point(aes(colour=Exp))+
     scale_color_gradient(low="blue",high="red")+
     scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
@@ -350,20 +352,53 @@ SecAct.signaling.velocity.spotST <- function(
     Act=act_new[gene,]
   )
 
-  p2 <- ggplot(fig.df2,aes(x=x,y=y))+
-    annotation_custom(image$grob)+
-    geom_point(aes(colour=Act))+
-    #scale_color_gradientn(colors=c("#a5a6ff","#ff72a1","brown"))+
-    scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
-    scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
-    #+
-    ggtitle(paste0(gene," (receiving)"))+
-    theme_void()+
-    theme(
-      plot.title = element_text(hjust = 0.5)
-    )+coord_flip()
+
+  library(akima)
+  # Interpolate onto grid
+  interp_res <- interp(
+    x = fig.df2$x,
+    y = fig.df2$y,
+    z = fig.df2$Act,
+    xo = seq(min(fig.df2$x), max(fig.df2$x), length = 20),  # grid resolution in x
+    yo = seq(min(fig.df2$y), max(fig.df2$y), length = 20)   # grid resolution in y
+  )
+
+  # Convert to data frame for ggplot
+  grid_df <- data.frame(
+    x = rep(interp_res$x, times = length(interp_res$y)),
+    y = rep(interp_res$y, each = length(interp_res$x)),
+    z = as.vector(interp_res$z)
+  )
+
+  if(contourMap==TRUE)
+  {
+    p2 <- ggplot(grid_df,aes(x=x,y=y))+
+      geom_contour_filled(aes(z=z)) +
+      scale_fill_brewer(palette = "PiYG",direction = -1)+
+      #scale_fill_manual(values=c("#b8e186","#de77ae","#c51b7d"))+
+      scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
+      scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
+      ggtitle(paste0(gene," (receiving)"))+
+      theme_void()+
+      theme(
+        plot.title = element_text(hjust = 0.5)
+      )+coord_flip()
+  }else{
+    p2 <- ggplot(fig.df2,aes(x=x,y=y))+
+      #annotation_custom(image$grob)+
+      geom_point(aes(colour=Act))+
+      #scale_color_gradientn(colors=c("#a5a6ff","#ff72a1","brown"))+
+      scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
+      scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
+      scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
+      ggtitle(paste0(gene," (receiving)"))+
+      theme_void()+
+      theme(
+        plot.title = element_text(hjust = 0.5)
+      )+coord_flip()
+  }
 
   if(animated==TRUE)
   {

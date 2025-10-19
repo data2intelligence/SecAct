@@ -12,6 +12,80 @@
 #' zscore: beta/se
 #' pvalue: statistical significance
 #'
+#' @rdname SecAct.inference2
+#' @export
+#'
+SecAct.inference2 <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
+{
+  if(SigMat=="SecAct")
+  {
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
+    X <- read.table(Xfile,sep="\t",check.names=F)
+  }else{
+    X <- read.table(SigMat,sep="\t",check.names=F)
+  }
+
+  olp <- intersect(row.names(Y),row.names(X))
+  X <- as.matrix(X[olp,,drop=F])
+  Y <- as.matrix(Y[olp,,drop=F])
+
+  X <- scale(X)
+  Y <- scale(Y)
+
+  n <- nrow(Y)
+  p <- ncol(X)
+  m <- ncol(Y)
+
+
+  A <- crossprod(X) + lambda * diag(p)  # SPD
+  R <- chol(A)                          # A = R'R
+  beta <- backsolve(R, forwardsolve(t(R), crossprod(X, Y)))
+
+  set.seed(123)
+  for(i in 1:nrand)
+  {
+    beta_rand <- backsolve(R, forwardsolve(t(R), crossprod(X, Y[sample.int(n),])))
+
+    if(i==1)
+    {
+      aver <- beta_rand
+      aver_sq <- beta_rand^2
+      pvalue <- abs(beta_rand)>=abs(beta)
+    }else{
+      aver <- aver + beta_rand
+      aver_sq <- aver_sq + beta_rand^2
+      pvalue <- pvalue + (abs(beta_rand)>=abs(beta))
+    }
+  }
+
+  aver <- aver/nrand
+  aver_sq <- aver_sq/nrand
+  aver_sq <- sqrt(aver_sq - aver*aver)
+
+  zscore <- (beta-aver)/aver_sq
+
+  pvalue <- (pvalue+1)/(nrand+1)
+  res <- list(beta=beta, se=aver_sq, zscore=zscore, pvalue=pvalue)
+
+
+  res
+}
+
+
+#' @title Secreted protein activity inference
+#' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
+#' @param Y Gene expression matrix with gene symbol (row) x sample (column).
+#' @param SigMat Secreted protein signature matrix.
+#' @param lambda Penalty factor in the ridge regression.
+#' @param nrand Number of randomizations in the permutation test, with a default value 1000.
+#' @return
+#'
+#' A list with four items, each is a matrix.
+#' beta: regression coefficients
+#' se: standard errors of coefficients
+#' zscore: beta/se
+#' pvalue: statistical significance
+#'
 #' @rdname SecAct.inference
 #' @export
 #'
@@ -74,7 +148,7 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 #' @param is.paired A logical indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired.
 #' @param is.singleSampleLevel A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.
 #' @param sigMatrix Secreted protein signature matrix.
-#' @param is.group.sig A logical indicating whether to group similar signatures.
+#' @param is.group.sig A logical indicating whether group similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
