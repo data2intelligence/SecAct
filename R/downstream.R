@@ -799,12 +799,17 @@ SecAct.CCC.scST <- function(
 #' @param condition_meta Column name in meta data that includes condition information.
 #' @param conditionCase Case condition.
 #' @param conditionControl Control condition.
-#' @param sigMatrix Secreted protein signature matrix.
 #' @param act_diff_cutoff Cut off for activity change (i.e., z score) in step 1.
 #' @param exp_logFC_cutoff Cut off for log fold change in step 2.
 #' @param exp_fraction_case_cutoff Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.
 #' @param padj_cutoff Adjusted p value cut off.
 #' @param scale.factor Sets the scale factor for cell-level normalization in step2.
+#' @param sigMatrix Secreted protein signature matrix.
+#' @param is.group.sig A logical indicating whether to group similar signatures.
+#' @param is.group.cor Correlation cutoff of similar signatures.
+#' @param lambda Penalty factor in the ridge regression.
+#' @param nrand Number of randomization in the permutation test, with a default value 1000.
+#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
 #' @return A Seurat object.
 #' @rdname SecAct.CCC.scRNAseq
 #' @export
@@ -815,13 +820,18 @@ SecAct.CCC.scRNAseq <- function(
   condition_meta,
   conditionCase,
   conditionControl,
-  sigMatrix="SecAct",
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
   exp_fraction_case_cutoff = 0.1,
   padj_cutoff = 0.01,
-  scale.factor = 1e+05
+  scale.factor = 1e+05,
+  sigMatrix="SecAct",
+  is.group.sig=TRUE,
+  is.group.cor=0.9,
+  lambda=1e+5,
+  nrand=1000,
+  sigFilter=FALSE
 )
 {
   if(!class(Seurat_obj)[1]=="Seurat")
@@ -998,8 +1008,17 @@ SecAct.CCC.scRNAseq <- function(
     bulk.diff[rownames(expr_case),cellType] <- expr_case - expr_control
   }
 
-  Seurat_obj @misc $SecAct_output $SecretedProteinActivity <- SecAct.activity.inference(bulk.diff, is.differential = TRUE, sigMatrix = sigMatrix)
-
+  Seurat_obj @misc $SecAct_output $SecretedProteinActivity <-
+    SecAct.activity.inference(
+      inputProfile = bulk.diff,
+      is.differential = TRUE,
+      sigMatrix = sigMatrix,
+      is.group.sig = is.group.sig,
+      is.group.cor = is.group.cor,
+      lambda = lambda,
+      nrand = nrand,
+      sigFilter = sigFilter
+      )
 
   print("Step 3: linking source and receiver cell types.")
 

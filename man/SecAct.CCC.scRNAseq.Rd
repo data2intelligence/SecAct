@@ -10,13 +10,18 @@ SecAct.CCC.scRNAseq(
   condition_meta,
   conditionCase,
   conditionControl,
-  sigMatrix = "SecAct",
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
   exp_fraction_case_cutoff = 0.1,
   padj_cutoff = 0.01,
-  scale.factor = 1e+05
+  scale.factor = 1e+05,
+  sigMatrix = "SecAct",
+  is.group.sig = TRUE,
+  is.group.cor = 0.9,
+  lambda = 1e+05,
+  nrand = 1000,
+  sigFilter = FALSE
 )
 }
 \arguments{
@@ -28,8 +33,6 @@ SecAct.CCC.scRNAseq(
 
 \item{conditionControl}{Control condition.}
 
-\item{sigMatrix}{Secreted protein signature matrix.}
-
 \item{act_diff_cutoff}{Cut off for activity change (i.e., z score) in step 1.}
 
 \item{exp_logFC_cutoff}{Cut off for log fold change in step 2.}
@@ -39,6 +42,18 @@ SecAct.CCC.scRNAseq(
 \item{padj_cutoff}{Adjusted p value cut off.}
 
 \item{scale.factor}{Sets the scale factor for cell-level normalization in step2.}
+
+\item{sigMatrix}{Secreted protein signature matrix.}
+
+\item{is.group.sig}{A logical indicating whether to group similar signatures.}
+
+\item{is.group.cor}{Correlation cutoff of similar signatures.}
+
+\item{lambda}{Penalty factor in the ridge regression.}
+
+\item{nrand}{Number of randomization in the permutation test, with a default value 1000.}
+
+\item{sigFilter}{A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.}
 
 \item{data}{A Seurat object.}
 }

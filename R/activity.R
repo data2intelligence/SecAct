@@ -12,10 +12,10 @@
 #' zscore: beta/se
 #' pvalue: statistical significance
 #'
-#' @rdname SecAct.inference2
+#' @rdname SecAct.inference
 #' @export
 #'
-SecAct.inference2 <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
+SecAct.inference <- function(Y, SigMat="SecAct", lambda=1e+5, nrand=1000)
 {
   if(SigMat=="SecAct")
   {
@@ -32,18 +32,18 @@ SecAct.inference2 <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
   X <- scale(X)
   Y <- scale(Y)
 
+
   n <- nrow(Y)
   p <- ncol(X)
   m <- ncol(Y)
-
 
   A <- crossprod(X) + lambda * diag(p)  # SPD
   R <- chol(A)                          # A = R'R
   beta <- backsolve(R, forwardsolve(t(R), crossprod(X, Y)))
 
-  set.seed(123)
   for(i in 1:nrand)
   {
+    set.seed(i)
     beta_rand <- backsolve(R, forwardsolve(t(R), crossprod(X, Y[sample.int(n),])))
 
     if(i==1)
@@ -78,79 +78,19 @@ SecAct.inference2 <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
   rownames(pvalue) <- colnames(X)
   colnames(pvalue) <- colnames(Y)
 
+  beta <- expand_rows(beta)
+  aver_sq <- expand_rows(aver_sq)
+  zscore <- expand_rows(zscore)
+  pvalue <- expand_rows(pvalue)
+
+  beta <- beta[sort(rownames(beta)),,drop=F]
+  aver_sq <- aver_sq[sort(rownames(beta)),,drop=F]
+  zscore <- zscore[sort(rownames(beta)),,drop=F]
+  pvalue <- pvalue[sort(rownames(beta)),,drop=F]
 
   res <- list(beta=beta, se=aver_sq, zscore=zscore, pvalue=pvalue)
 
-
   res
-}
-
-
-#' @title Secreted protein activity inference
-#' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
-#' @param Y Gene expression matrix with gene symbol (row) x sample (column).
-#' @param SigMat Secreted protein signature matrix.
-#' @param lambda Penalty factor in the ridge regression.
-#' @param nrand Number of randomizations in the permutation test, with a default value 1000.
-#' @return
-#'
-#' A list with four items, each is a matrix.
-#' beta: regression coefficients
-#' se: standard errors of coefficients
-#' zscore: beta/se
-#' pvalue: statistical significance
-#'
-#' @rdname SecAct.inference
-#' @export
-#'
-SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
-{
-    if(SigMat=="SecAct")
-    {
-      Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
-      X <- read.table(Xfile,sep="\t",check.names=F)
-    }else{
-      X <- read.table(SigMat,sep="\t",check.names=F)
-    }
-
-    olp <- intersect(row.names(Y),row.names(X))
-    X <- as.matrix(X[olp,,drop=F])
-    Y <- as.matrix(Y[olp,,drop=F])
-
-    X <- scale(X)
-    Y <- scale(Y)
-
-    n <- length(olp)
-    p <- ncol(X)
-    m <- ncol(Y)
-
-    res <- .C("ridgeReg",
-      X=as.double(t(X)),
-      Y=as.double(t(Y)),
-      as.integer(n),
-      as.integer(p),
-      as.integer(m),
-      as.double(lambda),
-      as.double(nrand),
-      beta=double(p*m),
-      se=double(p*m),
-      zscore=double(p*m),
-      pvalue=double(p*m)
-    )
-
-    beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-    se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-    zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-    pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-
-    beta <- expand_rows(beta)
-    se <- expand_rows(se)
-    zscore <- expand_rows(zscore)
-    pvalue <- expand_rows(pvalue)
-
-    res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
-
-    res
 }
 
 
@@ -163,6 +103,7 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 #' @param is.singleSampleLevel A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.
 #' @param sigMatrix Secreted protein signature matrix.
 #' @param is.group.sig A logical indicating whether group similar signatures.
+#' @param is.group.cor Correlation cutoff of similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
@@ -185,7 +126,8 @@ SecAct.activity.inference <- function(
   is.singleSampleLevel=FALSE,
   sigMatrix="SecAct",
   is.group.sig=TRUE,
-  lambda=5e+5,
+  is.group.cor=0.9,
+  lambda=1e+5,
   nrand=1000,
   sigFilter=FALSE
 )
@@ -232,13 +174,17 @@ SecAct.activity.inference <- function(
     X <- read.table(sigMatrix,sep="\t",check.names=F)
   }
 
+  if(sigFilter==TRUE)
+  {
+    X <- X[,colnames(X)%in%row.names(Y)]
+  }
+
   if(is.group.sig==TRUE)
   {
-
     dis <- as.dist(1-cor(X,method="pearson"))
     hc <- hclust(dis,method="complete")
 
-    group_labels <- cutree(hc, h = 1 - 0.9)
+    group_labels <- cutree(hc, h = 1 - is.group.cor)
     newsig <- data.frame()
 
     for(j in unique(group_labels))
@@ -251,36 +197,6 @@ SecAct.activity.inference <- function(
     X <- newsig
   }
 
-
-  if(sigFilter==TRUE)
-  {
-    #X <- X[,colnames(X)%in%row.names(Y)]
-
-    mat <- X
-    vec2 <- row.names(Y)
-
-    # Process column names
-    keep_idx <- sapply(colnames(mat), function(x) {
-      any(strsplit(x, "\\|")[[1]] %in% vec2)
-    })
-
-    new_colnames <- sapply(colnames(mat)[keep_idx], function(x) {
-      parts <- strsplit(x, "\\|")[[1]]
-      matched <- intersect(parts, vec2)
-      if (length(matched) > 0) {
-        paste(matched, collapse = "|")
-      } else {
-        NA  # shouldn't happen due to filter
-      }
-    })
-
-    # Final matrix
-    mat_clean <- mat[, keep_idx, drop = FALSE]
-    colnames(mat_clean) <- new_colnames
-
-    X <- mat_clean
-  }
-
   olp <- intersect(row.names(Y),row.names(X))
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
@@ -288,40 +204,63 @@ SecAct.activity.inference <- function(
   X <- scale(X)
   Y <- scale(Y)
 
-  n <- length(olp)
+
+  n <- nrow(Y)
   p <- ncol(X)
   m <- ncol(Y)
 
-  res <- .C("ridgeReg",
-    X=as.double(t(X)),
-    Y=as.double(t(Y)),
-    as.integer(n),
-    as.integer(p),
-    as.integer(m),
-    as.double(lambda),
-    as.double(nrand),
-    beta=double(p*m),
-    se=double(p*m),
-    zscore=double(p*m),
-    pvalue=double(p*m)
-  )
+  A <- crossprod(X) + lambda * diag(p)  # SPD
+  R <- chol(A)                          # A = R'R
+  beta <- backsolve(R, forwardsolve(t(R), crossprod(X, Y)))
 
-  beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
+  for(i in 1:nrand)
+  {
+    set.seed(i)
+    beta_rand <- backsolve(R, forwardsolve(t(R), crossprod(X, Y[sample.int(n),])))
+
+    if(i==1)
+    {
+      aver <- beta_rand
+      aver_sq <- beta_rand^2
+      pvalue <- abs(beta_rand)>=abs(beta)
+    }else{
+      aver <- aver + beta_rand
+      aver_sq <- aver_sq + beta_rand^2
+      pvalue <- pvalue + (abs(beta_rand)>=abs(beta))
+    }
+  }
+
+  aver <- aver/nrand
+  aver_sq <- aver_sq/nrand
+  aver_sq <- sqrt(aver_sq - aver*aver)
+
+  zscore <- (beta-aver)/aver_sq
+
+  pvalue <- (pvalue+1)/(nrand+1)
+
+  rownames(beta) <- colnames(X)
+  colnames(beta) <- colnames(Y)
+
+  rownames(aver_sq) <- colnames(X)
+  colnames(aver_sq) <- colnames(Y)
+
+  rownames(zscore) <- colnames(X)
+  colnames(zscore) <- colnames(Y)
+
+  rownames(pvalue) <- colnames(X)
+  colnames(pvalue) <- colnames(Y)
 
   beta <- expand_rows(beta)
-  se <- expand_rows(se)
+  aver_sq <- expand_rows(aver_sq)
   zscore <- expand_rows(zscore)
   pvalue <- expand_rows(pvalue)
 
   beta <- beta[sort(rownames(beta)),,drop=F]
-  se <- se[sort(rownames(beta)),,drop=F]
+  aver_sq <- aver_sq[sort(rownames(beta)),,drop=F]
   zscore <- zscore[sort(rownames(beta)),,drop=F]
   pvalue <- pvalue[sort(rownames(beta)),,drop=F]
 
-  res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
+  res <- list(beta=beta, se=aver_sq, zscore=zscore, pvalue=pvalue)
 
   res
 }
@@ -332,8 +271,9 @@ SecAct.activity.inference <- function(
 #' @param inputProfile A SpaCET object.
 #' @param inputProfile_control A SpaCET object.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
-#' @param is.group.sig A logical indicating whether to group similar signatures.
 #' @param sigMatrix Secreted protein signature matrix.
+#' @param is.group.sig A logical indicating whether to group similar signatures.
+#' @param is.group.cor Correlation cutoff of similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
@@ -347,7 +287,8 @@ SecAct.activity.inference.ST <- function(
     scale.factor = 1e+05,
     sigMatrix="SecAct",
     is.group.sig=TRUE,
-    lambda=5e+5,
+    is.group.cor=0.9,
+    lambda=1e+5,
     nrand=1000,
     sigFilter=FALSE
 )
@@ -400,6 +341,7 @@ SecAct.activity.inference.ST <- function(
     is.differential = TRUE,
     sigMatrix = sigMatrix,
     is.group.sig = is.group.sig,
+    is.group.cor = is.group.cor,
     lambda = lambda,
     nrand = nrand,
     sigFilter = sigFilter
@@ -417,6 +359,7 @@ SecAct.activity.inference.ST <- function(
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param sigMatrix Secreted protein signature matrix.
 #' @param is.group.sig A logical indicating whether to group similar signatures.
+#' @param is.group.cor Correlation cutoff of similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
@@ -429,7 +372,8 @@ SecAct.activity.inference.scRNAseq <- function(
     cellType_meta,
     sigMatrix="SecAct",
     is.group.sig=TRUE,
-    lambda=5e+5,
+    is.group.cor=0.9,
+    lambda=1e+5,
     nrand=1000,
     sigFilter=FALSE
 )
@@ -465,6 +409,7 @@ SecAct.activity.inference.scRNAseq <- function(
     is.differential = TRUE,
     sigMatrix = sigMatrix,
     is.group.sig = is.group.sig,
+    is.group.cor = is.group.cor,
     lambda = lambda,
     nrand = nrand,
     sigFilter = sigFilter

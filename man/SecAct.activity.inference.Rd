@@ -12,7 +12,8 @@ SecAct.activity.inference(
   is.singleSampleLevel = FALSE,
   sigMatrix = "SecAct",
   is.group.sig = TRUE,
-  lambda = 5e+05,
+  is.group.cor = 0.9,
+  lambda = 1e+05,
   nrand = 1000,
   sigFilter = FALSE
 )
@@ -31,6 +32,8 @@ SecAct.activity.inference(
 \item{sigMatrix}{Secreted protein signature matrix.}
 
 \item{is.group.sig}{A logical indicating whether group similar signatures.}
+
+\item{is.group.cor}{Correlation cutoff of similar signatures.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 
