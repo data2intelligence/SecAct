@@ -4,7 +4,7 @@
 \alias{SecAct.inference}
 \title{Secreted protein activity inference}
 \usage{
-SecAct.inference(Y, SigMat = "SecAct", lambda = 1e+05, nrand = 1000)
+SecAct.inference(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
 }
 \arguments{
 \item{Y}{Gene expression matrix with gene symbol (row) x sample (column).}

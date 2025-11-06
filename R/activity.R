@@ -15,11 +15,11 @@
 #' @rdname SecAct.inference.old
 #' @export
 #'
-SecAct.inference.old <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
+SecAct.inference.old <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 {
   if(SigMat=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/AllSigFilteredBy_MoranI_TCGA_ICGC_0.25_ds3.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(SigMat,sep="\t",check.names=F)
@@ -77,11 +77,11 @@ SecAct.inference.old <- function(Y, SigMat="SecAct", lambda=5e+5, nrand=1000)
 #' @rdname SecAct.inference
 #' @export
 #'
-SecAct.inference <- function(Y, SigMat="SecAct", lambda=1e+05, nrand=1000)
+SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 {
   if(SigMat=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(SigMat,sep="\t",check.names=F)
@@ -189,7 +189,7 @@ SecAct.activity.inference <- function(
   sigMatrix="SecAct",
   is.group.sig=TRUE,
   is.group.cor=0.9,
-  lambda=1e+05,
+  lambda=5e+05,
   nrand=1000,
   sigFilter=FALSE
 )
@@ -230,7 +230,7 @@ SecAct.activity.inference <- function(
 
   if(sigMatrix=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(sigMatrix,sep="\t",check.names=F)
