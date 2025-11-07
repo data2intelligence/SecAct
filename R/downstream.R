@@ -187,7 +187,7 @@ SecAct.signaling.velocity.spotST <- function(
   # transform to log space
   exp@x <- log2(exp@x + 1)
 
-  weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
+  weights <- calWeights(colnames(exp), radius=200, sigma=100, diagAsZero=TRUE)
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- exp[,colnames(weights)] # remove spot island
 

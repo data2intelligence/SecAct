@@ -20,7 +20,7 @@ sweep_sparse <- function(m, margin, stats, fun)
 
 transferSymbol <- function(x)
 {
-  alias2symbol <- read.csv(system.file("extdata", 'NCBI_20230818_gene_result_alias2symbol.csv', package = 'SecAct'),as.is=T)
+  alias2symbol <- read.csv(system.file("extdata", 'NCBI_20251008_gene_result_alias2symbol.csv', package = 'SecAct'),as.is=T)
   alias2symbol[is.na(alias2symbol[,"Alias"]),"Alias"] <- "NA"
 
   x[x%in%alias2symbol[,1]] <- alias2symbol[
@@ -33,25 +33,6 @@ transferSymbol <- function(x)
 }
 
 rm_duplicates <- function(mat)
-{
-  dupl <- duplicated(rownames(mat))
-  if (sum(dupl) > 0){
-    dupl_genes <- unique(rownames(mat)[dupl])
-    mat_dupl <- mat[rownames(mat) %in% dupl_genes,,drop=F]
-    mat_dupl_names <- rownames(mat_dupl)
-    mat <- mat[!dupl,,drop=F]
-
-    for(gene in dupl_genes){
-      mat_dupl_gene <- mat_dupl[mat_dupl_names == gene,]
-      dupl_sum <- Matrix::rowSums(mat_dupl_gene)
-      max_flag <- which(dupl_sum==max(dupl_sum))
-      mat[gene,] <- mat_dupl_gene[max_flag[1],] # in case two values are max
-    }
-  }
-  return(mat)
-}
-
-rm_duplicates_sparse <- function(mat)
 {
   gene_count <- table(rownames(mat))
   gene_dupl <- names(gene_count)[gene_count>1]
@@ -81,34 +62,40 @@ scalar1 <- function(x)
   x / sqrt(sum(x^2))
 }
 
-calWeights <- function(SpotIDs, r=3, diag0=TRUE)
+calWeights <- function(SpotIDs, radius=200, sigma=100, diagAsZero=TRUE)
 {
-  d <- matrix(Inf,ncol=length(SpotIDs),nrow=length(SpotIDs))
-  colnames(d) <- SpotIDs
-  rownames(d) <- SpotIDs
+  spotCoordinates <- t(matrix(as.numeric(unlist(strsplit(SpotIDs,"x"))),nrow=2))
+  rownames(spotCoordinates) <- SpotIDs
+  colnames(spotCoordinates) <- c("array_row","array_col")
 
-  for(i in 1:ncol(d))
-  {
-    xy <- rownames(d)[i]
-    x <- as.numeric(unlist(strsplit(xy,"x")))[1]
-    y <- as.numeric(unlist(strsplit(xy,"x")))[2]
-    xm <- r-1
-    ym <- 2*(r-1)+1
-    x_y <- expand.grid((x-xm):(x+xm),(y-ym):(y+ym))
-    x_y_d <- cbind(x_y,d=sqrt( (0.5*sqrt(3)*(x_y[,1]-x))^2 + (0.5*(x_y[,2]-y))^2) )
-    rownames(x_y_d) <- paste0(x_y[,1],"x",x_y[,2])
-    x_y_d <- x_y_d[rownames(x_y_d)%in%rownames(d),]
+  # transform array ID to coordinates (um)
+  spotCoordinates[,1] <- spotCoordinates[,1] * 0.5 * sqrt(3) * 100
+  spotCoordinates[,2] <- spotCoordinates[,2] * 0.5 * 100
 
-    d[xy,rownames(x_y_d)] <- x_y_d[,3]
-    d[rownames(x_y_d),xy] <- x_y_d[,3]
-  }
+  nn_result <- RANN::nn2(spotCoordinates, searchtype="radius", radius=radius, k=nrow(spotCoordinates))
 
-  W <- exp(-d^2/2)
+  neighbor_indices <- nn_result$nn.idx
+  neighbor_distances <- nn_result$nn.dists
 
-  if(diag0==TRUE) diag(W) <- 0
+  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices)) # row indices (cell index)
+  j <- as.vector(t(neighbor_indices))
+  x <- as.vector(t(neighbor_distances))
 
-  W <- W[,colSums(W)>0] # remove spot island
-  W <- W[rowSums(W)>0,] # remove spot island
+  valid <- x<=radius & x>0
+  i <- i[valid]          # Keep only valid indices
+  j <- j[valid]          # Valid neighbor indices
+  x <- x[valid]          # Valid distances
+
+  # transform distance to weight
+  x <- exp( -x^2 / (2*sigma^2) )
+
+  # Create the sparse matrix using the 'i', 'j', and 'x' vectors
+  library(Matrix)
+  W <- sparseMatrix(i=i, j=j, x=x, dims=c(nrow(neighbor_indices), nrow(neighbor_indices)), repr="T")
+  rownames(W) <- rownames(spotCoordinates)
+  colnames(W) <- rownames(spotCoordinates)
+
+  if(diagAsZero==FALSE) diag(W) <- 1
 
   W
 }
