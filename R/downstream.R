@@ -850,7 +850,7 @@ SecAct.CCC.scRNAseq <- function(
   }
 
   rownames(counts) <- transferSymbol(rownames(counts))
-  counts <- rm_duplicates_sparse(counts)
+  counts <- rm_duplicates(counts)
 
   meta <- Seurat_obj@meta.data
 
