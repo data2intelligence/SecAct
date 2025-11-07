@@ -20,7 +20,7 @@ sweep_sparse <- function(m, margin, stats, fun)
 
 transferSymbol <- function(x)
 {
-  alias2symbol <- read.csv(system.file("extdata", 'NCBI_20251008_gene_result_alias2symbol.csv', package = 'SecAct'),as.is=T)
+  alias2symbol <- read.csv(system.file("extdata", 'NCBI_20251008_gene_result_alias2symbol.csv.gz', package = 'SecAct'),as.is=T)
   alias2symbol[is.na(alias2symbol[,"Alias"]),"Alias"] <- "NA"
 
   x[x%in%alias2symbol[,1]] <- alias2symbol[
