@@ -350,7 +350,7 @@ SecAct.activity.inference.ST <- function(
     sigMatrix="SecAct",
     is.group.sig=TRUE,
     is.group.cor=0.9,
-    lambda=1e+05,
+    lambda=5e+05,
     nrand=1000,
     sigFilter=FALSE
 )
@@ -435,7 +435,7 @@ SecAct.activity.inference.scRNAseq <- function(
     sigMatrix="SecAct",
     is.group.sig=TRUE,
     is.group.cor=0.9,
-    lambda=1e+05,
+    lambda=5e+05,
     nrand=1000,
     sigFilter=FALSE
 )
