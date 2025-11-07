@@ -10,7 +10,7 @@
 #' @rdname SecAct.signaling.pattern
 #' @export
 #'
-SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
+SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k)
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
@@ -39,7 +39,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k=3)
   exp@x <- log2(exp@x + 1)
 
   ## only need SPs
-  weights <- calWeights(colnames(exp), r=3, diag0=TRUE)
+  weights <- calWeights(colnames(exp), radius=radius, sigma=100, diagAsZero=TRUE)
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- exp[,colnames(weights)] # remove spot island
 
@@ -140,6 +140,7 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 #' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param gene Gene symbol coding a secreted protein.
 #' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
+#' @param radius Radius cut off.
 #' @param contourMap A logical indicating whether transform as contour map.
 #' @param animated A logical indicating whether generate animated figure.
 #' @return A ggplot2 object.
@@ -159,6 +160,7 @@ SecAct.signaling.velocity.spotST <- function(
   scale.factor = 1e+05,
   gene,
   signalMode="receiving",
+  radius=200,
   contourMap=FALSE,
   animated=FALSE
 )
@@ -187,7 +189,7 @@ SecAct.signaling.velocity.spotST <- function(
   # transform to log space
   exp@x <- log2(exp@x + 1)
 
-  weights <- calWeights(colnames(exp), radius=200, sigma=100, diagAsZero=TRUE)
+  weights <- calWeights(colnames(exp), radius=radius, sigma=100, diagAsZero=TRUE)
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- exp[,colnames(weights)] # remove spot island
 
@@ -443,7 +445,7 @@ SecAct.signaling.velocity.scST <- function(
     receiver,
     cellType_meta,
     scale.factor = 1e+05,
-    radius = 0.02
+    radius = 20
 )
 {
   if(class(SpaCET_obj)!="SpaCET")
@@ -463,7 +465,7 @@ SecAct.signaling.velocity.scST <- function(
   cellType2_cells <- which(cellType_vec==receiver)
 
 
-  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
+  nn_result <- RANN::nn2(coordinate_mat[,c("coordinate_x_um","coordinate_y_um")], k=100, searchtype="radius", radius=radius)
 
   neighbor_indices <- nn_result$nn.idx
   neighbor_distances <- nn_result$nn.dists
@@ -516,8 +518,7 @@ SecAct.signaling.velocity.scST <- function(
   startend <- cbind(startend, x_end=coordinate_mat[startend[,2],1] )
   startend <- cbind(startend, y_end=coordinate_mat[startend[,2],2] )
 
-
-  ggplot(fg.df, aes(x_slide_mm, y_slide_mm)) + #sdimx, sdimy
+  ggplot(fg.df, aes(coordinate_x_um, coordinate_y_um)) + #sdimx, sdimy
     geom_point(aes(colour=cellType),size=0.1) +
     geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,
                  arrow = arrow(length = unit(0.3, "cm")), color="#ff0099")+
@@ -582,7 +583,7 @@ SecAct.CCC.scST <- function(
     SpaCET_obj,
     cellType_meta,
     scale.factor = 1e+05,
-    radius = 0.02,
+    radius = 20,
     ratio_cutoff = 0.2,
     padj_cutoff = 0.01
 )
@@ -614,7 +615,7 @@ SecAct.CCC.scST <- function(
   exp@x <- log2(exp@x + 1)
 
 
-  nn_result <- RANN::nn2(coordinate_mat, k=100, searchtype="radius", radius=radius)
+  nn_result <- RANN::nn2(coordinate_mat[,c("coordinate_x_um","coordinate_y_um")], k=100, searchtype="radius", radius=radius)
 
   neighbor_indices <- nn_result$nn.idx
   neighbor_distances <- nn_result$nn.dists
@@ -830,7 +831,7 @@ SecAct.CCC.scRNAseq <- function(
   sigMatrix="SecAct",
   is.group.sig=TRUE,
   is.group.cor=0.9,
-  lambda=1e+5,
+  lambda=5e+05,
   nrand=1000,
   sigFilter=FALSE
 )

@@ -62,7 +62,7 @@ scalar1 <- function(x)
   x / sqrt(sum(x^2))
 }
 
-calWeights <- function(SpotIDs, radius=200, sigma=100, diagAsZero=TRUE)
+calWeights <- function(SpotIDs, radius, sigma=100, diagAsZero=TRUE)
 {
   spotCoordinates <- t(matrix(as.numeric(unlist(strsplit(SpotIDs,"x"))),nrow=2))
   rownames(spotCoordinates) <- SpotIDs
