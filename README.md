@@ -4,6 +4,7 @@
 # SecAct: Secreted Protein Activity Inference <img src="man/figures/sticker.png" align="right" alt="" width="120" />
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 SecAct is an R package designed for inferring the intercellular
@@ -24,6 +25,7 @@ functionalities and terms are explained more formally in the following
 tutorials.
 
 <p align="center">
+
 <img src="man/figures/workflow.png" width="100%"/>
 </p>
 
@@ -51,7 +53,9 @@ The package has been installed successfully on Operating Systems:
 - macOS Sequoia 15.3.1
 
 <details>
+
 <summary>
+
 How to install GNU Scientific Library (GSL)?
 </summary>
 
@@ -85,7 +89,9 @@ library(SecAct)
 
 dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
 expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
-res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE) # ~2 mins
+
+# infer activity; ~2 mins
+res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE) 
 
 head(res$zscore)
 ```

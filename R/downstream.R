@@ -200,7 +200,8 @@ SecAct.signaling.velocity.spotST <- function(
   }else{
     weights_new <- weights * exp_new[gene,]
   }
-  weights_new <- t(t(weights_new) * act_new[gene,])
+
+  weights_new <- Matrix::t(Matrix::t(weights_new) * act_new[gene,])
 
   coordi <- data.frame(
     SpaCET_obj@input$spotCoordinates[colnames(weights_new),1],
@@ -214,7 +215,6 @@ SecAct.signaling.velocity.spotST <- function(
 
   colnames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
   rownames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
-
 
   # sending
   startend <- data.frame()

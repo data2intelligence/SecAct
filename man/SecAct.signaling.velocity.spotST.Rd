@@ -9,6 +9,7 @@ SecAct.signaling.velocity.spotST(
   scale.factor = 1e+05,
   gene,
   signalMode = "receiving",
+  radius = 200,
   contourMap = FALSE,
   animated = FALSE
 )
@@ -21,6 +22,8 @@ SecAct.signaling.velocity.spotST(
 \item{gene}{Gene symbol coding a secreted protein.}
 
 \item{signalMode}{Mode of signaling velocity, i.e., "receiving", "sending", and "both".}
+
+\item{radius}{Radius cut off.}
 
 \item{contourMap}{A logical indicating whether transform as contour map.}
 

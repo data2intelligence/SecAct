@@ -8,7 +8,7 @@ SecAct.CCC.scST(
   SpaCET_obj,
   cellType_meta,
   scale.factor = 1e+05,
-  radius = 0.02,
+  radius = 20,
   ratio_cutoff = 0.2,
   padj_cutoff = 0.01
 )
