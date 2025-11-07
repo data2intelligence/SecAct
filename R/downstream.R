@@ -2,6 +2,7 @@
 #' @description Calculate the signaling pattern of secreted proteins based on their activities.
 #' @param SpaCET_obj A SpaCET object.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param radius Radius cut off.
 #' @param k Number of patterns for NMF.
 #' @return A ggplot2 object.
 #' @examples
@@ -10,7 +11,7 @@
 #' @rdname SecAct.signaling.pattern
 #' @export
 #'
-SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, k)
+SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius, k)
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
