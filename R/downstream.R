@@ -374,8 +374,9 @@ SecAct.signaling.velocity.spotST <- function(
   {
     p2 <- ggplot(grid_df,aes(x=x,y=y))+
       geom_contour_filled(aes(z=z)) +
-      scale_fill_brewer(palette = "PiYG",direction = -1)+
+      scale_fill_brewer(palette = "RdYlGn",direction = -1)+
       #scale_fill_manual(values=c("#b8e186","#de77ae","#c51b7d"))+
+      #scale_fill_manual(values=c("#000004FF","#1C1044FF","#4F127BFF","#812581FF","#B5367AFF","#E55064FF","#FB8761FF","#FEC287FF","#FCFDBFFF"))+
       scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
       scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
       geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
