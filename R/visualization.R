@@ -216,7 +216,6 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
 #' @title Cell-cell communication dot plot
 #' @description Draw a dot plot of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
-#' @param colors_cellType Colors for cell types.
 #' @param sender Sender cell types.
 #' @param secretedProtein Secreted proteins.
 #' @param receiver Receiver cell types.
@@ -224,7 +223,7 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
 #' @rdname SecAct.CCC.dot
 #' @export
 #'
-SecAct.CCC.dot <- function(data, colors_cellType, sender=NULL, secretedProtein=NULL, receiver=NULL)
+SecAct.CCC.dot <- function(data, sender=NULL, secretedProtein=NULL, receiver=NULL)
 {
   if(class(data)[1]=="SpaCET")
   {

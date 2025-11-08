@@ -163,6 +163,7 @@ SecAct.signaling.velocity.spotST <- function(
   signalMode="receiving",
   radius=200,
   contourMap=FALSE,
+  coutourBins=11,
   animated=FALSE
 )
 {
@@ -376,7 +377,7 @@ SecAct.signaling.velocity.spotST <- function(
   if(contourMap==TRUE)
   {
     p2 <- ggplot(grid_df,aes(x=x,y=y))+
-      geom_contour_filled(aes(z=z)) +
+      geom_contour_filled(aes(z=z),bins = coutourBins) +
       scale_fill_brewer(palette = "RdYlGn",direction = -1)+
       #scale_fill_manual(values=c("#b8e186","#de77ae","#c51b7d"))+
       #scale_fill_manual(values=c("#000004FF","#1C1044FF","#4F127BFF","#812581FF","#B5367AFF","#E55064FF","#FB8761FF","#FEC287FF","#FCFDBFFF"))+

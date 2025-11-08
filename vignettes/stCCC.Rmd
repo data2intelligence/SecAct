@@ -186,7 +186,6 @@ secretedProtein <- c(
 
 SecAct.CCC.dot(
   SpaCET_obj, 
-  colors_cellType=my_cols, 
   sender=cellTypes, 
   secretedProtein=secretedProtein, 
   receiver=cellTypes
