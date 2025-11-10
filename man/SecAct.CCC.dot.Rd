@@ -4,18 +4,10 @@
 \alias{SecAct.CCC.dot}
 \title{Cell-cell communication dot plot}
 \usage{
-SecAct.CCC.dot(
-  data,
-  colors_cellType,
-  sender = NULL,
-  secretedProtein = NULL,
-  receiver = NULL
-)
+SecAct.CCC.dot(data, sender = NULL, secretedProtein = NULL, receiver = NULL)
 }
 \arguments{
 \item{data}{A SpaCET object or a Seurat object.}
-
-\item{colors_cellType}{Colors for cell types.}
 
 \item{sender}{Sender cell types.}
 

@@ -11,6 +11,7 @@ SecAct.signaling.velocity.spotST(
   signalMode = "receiving",
   radius = 200,
   contourMap = FALSE,
+  coutourBins = 11,
   animated = FALSE
 )
 }

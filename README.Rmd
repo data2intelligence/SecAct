@@ -44,23 +44,6 @@ The package has been installed successfully on Operating Systems:
 * Red Hat Enterprise Linux 8.10 (Ootpa)
 * macOS Sequoia 15.3.1
 
-<details>
-  <summary>How to install GNU Scientific Library (GSL)?</summary>
-
-If your operating system does not already have GSL installed, please follow one of the installation methods below, depending on your operating system.
-
-``` 
-# Linux (Ubuntu/Debian):
-sudo apt-get install libgsl-dev
-
-# Linux (Fedora/RHEL-based):
-sudo dnf install gsl-devel
-
-# macOS (Homebrew):
-brew install gsl
-```
-</details>
-
 
 ## Dependencies
 
