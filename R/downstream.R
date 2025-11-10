@@ -1098,17 +1098,19 @@ SecAct.CCC.scRNAseq <- function(
 
   ccc <- ccc[!ccc[,"sender"]==ccc[,"receiver"],]
 
-  ccc[,"overall_strength"] <- ccc[,"sender_exp_logFC"] * ccc[,"receiver_act_diff"]
+  if(ncol(ccc)>0)
+  {
+    ccc[,"overall_strength"] <- ccc[,"sender_exp_logFC"] * ccc[,"receiver_act_diff"]
 
+    library(metap)
+    ccc[ccc[,"sender_exp_pv"]==0,"sender_exp_pv"] <- .Machine$double.xmin # sumlog requires non-zero
 
-  library(metap)
-  ccc[ccc[,"sender_exp_pv"]==0,"sender_exp_pv"] <- .Machine$double.xmin # sumlog requires non-zero
+    ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) sumlog(x)$p)
+    ccc[,"overall_pv.adj"] <- p.adjust(ccc[,"overall_pv"], method="BH")
+    ccc <- ccc[ccc[,"overall_pv.adj"]<padj_cutoff,]
 
-  ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) sumlog(x)$p)
-  ccc[,"overall_pv.adj"] <- p.adjust(ccc[,"overall_pv"], method="BH")
-  ccc <- ccc[ccc[,"overall_pv.adj"]<padj_cutoff,]
-
-  ccc <- ccc[order(ccc[,"overall_pv.adj"]),]
+    ccc <- ccc[order(ccc[,"overall_pv.adj"]),]
+  }
 
   Seurat_obj @misc $SecAct_output $SecretedProteinCCC  <- ccc
 
