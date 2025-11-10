@@ -1021,12 +1021,16 @@ SecAct.CCC.scRNAseq <- function(
       nrand = nrand
       )
 
+
   print("Step 3: linking source and receiver cell types.")
 
   smy_deg_comb <- data.frame()
   smy_act_comb <- data.frame()
 
   cellTypes <- names(Seurat_obj @misc $SecAct_output $SecretedProteinExpression)
+
+  if(length(cellTypes)<2) stop("Only one cell type with more than 30 cells.")
+
   for(cellType in cellTypes)
   {
     smy_deg <- Seurat_obj @misc $SecAct_output $SecretedProteinExpression [[cellType]]
