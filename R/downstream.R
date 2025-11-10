@@ -803,17 +803,16 @@ SecAct.CCC.scST <- function(
 #' @param condition_meta Column name in meta data that includes condition information.
 #' @param conditionCase Case condition.
 #' @param conditionControl Control condition.
+#' @param scale.factor Sets the scale factor for cell-level normalization in step2.
 #' @param act_diff_cutoff Cut off for activity change (i.e., z score) in step 1.
 #' @param exp_logFC_cutoff Cut off for log fold change in step 2.
 #' @param exp_fraction_case_cutoff Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.
 #' @param padj_cutoff Adjusted p value cut off.
-#' @param scale.factor Sets the scale factor for cell-level normalization in step2.
 #' @param sigMatrix Secreted protein signature matrix.
 #' @param is.group.sig A logical indicating whether to group similar signatures.
 #' @param is.group.cor Correlation cutoff of similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
-#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
 #' @return A Seurat object.
 #' @rdname SecAct.CCC.scRNAseq
 #' @export
@@ -824,18 +823,17 @@ SecAct.CCC.scRNAseq <- function(
   condition_meta,
   conditionCase,
   conditionControl,
+  scale.factor = 1e+05,
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
   exp_mean_all_cutoff = 2,
   exp_fraction_case_cutoff = 0.1,
   padj_cutoff = 0.01,
-  scale.factor = 1e+05,
   sigMatrix="SecAct",
   is.group.sig=TRUE,
   is.group.cor=0.9,
   lambda=5e+05,
-  nrand=1000,
-  sigFilter=FALSE
+  nrand=1000
 )
 {
   if(!class(Seurat_obj)[1]=="Seurat")
@@ -872,7 +870,7 @@ SecAct.CCC.scRNAseq <- function(
 
   if(sigMatrix=="SecAct")
   {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/vst_condition_logUMI_cellType.tsv.gz")
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
     X <- read.table(Xfile,sep="\t",check.names=F)
   }else{
     X <- read.table(sigMatrix,sep="\t",check.names=F)
@@ -883,9 +881,9 @@ SecAct.CCC.scRNAseq <- function(
     # case
     if(is.null(condition_meta))
     {
-      expr <- counts[,meta[,cellType_meta]==cellType]
+      expr <- counts[,meta[,cellType_meta]==cellType,drop=FALSE]
     }else{
-      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType,drop=FALSE]
     }
     if(ncol(expr)<30) next
 
@@ -903,9 +901,9 @@ SecAct.CCC.scRNAseq <- function(
     # control
     if(is.null(condition_meta))
     {
-      expr <- counts[,meta[,cellType_meta]!=cellType]
+      expr <- counts[,meta[,cellType_meta]!=cellType,drop=FALSE]
     }else{
-      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType,drop=FALSE]
     }
 
     # normalize to TPM
@@ -970,9 +968,9 @@ SecAct.CCC.scRNAseq <- function(
     # case
     if(is.null(condition_meta))
     {
-      expr <- counts[,meta[,cellType_meta]==cellType]
+      expr <- counts[,meta[,cellType_meta]==cellType,drop=FALSE]
     }else{
-      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType]
+      expr <- counts[,meta[,condition_meta]==conditionCase&meta[,cellType_meta]==cellType,drop=FALSE]
     }
     if(ncol(expr)<30) next
 
@@ -991,9 +989,9 @@ SecAct.CCC.scRNAseq <- function(
     # control
     if(is.null(condition_meta))
     {
-      expr <- counts[,meta[,cellType_meta]!=cellType]
+      expr <- counts[,meta[,cellType_meta]!=cellType,drop=FALSE]
     }else{
-      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType]
+      expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType,drop=FALSE]
     }
 
     expr <- Matrix::rowSums(expr)
@@ -1020,8 +1018,7 @@ SecAct.CCC.scRNAseq <- function(
       is.group.sig = is.group.sig,
       is.group.cor = is.group.cor,
       lambda = lambda,
-      nrand = nrand,
-      sigFilter = sigFilter
+      nrand = nrand
       )
 
   print("Step 3: linking source and receiver cell types.")
