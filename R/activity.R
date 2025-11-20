@@ -260,6 +260,9 @@ SecAct.activity.inference <- function(
   }
 
   olp <- intersect(row.names(Y),row.names(X))
+
+  if(length(olp)<2) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
+
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
 
