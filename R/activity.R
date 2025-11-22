@@ -155,6 +155,126 @@ SecAct.inference <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
   res
 }
 
+#' @title Secreted protein activity inference
+#' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
+#' @param Y Gene expression matrix with gene symbol (row) x sample (column).
+#' @param SigMat Secreted protein signature matrix.
+#' @param lambda Penalty factor in the ridge regression.
+#' @param nrand Number of randomizations in the permutation test, with a default value 1000.
+#' @return
+#'
+#' A list with four items, each is a matrix.
+#' beta: regression coefficients
+#' se: standard errors of coefficients
+#' zscore: beta/se
+#' pvalue: statistical significance
+#'
+#' @rdname SecAct.inference.p
+#' @export
+#'
+SecAct.inference.p <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000, coreNo)
+{
+  if(SigMat=="SecAct")
+  {
+    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
+    X <- read.table(Xfile,sep="\t",check.names=F)
+  }else{
+    X <- read.table(SigMat,sep="\t",check.names=F)
+  }
+
+  olp <- intersect(row.names(Y),row.names(X))
+  X <- as.matrix(X[olp,,drop=F])
+  Y <- as.matrix(Y[olp,,drop=F])
+
+  X <- scale(X)
+  Y <- scale(Y)
+
+
+  n <- nrow(Y)
+  p <- ncol(X)
+  m <- ncol(Y)
+
+  A <- crossprod(X) + lambda * diag(p)  # SPD
+  R <- chol(A)                          # A = R'R
+  beta <- backsolve(R, forwardsolve(t(R), crossprod(X, Y)))
+
+
+  split_ranges <- function(N, C) {
+    C <- max(1L, min(as.integer(C), as.integer(N)))  # at most N non-empty ranges
+    base  <- N %/% C
+    extra <- N %% C
+    sizes <- rep(base, C)
+    if (extra > 0L) sizes[seq_len(extra)] <- sizes[seq_len(extra)] + 1L
+
+    ends   <- cumsum(sizes)
+    starts <- c(1L, ends[-C] + 1L)
+    Map(seq.int, starts, ends)
+  }
+  ranges <- split_ranges(nrand, coreNo)
+
+  worker_range <- function(idx_range)
+  {
+    aver   <- matrix(0.0, p, m)
+    aver_sq <- matrix(0.0, p, m)
+    pvalue    <- matrix(0L,  p, m)
+
+    for (i in idx_range)
+    {
+      set.seed(i)
+      beta_rand <- backsolve(R, forwardsolve(t(R), crossprod(X, Y[sample.int(n),])))
+
+      aver <- aver + beta_rand
+      aver_sq <- aver_sq + beta_rand^2
+      pvalue <- pvalue + (abs(beta_rand)>=abs(beta))
+    }
+
+    list(aver = aver, aver_sq = aver_sq, pvalue = pvalue)
+  }
+
+  plan(multisession, workers = coreNo)
+  parts <- future_lapply(ranges, worker_range, future.seed = NULL)
+
+  # Reduce results
+  aver   <- Reduce(`+`, lapply(parts, `[[`, "aver"))
+  aver_sq <- Reduce(`+`, lapply(parts, `[[`, "aver_sq"))
+  pvalue    <- Reduce(`+`, lapply(parts, `[[`, "pvalue"))
+
+
+  aver <- aver/nrand
+  aver_sq <- aver_sq/nrand
+  aver_sq <- sqrt(aver_sq - aver*aver)
+
+  zscore <- (beta-aver)/aver_sq
+
+  pvalue <- (pvalue+1)/(nrand+1)
+
+  rownames(beta) <- colnames(X)
+  colnames(beta) <- colnames(Y)
+
+  rownames(aver_sq) <- colnames(X)
+  colnames(aver_sq) <- colnames(Y)
+
+  rownames(zscore) <- colnames(X)
+  colnames(zscore) <- colnames(Y)
+
+  rownames(pvalue) <- colnames(X)
+  colnames(pvalue) <- colnames(Y)
+
+  beta <- expand_rows(beta)
+  aver_sq <- expand_rows(aver_sq)
+  zscore <- expand_rows(zscore)
+  pvalue <- expand_rows(pvalue)
+
+  beta <- beta[sort(rownames(beta)),,drop=F]
+  aver_sq <- aver_sq[sort(rownames(beta)),,drop=F]
+  zscore <- zscore[sort(rownames(beta)),,drop=F]
+  pvalue <- pvalue[sort(rownames(beta)),,drop=F]
+
+  res <- list(beta=beta, se=aver_sq, zscore=zscore, pvalue=pvalue)
+
+  res
+}
+
 
 #' @title Secreted protein activity inference
 #' @description Infer the signaling activity of 1248 secreted proteins from gene expression profiles.
