@@ -1,132 +1,48 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/bulk.html</loc>
-  </url>
-  <url>
-    <loc>/articles/bulkChange.html</loc>
-  </url>
-  <url>
-    <loc>/articles/bulkCohort.html</loc>
-  </url>
-  <url>
-    <loc>/articles/bulkDiff.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/scCCC.html</loc>
-  </url>
-  <url>
-    <loc>/articles/scState.html</loc>
-  </url>
-  <url>
-    <loc>/articles/singleCell.html</loc>
-  </url>
-  <url>
-    <loc>/articles/spatial.html</loc>
-  </url>
-  <url>
-    <loc>/articles/stCCC.html</loc>
-  </url>
-  <url>
-    <loc>/articles/stPattern.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct-package.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.CCC.circle.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.CCC.dot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.CCC.heatmap.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.CCC.sankey.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.CCC.scRNAseq.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.CCC.scST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.activity.inference.ST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.activity.inference.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.activity.inference.scRNAseq.2.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.activity.inference.scRNAseq.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.bar.plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.coxph.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.coxph.regression.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.heat.map.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.heatmap.plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.inference.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.lollipop.plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.pattern.gene.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.signaling.pattern.gene.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.signaling.pattern.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.signaling.velocity.scST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.signaling.velocity.spotST.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.signalling.direction.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.spatial.velocity.html</loc>
-  </url>
-  <url>
-    <loc>/reference/SecAct.survival.plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/articles/bulk.html</loc></url>
+<url><loc>/articles/bulkChange.html</loc></url>
+<url><loc>/articles/bulkCohort.html</loc></url>
+<url><loc>/articles/bulkDiff.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/scCCC.html</loc></url>
+<url><loc>/articles/scState.html</loc></url>
+<url><loc>/articles/singleCell.html</loc></url>
+<url><loc>/articles/spatial.html</loc></url>
+<url><loc>/articles/stCCC.html</loc></url>
+<url><loc>/articles/stPattern.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/SecAct-package.html</loc></url>
+<url><loc>/reference/SecAct.CCC.circle.html</loc></url>
+<url><loc>/reference/SecAct.CCC.dot.html</loc></url>
+<url><loc>/reference/SecAct.CCC.heatmap.html</loc></url>
+<url><loc>/reference/SecAct.CCC.sankey.html</loc></url>
+<url><loc>/reference/SecAct.CCC.scRNAseq.html</loc></url>
+<url><loc>/reference/SecAct.CCC.scST.html</loc></url>
+<url><loc>/reference/SecAct.activity.inference.ST.html</loc></url>
+<url><loc>/reference/SecAct.activity.inference.html</loc></url>
+<url><loc>/reference/SecAct.activity.inference.scRNAseq.2.html</loc></url>
+<url><loc>/reference/SecAct.activity.inference.scRNAseq.html</loc></url>
+<url><loc>/reference/SecAct.bar.plot.html</loc></url>
+<url><loc>/reference/SecAct.coxph.html</loc></url>
+<url><loc>/reference/SecAct.coxph.regression.html</loc></url>
+<url><loc>/reference/SecAct.heat.map.html</loc></url>
+<url><loc>/reference/SecAct.heatmap.plot.html</loc></url>
+<url><loc>/reference/SecAct.inference.gsl.html</loc></url>
+<url><loc>/reference/SecAct.inference.html</loc></url>
+<url><loc>/reference/SecAct.inference.r.html</loc></url>
+<url><loc>/reference/SecAct.lollipop.plot.html</loc></url>
+<url><loc>/reference/SecAct.pattern.gene.html</loc></url>
+<url><loc>/reference/SecAct.signaling.pattern.gene.html</loc></url>
+<url><loc>/reference/SecAct.signaling.pattern.html</loc></url>
+<url><loc>/reference/SecAct.signaling.velocity.scST.html</loc></url>
+<url><loc>/reference/SecAct.signaling.velocity.spotST.html</loc></url>
+<url><loc>/reference/SecAct.signalling.direction.html</loc></url>
+<url><loc>/reference/SecAct.spatial.velocity.html</loc></url>
+<url><loc>/reference/SecAct.survival.plot.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
 </urlset>
+

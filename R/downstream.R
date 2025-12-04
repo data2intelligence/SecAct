@@ -535,10 +535,10 @@ SecAct.signaling.velocity.scST <- function(
       legend.position = "right"
     )
 
-  #x.left <- 8.29
-  #x.right <- 8.366
-  #y.top <- 1.4
-  #y.bottom <- 1.1
+  #x.left <- 8.29*1000
+  #x.right <- 8.366*1000
+  #y.top <- 1.4*1000
+  #y.bottom <- 1.1*1000
   #
   #fg.df_cut <- fg.df[
   #  fg.df[,1]> x.left&
@@ -549,7 +549,7 @@ SecAct.signaling.velocity.scST <- function(
   #
   #startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
   #
-  #p2 <- ggplot(fg.df_cut, aes(x_slide_mm, y_slide_mm)) +
+  #p2 <- ggplot(fg.df_cut, aes(coordinate_x_um, coordinate_y_um)) +
   #  geom_point(aes(color=cellType),size=8) +
   #  geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut,
   #               arrow = arrow(length = unit(0.7, "cm")),color="#ff0099",linewidth=4)+

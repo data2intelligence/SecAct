@@ -33,7 +33,8 @@ navbar:
 reference:
   - title: Activity inference
     contents:
-    - SecAct.inference
+    - SecAct.inference.gsl
+    - SecAct.inference.r
     - SecAct.activity.inference
     - SecAct.activity.inference.ST
     - SecAct.activity.inference.scRNAseq

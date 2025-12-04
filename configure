@@ -6,12 +6,16 @@ GSL_CFLAGS=$(gsl-config --cflags)
 GSL_LIBS=$(gsl-config --libs)
 
 if [ -z "$GSL_CFLAGS" ] || [ -z "$GSL_LIBS" ]; then
-    echo "ERROR: GSL not found. Please install GNU Scientific Library (GSL). You can find the solution within the Installation part of SecAct Readme Page."
+    echo "ERROR: GSL not found."
+    echo "Please install GSL first:"
+    echo "  macOS: brew install gsl"
+    echo "  Ubuntu/Debian: sudo apt-get install libgsl-dev"
+    echo "  RedHat/CentOS: sudo yum install gsl-devel"
+    echo "  Fedora/RHEL: sudo dnf install gsl-devel"
     exit 1
 fi
 
 echo "GSL found!"
-
 
 #make the Makevars file
 if [ ! -e "./src/Makevars" ]; then
