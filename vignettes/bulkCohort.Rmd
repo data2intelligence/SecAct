@@ -117,9 +117,6 @@ User can select a secreted protein of interest to draw its survival curve using 
 # Take secreted protein WNT7B as an example
 riskMat["WNT7B",]
 
-## risk score z      p value 
-## 3.4410021822 0.0005795639 
-
 # visualize in survival plot
 SecAct.survival.plot(act, clinical, "WNT7B", x.title="Overall (Days)")
 
