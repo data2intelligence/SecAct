@@ -871,9 +871,9 @@ SecAct.CCC.scRNAseq <- function(
   if(sigMatrix=="SecAct")
   {
     Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
-    X <- read.table(Xfile,sep="\t",check.names=F)
+    SPs <- strsplit(readLines(Xfile, n = 1), "\t")[[1]]
   }else{
-    X <- read.table(sigMatrix,sep="\t",check.names=F)
+    SPs <- strsplit(readLines(sigMatrix, n = 1), "\t")[[1]]
   }
 
   for(cellType in cellTypes)
@@ -916,7 +916,9 @@ SecAct.CCC.scRNAseq <- function(
 
     expr_control <- expr
 
-    genes <- intersect(rownames(expr_case), unlist(strsplit(colnames(X),"|",fixed=T)))
+
+    # case vs control
+    genes <- intersect(rownames(expr_case), SPs)
 
     case_mat <- expr_case[genes, , drop = FALSE]
     control_mat <- expr_control[genes, , drop = FALSE]

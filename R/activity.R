@@ -427,17 +427,26 @@ SecAct.activity.inference.scRNAseq <- function(
     stop("Please input a Seurat object.")
   }
 
-  # extract count matrix
-  expr <-  inputProfile@assays$RNA@counts
+  if(class(Seurat_obj@assays$RNA)=="Assay5")
+  {
+    counts <- Seurat_obj@assays$RNA@layers$counts
+    colnames(counts) <- rownames(Seurat_obj@assays$RNA@cells)
+    rownames(counts) <- rownames(Seurat_obj@assays$RNA@features)
+  }else{
+    counts <-  Seurat_obj@assays$RNA@counts
+  }
+
+  rownames(counts) <- transferSymbol(rownames(counts))
+  counts <- rm_duplicates(counts)
+
   cellType_vec <- inputProfile@meta.data[,cellType_meta]
 
   # generate pseudo bulk
-  bulk <- data.frame()
+  expr <- data.frame()
   for(cellType in sort(unique(cellType_vec)))
   {
-    bulk[rownames(expr),cellType] <- Matrix::rowSums(expr[,cellType_vec==cellType,drop=F])
+    expr[rownames(counts),cellType] <- Matrix::rowSums(counts[,cellType_vec==cellType,drop=F])
   }
-  expr <- bulk
 
   # normalize to TPM
   expr <- sweep(expr, 2, Matrix::colSums(expr), "/") *1e6

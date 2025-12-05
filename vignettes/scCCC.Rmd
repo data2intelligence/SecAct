@@ -62,7 +62,7 @@ p1+p2
 When running `SecAct.CCC.scRNAseq`, user need to assign the `cellType_meta` and `condition_meta` with the column names of cell-type annotation and condition information in `Seurat_obj@meta.data`, respectively. Also, claim what case and control conditions are by `conditionCase` and `conditionControl`. User can find the SecAct results in `Seurat_obj @misc $SecAct_output`.
 
 ``` r
-# infer activity; ~10 mins
+# infer activity; ~2 mins
 Seurat_obj <- SecAct.CCC.scRNAseq(
   Seurat_obj, 
   cellType_meta="MyCellType",
