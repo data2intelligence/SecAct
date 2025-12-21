@@ -3,7 +3,7 @@
 #' @param Y Gene expression matrix with gene symbol (row) x sample (column).
 #' @param SigMat Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
-#' @param nrand Number of randomizations in the permutation test, with a default value 1000.
+#' @param nrand Number of randomization in the permutation test, with a default value 1000.
 #' @return
 #'
 #' A list with four items, each is a matrix.
@@ -402,6 +402,7 @@ SecAct.activity.inference.ST <- function(
 #' @param inputProfile A Seurat object.
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param sigMatrix Secreted protein signature matrix.
+#' @param is.singleCellLevel A logical indicating whether to calculate for each single cell.
 #' @param is.group.sig A logical indicating whether to group similar signatures.
 #' @param is.group.cor Correlation cutoff of similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
@@ -415,6 +416,7 @@ SecAct.activity.inference.scRNAseq <- function(
     inputProfile,
     cellType_meta,
     sigMatrix="SecAct",
+    is.singleCellLevel=FALSE,
     is.group.sig=TRUE,
     is.group.cor=0.9,
     lambda=5e+05,
@@ -427,37 +429,48 @@ SecAct.activity.inference.scRNAseq <- function(
     stop("Please input a Seurat object.")
   }
 
-  if(class(Seurat_obj@assays$RNA)=="Assay5")
+  if(class(inputProfile@assays$RNA)=="Assay5")
   {
-    counts <- Seurat_obj@assays$RNA@layers$counts
-    colnames(counts) <- rownames(Seurat_obj@assays$RNA@cells)
-    rownames(counts) <- rownames(Seurat_obj@assays$RNA@features)
+    counts <- inputProfile@assays$RNA@layers$counts
+    colnames(counts) <- rownames(inputProfile@assays$RNA@cells)
+    rownames(counts) <- rownames(inputProfile@assays$RNA@features)
   }else{
-    counts <-  Seurat_obj@assays$RNA@counts
+    counts <-  inputProfile@assays$RNA@counts
   }
 
   rownames(counts) <- transferSymbol(rownames(counts))
   counts <- rm_duplicates(counts)
 
-  cellType_vec <- inputProfile@meta.data[,cellType_meta]
-
-  # generate pseudo bulk
-  expr <- data.frame()
-  for(cellType in sort(unique(cellType_vec)))
+  if(is.singleCellLevel==FALSE)
   {
-    expr[rownames(counts),cellType] <- Matrix::rowSums(counts[,cellType_vec==cellType,drop=F])
-  }
+    cellType_vec <- inputProfile@meta.data[,cellType_meta]
 
-  # normalize to TPM
-  expr <- sweep(expr, 2, Matrix::colSums(expr), "/") *1e6
+    # generate pseudo bulk
+    expr <- data.frame()
+    for(cellType in sort(unique(cellType_vec)))
+    {
+      expr[rownames(counts),cellType] <- Matrix::rowSums(counts[,cellType_vec==cellType,drop=F])
+    }
+
+    # normalize to TPM
+    expr <- sweep(expr, 2, Matrix::colSums(expr), "/") *1e6
+
+  }else{
+    expr <- sweep(counts, 2, Matrix::colSums(counts), "/") *1e5
+
+  }
+  rm(counts);gc()
 
   # transform to log space
   expr <- log2(expr + 1)
 
   # normalized with the control samples
-  expr.diff <- expr - rowMeans(expr)
+  expr.diff <- expr - Matrix::rowMeans(expr)
 
-  res <- SecAct.activity.inference(
+  rm(expr);gc()
+
+  inputProfile @misc $SecAct_output $SecretedProteinActivity <-
+    SecAct.activity.inference(
     inputProfile = expr.diff,
     is.differential = TRUE,
     sigMatrix = sigMatrix,
@@ -467,8 +480,6 @@ SecAct.activity.inference.scRNAseq <- function(
     nrand = nrand,
     sigFilter = sigFilter
   )
-
-  inputProfile @misc $SecAct_output $SecretedProteinActivity <- res
 
   inputProfile
 }

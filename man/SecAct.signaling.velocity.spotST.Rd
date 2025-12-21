@@ -42,6 +42,5 @@ The velocity direction starts from the source cell producing a secreted protein 
 \examples{
 SecAct.signaling.velocity.spotST(SpaCET_obj, gene="TGFB1", signalMode="receiving")
 SecAct.signaling.velocity.spotST(SpaCET_obj, gene="TGFB1", signalMode="sending")
-SecAct.signaling.velocity.spotST(SpaCET_obj, gene="TGFB1", signalMode="both")
 
 }

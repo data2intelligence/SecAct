@@ -80,18 +80,18 @@
 
     
     
-<p>This tutorial demonstrates how to infer the activity change of
-secreted proteins between two phenotypes, such as treatment vs control,
+<p>This tutorial demonstrates how to infer changes in secreted protein
+signaling activity between two phenotypes, such as treatment vs control,
 tumor vs normal, or responder vs non-responder. The input expression
 values, from either RNA sequencing or MicroArray, should be transformed
 by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA-Seq
 data.</p>
 <p>For this demonstration, we employ a clinical
 <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE100093" target="_blank" class="external-link">cohort</a>
-of patients with discoid lupus erythematosus, who received a single dose
-of anti-IFNG antibody AMG 811. Using the SecAct framework, we will
-predict the activity change of secreted proteins between treatment and
-control groups.</p>
+of patients with discoid lupus erythematosus who received a single dose
+of anti-IFNG antibody AMG 811. Using the SecAct framework, we predict
+the activity change of secreted proteins between treatment and control
+groups.</p>
 <div class="section level2">
 <h2 id="prepare-expression-data">Prepare expression data<a class="anchor" aria-label="anchor" href="#prepare-expression-data"></a>
 </h2>
@@ -119,12 +119,12 @@ groups.</p>
 into <code>SecAct.activity.inference</code> to infer the activity change
 of secreted proteins between treatment and control groups.
 <code>SecAct</code> calculates the OVERALL activity change between two
-phenotypes with default setting
-<code>is.singleSampleLevel = FALSE</code>. You can also obtain the
-activity change for each SINGLE sample in <code>expr.treatment</code> by
-setting <code>is.singleSampleLevel = TRUE</code>. Of note, if your
-samples are paired, just change the default setting
-<code>is.paired = FALSE</code> to <code>TRUE</code>.</p>
+groups with default setting <code>is.singleSampleLevel = FALSE</code>.
+You can also obtain the activity change for each SINGLE sample in
+<code>expr.treatment</code> by setting
+<code>is.singleSampleLevel = TRUE</code>. Of note, if your samples are
+paired, just change the default setting <code>is.paired = FALSE</code>
+to <code>is.paired = TRUE</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity change; ~2 mins</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>

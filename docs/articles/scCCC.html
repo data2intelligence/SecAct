@@ -132,10 +132,10 @@ easily access them using the following code.</p>
 <p><code>SecAct</code> performs three steps to infer condition-specific
 cell-cell communication mediated by secreted proteins: (1) assessing
 changes in secreted protein expression for each cell type (defined the
-source cell type) between two conditions, (2) calculating changes in
-secreted protein activity for each cell type (defined the receiver cell
-type) between two conditions, and (3) linking source and receiver cell
-types.</p>
+source cell type) between two conditions (e.g., Metastatic vs Primary),
+(2) calculating changes in secreted protein signaling activity for each
+cell type (defined the receiver cell type) between two conditions, and
+(3) linking source and receiver cell types.</p>
 <p>When running <code>SecAct.CCC.scRNAseq</code>, user need to assign
 the <code>cellType_meta</code> and <code>condition_meta</code> with the
 column names of cell-type annotation and condition information in
@@ -144,7 +144,7 @@ and control conditions are by <code>conditionCase</code> and
 <code>conditionControl</code>. User can find the SecAct results in
 <code>Seurat_obj @misc $SecAct_output</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity; ~2 mins</span></span>
+<code class="sourceCode R"><span><span class="co"># infer CCC; ~2 mins</span></span>
 <span><span class="va">Seurat_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.CCC.scRNAseq.html">SecAct.CCC.scRNAseq</a></span><span class="op">(</span></span>
 <span>  <span class="va">Seurat_obj</span>, </span>
 <span>  cellType_meta<span class="op">=</span><span class="st">"MyCellType"</span>,</span>
@@ -162,6 +162,12 @@ and control conditions are by <code>conditionCase</code> and
 <span></span>
 <span><span class="co"># cell-cell communication results</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">Seurat_obj</span> <span class="op">@</span><span class="va">misc</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinCCC</span><span class="op">)</span></span></code></pre></div>
+<p>This table lists metastasis-specific cell–cell communication events
+mediated by secreted proteins. Each row represents one interaction,
+indicating that the corresponding secreted protein shows upregulated
+expression in the sender cell type and increased signaling activity in
+the receiver cell type under metastatic compared with primary
+conditions.</p>
 </div>
 <div class="section level2">
 <h2 id="visualize-cell-cell-communication">Visualize cell-cell communication<a class="anchor" aria-label="anchor" href="#visualize-cell-cell-communication"></a>
@@ -170,9 +176,15 @@ and control conditions are by <code>conditionCase</code> and
 communication, i.e., heatmap and circle plot. The number in the heatmap
 represents the count of secreted proteins from senders to receivers.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.heatmap.html">SecAct.CCC.heatmap</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, row.sorted<span class="op">=</span><span class="cn">TRUE</span>, column.sorted<span class="op">=</span><span class="cn">TRUE</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span>
-<span><span class="fu"><a href="../reference/SecAct.CCC.circle.html">SecAct.CCC.circle</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span></code></pre></div>
-<p><img src="img/OV_heatmap.png" width="45%" style="border:none"><img src="img/OV_circlize.png" width="45%" style="border:none"></p>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.heatmap.html">SecAct.CCC.heatmap</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, row.sorted<span class="op">=</span><span class="cn">TRUE</span>, column.sorted<span class="op">=</span><span class="cn">TRUE</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span></code></pre></div>
+<center>
+<img src="img/OV_heatmap.png" width="50%" style="border:none">
+</center>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/SecAct.CCC.circle.html">SecAct.CCC.circle</a></span><span class="op">(</span><span class="va">Seurat_obj</span>, colors_cellType<span class="op">=</span><span class="va">my_cols</span><span class="op">)</span></span></code></pre></div>
+<center>
+<img src="img/OV_circlize.png" width="50%" style="border:none">
+</center>
 </div>
 <div class="section level2">
 <h2 id="visualize-secreted-signaling-flow">Visualize secreted signaling flow<a class="anchor" aria-label="anchor" href="#visualize-secreted-signaling-flow"></a>
@@ -182,7 +194,7 @@ represents the count of secreted proteins from senders to receivers.</p>
 visualize them using <code>SecAct.CCC.sankey</code>. You need to assign
 values to <code>sender</code>, <code>secretedProtein</code>, and
 <code>receiver</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sender</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Fibroblast"</span>,<span class="st">"Macrophage"</span>,<span class="st">"Endothelial"</span>,<span class="st">"CD8T"</span>,<span class="st">"Tex"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">secretedProtein</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>

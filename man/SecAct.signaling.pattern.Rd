@@ -4,7 +4,7 @@
 \alias{SecAct.signaling.pattern}
 \title{Secreted protein signaling pattern}
 \usage{
-SecAct.signaling.pattern(SpaCET_obj, scale.factor = 1e+05, radius, k)
+SecAct.signaling.pattern(SpaCET_obj, scale.factor = 1e+05, radius = 200, k)
 }
 \arguments{
 \item{SpaCET_obj}{A SpaCET object.}

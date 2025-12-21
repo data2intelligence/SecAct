@@ -62,16 +62,9 @@ scalar1 <- function(x)
   x / sqrt(sum(x^2))
 }
 
-calWeights <- function(SpotIDs, radius, sigma=100, diagAsZero=TRUE)
+
+calWeights <- function(spotCoordinates, radius, sigma=100, diagAsZero=TRUE)
 {
-  spotCoordinates <- t(matrix(as.numeric(unlist(strsplit(SpotIDs,"x"))),nrow=2))
-  rownames(spotCoordinates) <- SpotIDs
-  colnames(spotCoordinates) <- c("array_row","array_col")
-
-  # transform array ID to coordinates (um)
-  spotCoordinates[,1] <- spotCoordinates[,1] * 0.5 * sqrt(3) * 100
-  spotCoordinates[,2] <- spotCoordinates[,2] * 0.5 * 100
-
   nn_result <- RANN::nn2(spotCoordinates, searchtype="radius", radius=radius, k=nrow(spotCoordinates))
 
   neighbor_indices <- nn_result$nn.idx
@@ -99,7 +92,6 @@ calWeights <- function(SpotIDs, radius, sigma=100, diagAsZero=TRUE)
 
   W
 }
-
 
 CoxPH_best_separation = function(X, Y, margin)
 {

@@ -121,14 +121,12 @@ SpaCET.visualize.spatialFeature(
 After loading ST data, user can run `SecAct.activity.inference.ST` to infer the signaling activities of secreted proteins for each spot. The output are stored in `SpaCET_obj @results $SecAct_output $SecretedProteinActivity`, which includes four items, (1) beta: regression coefficients; (2) se: standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value of z score from permutation test.
 
 ``` r
-# infer activity; ~1 hrs
+# infer activity; ~30 mins
 SpaCET_obj <- SecAct.activity.inference.ST(
   inputProfile = SpaCET_obj,
   scale.factor = 1000,
   sigFilter=TRUE
 )
-# The running times mentioned here and onwards were obtained
-# from our HPC with 20 cores and 200 GB of memory.
 
 # show activity
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
@@ -145,12 +143,12 @@ First, `SecAct` filters >1,000 secreted proteins to identify the significant sec
 Second, We designed a computational strategy to statistically test whether a type of secreted protein s mediates the intercellular communication from cell type 1 to cell type 2. Cell-type annotations were retrieved from the original study. First, we identified all neighboring pairs of cells, where one cell was from cell type 1 and the other from cell type 2, based on spatial proximity (distance < 20 μm). Among these neighboring pairs, we identified communicating pairs of cells as those where cell type 1 expressed RNA for s (count > 0), and cell type 2 exhibited signaling activity for s (activity score > 0). We then calculated a communication score for cell type 1 → s → cell type 2, defined as the ratio of communicating pairs to total neighboring pairs. The p-value is Probability (random ratio >= real ratio), computed through 1000 randomizations adjusted by the Benjamini–Hochberg procedure. In each randomization, we randomly permuted the cell IDs within each cell type. A cell type 1 → s → cell type 2 communication is considered significant if ratio > 0.2 and FDR < 0.01.
 
 ``` r
-# infer CCC; ~1 hrs
+# infer CCC; ~20 mins
 SpaCET_obj <- SecAct.CCC.scST(
     SpaCET_obj,
     cellType_meta = "cellType",
     scale.factor = 1000,
-    radius = 0.02,
+    radius = 20,
     ratio_cutoff = 0.2,
     padj_cutoff = 0.01
 )
@@ -196,7 +194,7 @@ SecAct.CCC.dot(
 <img src="img/HCC_CoxMx_dot.png" width="60%" style="border:none" />
 
 
-## Visualize signaling velocity
+## Visualize secreted signaling velocity
 User can select the cell-cell communication of interest from `SpaCET_obj @results $SecAct_output $SecretedProteinCCC` to visualize them using `SecAct.signaling.velocity.scST`. You need to assign values to `sender`, `secretedProtein`, and `receiver`.
 
 ```
@@ -211,4 +209,18 @@ SecAct.signaling.velocity.scST(
 ```
 
 <img src="img/HCC_CoxMx_velocity.png" width="60%" style="border:none" />
+
+```
+SecAct.signaling.velocity.scST(
+  SpaCET_obj, 
+  sender="Fibroblast", 
+  secretedProtein="THBS2", 
+  receiver="Tumor_boundary", 
+  cellType_meta="cellType", 
+  CustomizedAreaCoordinates=c(8290,8366,1100,1400)
+)
+
+```
+
+<img src="img/HCC_CoxMx_velocity_cut.png" width="50%" style="border:none" />
 

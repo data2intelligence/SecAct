@@ -130,16 +130,25 @@ which includes four items, (1) beta: regression coefficients; (2) se:
 standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value
 of z score from permutation test.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># infer activity; ~0.5 hrs</span></span>
+<code class="sourceCode R"><span><span class="co"># infer activity; ~10 mins</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span></span>
 <span>  inputProfile <span class="op">=</span> <span class="va">SpaCET_obj</span>,</span>
 <span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co"># The running times mentioned here and onwards were obtained</span></span>
-<span><span class="co"># from our HPC with 20 cores and 200 GB of memory.</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
-<span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span></code></pre></div>
+<span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># visualize HDGF and MYDGF signaling activity</span></span>
+<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
+<span>     <span class="va">SpaCET_obj</span>, </span>
+<span>     spatialType <span class="op">=</span> <span class="st">"SecretedProteinActivity"</span>, </span>
+<span>     spatialFeatures<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HDGF"</span>,<span class="st">"MYDGF"</span><span class="op">)</span>,</span>
+<span>     imageBg<span class="op">=</span><span class="cn">FALSE</span>,</span>
+<span>     colors<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1A9850"</span>,<span class="st">"#1A9850"</span>,<span class="st">"#1A9850"</span>,<span class="st">"#1A9850"</span>,<span class="st">"#FDAE61"</span>,<span class="st">"#FC8D59"</span>,<span class="st">"#D7191C"</span><span class="op">)</span>,</span>
+<span>     pointSize<span class="op">=</span><span class="fl">0.8</span></span>
+<span> <span class="op">)</span></span></code></pre></div>
+<p><img src="img/HCC_visium_HDGF.png" width="100%" style="border:none"></p>
 </div>
 <div class="section level2">
 <h2 id="estimate-signaling-pattern">Estimate signaling pattern<a class="anchor" aria-label="anchor" href="#estimate-signaling-pattern"></a>
@@ -164,7 +173,7 @@ in the silhouette value. This will take a while. Based on our
 pre-calculation, <code>k=3</code> is the optimal number of factors. To
 save time, we directly run against <code>k=3</code>.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># estimate signaling pattern; 3 minutes</span></span>
+<code class="sourceCode R"><span><span class="co"># estimate signaling pattern; ~3 mins</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.signaling.pattern.html">SecAct.signaling.pattern</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, k<span class="op">=</span><span class="fl">3</span><span class="op">)</span></span>
 <span></span>
 <span></span>
@@ -200,10 +209,14 @@ signaling activity, SecAct can also infer signaling velocity at each
 spatial spot, indicating the direction and strength of secreted
 signaling. Let’s take SPARC as an example.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># show SPARC signaling velocity </span></span>
-<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span><span class="op">)</span> </span></code></pre></div>
-<p><img src="img/HCC_visium_SPARC.png" width="100%" style="border:none"></p>
+<code class="sourceCode R"><span><span class="co"># show SPARC signaling velocity as contour map</span></span>
+<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>,contourMap <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
+<p><img src="img/HCC_visium_SPARC_contourMap.png" width="100%" style="border:none"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># show SPARC signaling velocity at spot level</span></span>
+<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>,contourMap <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> </span></code></pre></div>
+<p><img src="img/HCC_visium_SPARC.png" width="100%" style="border:none"></p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show animated SPARC signaling velocity</span></span>
 <span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, animated<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="img/HCC_visium_SPARC.gif" width="100%" style="border:none"></p>
@@ -216,7 +229,7 @@ signaling. Let’s take SPARC as an example.</p>
 <a href="https://data2intelligence.github.io/SpaCET/articles/visium_BC.html" target="_blank" class="external-link">here</a> for more details. Based on the deconvolution
 results, we can see the interface region consists of fibroblasts,
 macrophages, and endothelial cells.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># deconvolve ST data</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.deconvolution.html" class="external-link">SpaCET.deconvolution</a></span><span class="op">(</span></span>
 <span>  <span class="va">SpaCET_obj</span>, </span>
@@ -243,7 +256,7 @@ macrophages, and endothelial cells.</p>
 <p>User also can run <code>SpaCET.GeneSetScore</code> to estimate the
 hallmark scores for each spot. Click <a href="https://data2intelligence.github.io/SpaCET/articles/GeneSetScore.html" target="_blank" class="external-link">here</a> for more details. You can see that Pattern 3 is
 correlated with epithelial-mesenchymal transition (EMT).</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># run gene set calculation</span></span>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.GeneSetScore.html" class="external-link">SpaCET.GeneSetScore</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, GeneSets<span class="op">=</span><span class="st">"Hallmark"</span><span class="op">)</span></span>
 <span></span>

@@ -57,12 +57,12 @@ p1+p2
 
 ## Infer cell-cell communication
 
-`SecAct` performs three steps to infer condition-specific cell-cell communication mediated by secreted proteins: (1) assessing changes in secreted protein expression for each cell type (defined the source cell type) between two conditions, (2) calculating changes in secreted protein activity for each cell type (defined the receiver cell type) between two conditions, and (3) linking source and receiver cell types.
+`SecAct` performs three steps to infer condition-specific cell-cell communication mediated by secreted proteins: (1) assessing changes in secreted protein expression for each cell type (defined the source cell type) between two conditions (e.g., Metastatic vs Primary), (2) calculating changes in secreted protein signaling activity for each cell type (defined the receiver cell type) between two conditions, and (3) linking source and receiver cell types.
 
 When running `SecAct.CCC.scRNAseq`, user need to assign the `cellType_meta` and `condition_meta` with the column names of cell-type annotation and condition information in `Seurat_obj@meta.data`, respectively. Also, claim what case and control conditions are by `conditionCase` and `conditionControl`. User can find the SecAct results in `Seurat_obj @misc $SecAct_output`.
 
 ``` r
-# infer activity; ~2 mins
+# infer CCC; ~2 mins
 Seurat_obj <- SecAct.CCC.scRNAseq(
   Seurat_obj, 
   cellType_meta="MyCellType",
@@ -83,17 +83,23 @@ head(Seurat_obj @misc $SecAct_output $SecretedProteinCCC)
 
 ``` 
 
+This table lists metastasis-specific cell–cell communication events mediated by secreted proteins. Each row represents one interaction, indicating that the corresponding secreted protein shows upregulated expression in the sender cell type and increased signaling activity in the receiver cell type under metastatic compared with primary conditions.
+
 ## Visualize cell-cell communication
 
 We provide two types of visualization plot for cell-cell communication, i.e., heatmap and circle plot. The number in the heatmap represents the count of secreted proteins from senders to receivers.
 
 ``` r
 SecAct.CCC.heatmap(Seurat_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellType=my_cols)
+```
+
+<center><img src="img/OV_heatmap.png" width="50%" style="border:none" /></center>
+
+``` r
 SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols)
 ```
 
-<img src="img/OV_heatmap.png" width="45%" style="border:none" />
-<img src="img/OV_circlize.png" width="45%" style="border:none" />
+<center><img src="img/OV_circlize.png" width="50%" style="border:none" /></center>
 
 ## Visualize secreted signaling flow
 

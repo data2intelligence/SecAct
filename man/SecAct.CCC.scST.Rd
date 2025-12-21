@@ -7,10 +7,11 @@
 SecAct.CCC.scST(
   SpaCET_obj,
   cellType_meta,
-  scale.factor = 1e+05,
+  scale.factor = 1000,
   radius = 20,
   ratio_cutoff = 0.2,
-  padj_cutoff = 0.01
+  padj_cutoff = 0.01,
+  coreNo = 6
 )
 }
 \arguments{
@@ -20,11 +21,13 @@ SecAct.CCC.scST(
 
 \item{scale.factor}{Sets the scale factor for spot-level normalization.}
 
-\item{radius}{Radius cut off.}
+\item{radius}{Radius cut off (unit: um).}
 
 \item{ratio_cutoff}{Ratio cut off.}
 
 \item{padj_cutoff}{Adjusted p value cut off.}
+
+\item{coreNo}{Core number in parallel computation.}
 }
 \value{
 A Seurat object.

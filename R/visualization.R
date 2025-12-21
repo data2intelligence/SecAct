@@ -503,4 +503,3 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
     xlab(x.title)+
     ylab("Percentage")
 }
-

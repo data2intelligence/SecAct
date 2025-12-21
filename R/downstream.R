@@ -11,7 +11,7 @@
 #' @rdname SecAct.signaling.pattern
 #' @export
 #'
-SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius, k)
+SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=200, k)
 {
   if(class(SpaCET_obj)!="SpaCET")
   {
@@ -40,7 +40,10 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius, k
   exp@x <- log2(exp@x + 1)
 
   ## only need SPs
-  weights <- calWeights(colnames(exp), radius=radius, sigma=100, diagAsZero=TRUE)
+  weights <- calWeights(
+    SpaCET_obj@input$spotCoordinates[,c("coordinate_x_um","coordinate_y_um")],
+    radius=radius, sigma=100, diagAsZero=TRUE)
+
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- exp[,colnames(weights)] # remove spot island
 
@@ -64,6 +67,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius, k
       corr[gene,"p"] <- NA
     }
   }
+
   corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
   corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
 
@@ -82,7 +86,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius, k
   {
     NMF_res <- nmf(act_nneg, k, seed=123456)
   }else{
-    estim.r <- nmf(act_nneg, k, nrun=30, seed=123456)
+    estim.r <- nmf(act_nneg, k, nrun=10, seed=123456)
     v <- estim.r$measures$silhouette.coef
 
     v_diff <- v[1:(length(v)-1)]-v[2:length(v)]
@@ -151,7 +155,6 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 #' @examples
 #' SecAct.signaling.velocity.spotST(SpaCET_obj, gene="TGFB1", signalMode="receiving")
 #' SecAct.signaling.velocity.spotST(SpaCET_obj, gene="TGFB1", signalMode="sending")
-#' SecAct.signaling.velocity.spotST(SpaCET_obj, gene="TGFB1", signalMode="both")
 #'
 #' @rdname SecAct.signaling.velocity.spotST
 #' @export
@@ -175,6 +178,13 @@ SecAct.signaling.velocity.spotST <- function(
   {
     stop("Please run SecAct.activity.inference first.")
   }
+  if(contourMap==TRUE&animated==TRUE)
+  {
+    stop("contourMap and animated can not be TRUE simultaneously.")
+  }
+
+  library(ggplot2)
+  library(patchwork)
 
   act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
   act[act<0] <- 0
@@ -191,7 +201,10 @@ SecAct.signaling.velocity.spotST <- function(
   # transform to log space
   exp@x <- log2(exp@x + 1)
 
-  weights <- calWeights(colnames(exp), radius=radius, sigma=100, diagAsZero=TRUE)
+  weights <- calWeights(
+    SpaCET_obj@input$spotCoordinates[,c("coordinate_x_um","coordinate_y_um")],
+    radius=radius, sigma=100, diagAsZero=TRUE)
+
   act_new <- act[,colnames(weights)] # remove spot island
   exp_new <- exp[,colnames(weights)] # remove spot island
 
@@ -217,188 +230,178 @@ SecAct.signaling.velocity.spotST <- function(
   colnames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
   rownames(weights_new) <- paste0(coordi[,1],"x",coordi[,2])
 
-  # sending
-  startend <- data.frame()
-  for(i in 1:nrow(weights_new))
+
+  if(signalMode=="sending")
   {
-    vector_len <- sum(weights_new[i,])
-    if(vector_len==0) next
+    startend <- data.frame()
+    for(i in 1:nrow(weights_new))
+    {
+      vector_len <- sum(weights_new[i,])
+      if(vector_len==0) next
 
-    spot <- rownames(weights_new)[i]
-    neighbors <- colnames(weights_new)[weights_new[i,]>0]
-    neighbors_value <- weights_new[i,weights_new[i,]>0]
+      spot <- rownames(weights_new)[i]
+      neighbors <- colnames(weights_new)[weights_new[i,]>0]
+      neighbors_value <- weights_new[i,weights_new[i,]>0]
 
-    spot_2col <- t(matrix(as.numeric(unlist(strsplit(spot,"x"))),nrow=2))
-    neighbors_2col <- t(matrix(as.numeric(unlist(strsplit(neighbors,"x"))),nrow=2))
-    neighbors_2col[,1] <- neighbors_2col[,1] - spot_2col[,1]
-    neighbors_2col[,2] <- neighbors_2col[,2] - spot_2col[,2]
+      spot_2col <- t(matrix(as.numeric(unlist(strsplit(spot,"x"))),nrow=2))
+      neighbors_2col <- t(matrix(as.numeric(unlist(strsplit(neighbors,"x"))),nrow=2))
+      neighbors_2col[,1] <- neighbors_2col[,1] - spot_2col[,1]
+      neighbors_2col[,2] <- neighbors_2col[,2] - spot_2col[,2]
 
-    neighbors_2col <- t(apply(neighbors_2col,1,scalar1))
-    rownames(neighbors_2col) <- neighbors
+      neighbors_2col <- t(apply(neighbors_2col,1,scalar1))
+      rownames(neighbors_2col) <- neighbors
 
-    neighbors_2col <- neighbors_2col*neighbors_value
-    neighbors_2col <- colMeans(neighbors_2col)
-    neighbors_2col <- scalar1(neighbors_2col)
-    neighbors_2col <- neighbors_2col * vector_len
+      neighbors_2col <- neighbors_2col*neighbors_value
+      neighbors_2col <- colMeans(neighbors_2col)
+      neighbors_2col <- scalar1(neighbors_2col)
+      neighbors_2col <- neighbors_2col * vector_len
 
-    startend[spot,"x_start"] <- spot_2col[,1]
-    startend[spot,"y_start"] <- spot_2col[,2]
-    startend[spot,"x_change"] <- neighbors_2col[1]
-    startend[spot,"y_change"] <- neighbors_2col[2]
-    startend[spot,"x_end"] <- spot_2col[,1] + neighbors_2col[1]
-    startend[spot,"y_end"] <- spot_2col[,2] + neighbors_2col[2]
-    startend[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
+      startend[spot,"x_start"] <- spot_2col[,1]
+      startend[spot,"y_start"] <- spot_2col[,2]
+      startend[spot,"x_change"] <- neighbors_2col[1]
+      startend[spot,"y_change"] <- neighbors_2col[2]
+      startend[spot,"x_end"] <- spot_2col[,1] + neighbors_2col[1]
+      startend[spot,"y_end"] <- spot_2col[,2] + neighbors_2col[2]
+      startend[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
+    }
+
+    if(nrow(startend)!=0)
+    {
+      startend[,3] <- startend[,3]*10/max(abs(startend[,3]))
+      startend[,4] <- startend[,4]*10/max(abs(startend[,4]))
+
+      startend[,5] <- startend[,1] + startend[,3]
+      startend[,6] <- startend[,2] + startend[,4]
+
+      startend[startend[,"vec_len"]<0.1,"vec_len"] <- 0.01
+      startend[startend[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+    }
+
+  }else{ # receiving
+
+    startend2 <- data.frame()
+    for(i in 1:ncol(weights_new))
+    {
+      vector_len <- sum(weights_new[,i])
+      if(vector_len==0) next
+
+      spot <- colnames(weights_new)[i]
+      neighbors <- rownames(weights_new)[weights_new[,i]>0]
+      neighbors_value <- weights_new[weights_new[,i]>0,i]
+
+      spot_2col <- t(matrix(as.numeric(unlist(strsplit(spot,"x"))),nrow=2))
+      neighbors_2col <- t(matrix(as.numeric(unlist(strsplit(neighbors,"x"))),nrow=2))
+      neighbors_2col[,1] <- -(neighbors_2col[,1] - spot_2col[,1])
+      neighbors_2col[,2] <- -(neighbors_2col[,2] - spot_2col[,2])
+
+      neighbors_2col <- t(apply(neighbors_2col,1,scalar1))
+      rownames(neighbors_2col) <- neighbors
+
+      neighbors_2col <- neighbors_2col*neighbors_value
+      neighbors_2col <- colMeans(neighbors_2col)
+      neighbors_2col <- scalar1(neighbors_2col)
+      neighbors_2col <- neighbors_2col * vector_len
+
+      startend2[spot,"x_start"] <- spot_2col[,1] - neighbors_2col[1]
+      startend2[spot,"y_start"] <- spot_2col[,2] - neighbors_2col[2]
+      startend2[spot,"x_change"] <- neighbors_2col[1]
+      startend2[spot,"y_change"] <- neighbors_2col[2]
+      startend2[spot,"x_end"] <- spot_2col[,1]
+      startend2[spot,"y_end"] <- spot_2col[,2]
+      startend2[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
+    }
+
+    if(nrow(startend2)!=0)
+    {
+      startend2[,3] <- startend2[,3]*10/max(abs(startend2[,3]))
+      startend2[,4] <- startend2[,4]*10/max(abs(startend2[,4]))
+
+      startend2[,1] <- startend2[,5] - startend2[,3]
+      startend2[,2] <- startend2[,6] - startend2[,4]
+
+      startend2[startend2[,"vec_len"]<0.1,"vec_len"] <- 0.001
+      startend2[startend2[,"vec_len"]>=0.1,"vec_len"] <- 0.08
+    }
+
+    startend <- startend2
   }
 
-  if(nrow(startend)!=0)
+
+  if(signalMode=="sending")
   {
-    startend[,3] <- startend[,3]*10/max(abs(startend[,3]))
-    startend[,4] <- startend[,4]*10/max(abs(startend[,4]))
+    fig.df <- data.frame(
+      x=coordi[,1],
+      y=coordi[,2],
+      value=exp_new[gene,]
+    )
+    fig.df[fig.df[,3]>5,3] <- 5
 
-    startend[,5] <- startend[,1] + startend[,3]
-    startend[,6] <- startend[,2] + startend[,4]
+  }else{  # receiving
+    fig.df <- data.frame(
+      x=coordi[,1],
+      y=coordi[,2],
+      value=act_new[gene,]
+    )
 
-    startend[startend[,"vec_len"]<0.1,"vec_len"] <- 0.01
-    startend[startend[,"vec_len"]>=0.1,"vec_len"] <- 0.08
   }
 
-
-
-  # receiving
-  startend2 <- data.frame()
-  for(i in 1:ncol(weights_new))
-  {
-    vector_len <- sum(weights_new[,i])
-    if(vector_len==0) next
-
-    spot <- colnames(weights_new)[i]
-    neighbors <- rownames(weights_new)[weights_new[,i]>0]
-    neighbors_value <- weights_new[weights_new[,i]>0,i]
-
-    spot_2col <- t(matrix(as.numeric(unlist(strsplit(spot,"x"))),nrow=2))
-    neighbors_2col <- t(matrix(as.numeric(unlist(strsplit(neighbors,"x"))),nrow=2))
-    neighbors_2col[,1] <- -(neighbors_2col[,1] - spot_2col[,1])
-    neighbors_2col[,2] <- -(neighbors_2col[,2] - spot_2col[,2])
-
-    neighbors_2col <- t(apply(neighbors_2col,1,scalar1))
-    rownames(neighbors_2col) <- neighbors
-
-    neighbors_2col <- neighbors_2col*neighbors_value
-    neighbors_2col <- colMeans(neighbors_2col)
-    neighbors_2col <- scalar1(neighbors_2col)
-    neighbors_2col <- neighbors_2col * vector_len
-
-    startend2[spot,"x_start"] <- spot_2col[,1] - neighbors_2col[1]
-    startend2[spot,"y_start"] <- spot_2col[,2] - neighbors_2col[2]
-    startend2[spot,"x_change"] <- neighbors_2col[1]
-    startend2[spot,"y_change"] <- neighbors_2col[2]
-    startend2[spot,"x_end"] <- spot_2col[,1]
-    startend2[spot,"y_end"] <- spot_2col[,2]
-    startend2[spot,"vec_len"] <- sqrt(neighbors_2col[1]^2 + neighbors_2col[2]^2)
-  }
-
-  if(nrow(startend2)!=0)
-  {
-    startend2[,3] <- startend2[,3]*10/max(abs(startend2[,3]))
-    startend2[,4] <- startend2[,4]*10/max(abs(startend2[,4]))
-
-    startend2[,1] <- startend2[,5] - startend2[,3]
-    startend2[,2] <- startend2[,6] - startend2[,4]
-
-    startend2[startend2[,"vec_len"]<0.1,"vec_len"] <- 0.001
-    startend2[startend2[,"vec_len"]>=0.1,"vec_len"] <- 0.08
-
-    #startend2[,"vec_len"] <- startend2[,"vec_len"]/max(startend2[,"vec_len"])
-    #startend2[,"vec_len"] <- startend2[,"vec_len"]/10
-  }
 
   if(animated==TRUE)
   {
-    startend2_temp <- startend2
-    startend2_temp[,"x_end"] <- startend2_temp[,"x_start"]
-    startend2_temp[,"y_end"] <- startend2_temp[,"y_start"]
+    startend_temp <- startend
+    startend_temp[,"x_end"] <- startend_temp[,"x_start"]
+    startend_temp[,"y_end"] <- startend_temp[,"y_start"]
 
-    startend2 <- rbind(
-      cbind(startend2_temp,tim=1),
-      cbind(startend2,tim=2)
+    startend <- rbind(
+      cbind(startend_temp,tim=1),
+      cbind(startend,tim=2)
     )
   }
 
-
-  library(ggplot2)
-  library(patchwork)
-
-  fig.df <- data.frame(
-    x=coordi[,1],
-    y=coordi[,2],
-    Exp=exp_new[gene,]
-  )
-
-  fig.df[fig.df[,3]>5,3] <- 5
-
-  p1 <- ggplot(fig.df,aes(x=x,y=y))+
-    #annotation_custom(image$grob)+
-    geom_point(aes(colour=Exp))+
-    scale_color_gradient(low="blue",high="red")+
-    scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")))+
-    ggtitle(paste0(gene," (sending)"))+
-    theme_void()+
-    theme(
-      plot.title = element_text(hjust = 0.5)
-    )+coord_flip()
-
-
-  fig.df2 <- data.frame(
-    x=coordi[,1],
-    y=coordi[,2],
-    Act=act_new[gene,]
-  )
-
-
-  library(akima)
-  # Interpolate onto grid
-  interp_res <- interp(
-    x = fig.df2$x,
-    y = fig.df2$y,
-    z = fig.df2$Act,
-    xo = seq(min(fig.df2$x), max(fig.df2$x), length = 20),  # grid resolution in x
-    yo = seq(min(fig.df2$y), max(fig.df2$y), length = 20)   # grid resolution in y
-  )
-
-  # Convert to data frame for ggplot
-  grid_df <- data.frame(
-    x = rep(interp_res$x, times = length(interp_res$y)),
-    y = rep(interp_res$y, each = length(interp_res$x)),
-    z = as.vector(interp_res$z)
-  )
-
   if(contourMap==TRUE)
   {
-    p2 <- ggplot(grid_df,aes(x=x,y=y))+
+    library(akima)
+    # Interpolate onto grid
+    interp_res <- interp(
+      x = fig.df$x,
+      y = fig.df$y,
+      z = fig.df$value,
+      xo = seq(min(fig.df$x), max(fig.df$x), length = 20),  # grid resolution in x
+      yo = seq(min(fig.df$y), max(fig.df$y), length = 20)   # grid resolution in y
+    )
+
+    # Convert to data frame for ggplot
+    grid_df <- data.frame(
+      x = rep(interp_res$x, times = length(interp_res$y)),
+      y = rep(interp_res$y, each = length(interp_res$x)),
+      z = as.vector(interp_res$z)
+    )
+
+    p <- ggplot(grid_df,aes(x=x,y=y))+
       geom_contour_filled(aes(z=z),bins = coutourBins) +
       scale_fill_brewer(palette = "RdYlGn",direction = -1)+
       #scale_fill_manual(values=c("#b8e186","#de77ae","#c51b7d"))+
       #scale_fill_manual(values=c("#000004FF","#1C1044FF","#4F127BFF","#812581FF","#B5367AFF","#E55064FF","#FB8761FF","#FEC287FF","#FCFDBFFF"))+
       scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
       scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
-      ggtitle(paste0(gene," (receiving)"))+
+      ggtitle(paste0(gene," (",signalMode,")"))+
       theme_void()+
       theme(
         plot.title = element_text(hjust = 0.5)
       )+coord_flip()
+    p <- p+geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")),inherit.aes = FALSE)
+
   }else{
-    p2 <- ggplot(fig.df2,aes(x=x,y=y))+
+    p <- ggplot(fig.df,aes(x=x,y=y))+
       #annotation_custom(image$grob)+
-      geom_point(aes(colour=Act))+
+      geom_point(aes(colour=value))+
+      #scale_color_brewer(palette = "RdYlGn",direction = -1)+
       #scale_color_gradientn(colors=c("#a5a6ff","#ff72a1","brown"))+
       scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
       scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
       scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
-      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend2, arrow = arrow(length = unit(startend2$vec_len, "cm")))+
-      ggtitle(paste0(gene," (receiving)"))+
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), color="black", data=startend, arrow = arrow(length = unit(startend$vec_len, "cm")),inherit.aes = FALSE)+
+      ggtitle(paste0(gene," (",signalMode,")"))+
       theme_void()+
       theme(
         plot.title = element_text(hjust = 0.5)
@@ -408,18 +411,10 @@ SecAct.signaling.velocity.spotST <- function(
   if(animated==TRUE)
   {
     library(gganimate)
-    p2 <- animate(p2+transition_time(tim),nframes=15)
+    p <- animate(p+transition_time(tim),nframes=15)
   }
 
-  if(signalMode=="sending")
-  {
-    p1
-  }else if(signalMode=="receiving"){
-    p2
-  }else{
-    p1+p2
-  }
-
+  p
 }
 
 
@@ -430,12 +425,14 @@ SecAct.signaling.velocity.spotST <- function(
 #' @param secretedProtein Secreted proteins.
 #' @param receiver Receiver cell types.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param radius Radius cut off (unit: um).
 #' @return A ggplot2 object.
 #' @details
 #' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
 #'
 #' @examples
 #' SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="THBS2", receiver="Tumor_boundary", cellType_meta="cellType")
+#' SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="THBS2", receiver="Tumor_boundary", cellType_meta="cellType", CustomizedAreaCoordinates=c(8290,8366,1100,1400))
 #'
 #' @rdname SecAct.signaling.velocity.scST
 #' @export
@@ -447,6 +444,7 @@ SecAct.signaling.velocity.scST <- function(
     receiver,
     cellType_meta,
     scale.factor = 1e+05,
+    CustomizedAreaCoordinates = NULL,
     radius = 20
 )
 {
@@ -520,52 +518,52 @@ SecAct.signaling.velocity.scST <- function(
   startend <- cbind(startend, x_end=coordinate_mat[startend[,2],1] )
   startend <- cbind(startend, y_end=coordinate_mat[startend[,2],2] )
 
-  ggplot(fg.df, aes(coordinate_x_um, coordinate_y_um)) + #sdimx, sdimy
-    geom_point(aes(colour=cellType),size=0.1) +
-    geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,
-                 arrow = arrow(length = unit(0.3, "cm")), color="#ff0099")+
-    scale_color_manual(values=my_cols)+
-    ggtitle(" ")+
-    xlab(" ")+
-    ylab(" ")+
-    theme_classic()+
-    theme(
-      plot.background = element_blank(),
-      panel.grid = element_blank(),
-      legend.position = "right"
-    )
+  if(is.null(CustomizedAreaCoordinates))
+  {
+    ggplot(fg.df, aes(coordinate_x_um, coordinate_y_um)) + #sdimx, sdimy
+      geom_point(aes(colour=cellType),size=0.1) +
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,
+                   arrow = arrow(length = unit(0.3, "cm")), color="#ff0099")+
+      scale_color_manual(values=my_cols)+
+      ggtitle(" ")+
+      xlab(" ")+
+      ylab(" ")+
+      theme_classic()+
+      theme(
+        plot.background = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "right"
+      )
+  }else{
+    x.left <- CustomizedAreaCoordinates[1]
+    x.right <- CustomizedAreaCoordinates[2]
+    y.bottom <- CustomizedAreaCoordinates[3]
+    y.top <- CustomizedAreaCoordinates[4]
 
-  #x.left <- 8.29*1000
-  #x.right <- 8.366*1000
-  #y.top <- 1.4*1000
-  #y.bottom <- 1.1*1000
-  #
-  #fg.df_cut <- fg.df[
-  #  fg.df[,1]> x.left&
-  #    fg.df[,1]< x.right&
-  #    fg.df[,2]> y.bottom&
-  #    fg.df[,2]< y.top,
-  #]
-  #
-  #startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
-  #
-  #p2 <- ggplot(fg.df_cut, aes(coordinate_x_um, coordinate_y_um)) +
-  #  geom_point(aes(color=cellType),size=8) +
-  #  geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut,
-  #               arrow = arrow(length = unit(0.7, "cm")),color="#ff0099",linewidth=4)+
-  #  scale_color_manual(values=my_cols)+
-  #  ggtitle(" ")+
-  #  xlab(" ")+
-  #  ylab(" ")+
-  #  theme_void()+
-  #  theme(
-  #    plot.background = element_blank(),
-  #    panel.grid = element_blank(),
-  #    legend.position = "none"
-  #  )
-  #
-  #
-  #  p1+p2
+    fg.df_cut <- fg.df[
+      fg.df[,1]> x.left&
+        fg.df[,1]< x.right&
+        fg.df[,2]> y.bottom&
+        fg.df[,2]< y.top,
+    ]
+
+    startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
+
+    ggplot(fg.df_cut, aes(coordinate_x_um, coordinate_y_um)) +
+      geom_point(aes(color=cellType),size=8) +
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut,
+                   arrow = arrow(length = unit(0.7, "cm")),color="#ff0099",linewidth=4)+
+      scale_color_manual(values=my_cols)+
+      ggtitle(" ")+
+      xlab(" ")+
+      ylab(" ")+
+      theme_void()+
+      theme(
+        plot.background = element_blank(),
+        panel.grid = element_blank(),
+        legend.position = "none"
+      )
+  }
 }
 
 
@@ -574,9 +572,10 @@ SecAct.signaling.velocity.scST <- function(
 #' @param SpaCET_obj A SpaCET object.
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
-#' @param radius Radius cut off.
+#' @param radius Radius cut off (unit: um).
 #' @param ratio_cutoff Ratio cut off.
 #' @param padj_cutoff Adjusted p value cut off.
+#' @param coreNo Core number in parallel computation.
 #' @return A Seurat object.
 #' @rdname SecAct.CCC.scST
 #' @export
@@ -584,10 +583,11 @@ SecAct.signaling.velocity.scST <- function(
 SecAct.CCC.scST <- function(
     SpaCET_obj,
     cellType_meta,
-    scale.factor = 1e+05,
+    scale.factor = 1000,
     radius = 20,
     ratio_cutoff = 0.2,
-    padj_cutoff = 0.01
+    padj_cutoff = 0.01,
+    coreNo=6
 )
 {
   if(class(SpaCET_obj)!="SpaCET")
@@ -597,6 +597,13 @@ SecAct.CCC.scST <- function(
   if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
   {
     stop("Please run SecAct.activity.inference first.")
+  }
+
+  coreNoDect <- parallel::detectCores(logical = FALSE)
+  if(coreNoDect<coreNo)
+  {
+    message(paste0("Since the number of your physical cores is ",coreNoDect,", coreNo=",coreNoDect," is used automatically."))
+    coreNo <- coreNoDect
   }
 
   coordinate_mat <- SpaCET_obj@input$spotCoordinates
@@ -684,6 +691,7 @@ SecAct.CCC.scST <- function(
   print("Step 2. CCC")
 
   cellTypes <- unique(cellType_vec)
+  cellGroups <- split(seq_along(cellType_vec), cellType_vec)
 
   cellTypePair1 <- rep(cellTypes, each=length(cellTypes))
   cellTypePair2 <- rep(cellTypes, length(cellTypes))
@@ -695,17 +703,14 @@ SecAct.CCC.scST <- function(
   olp <- corr_genes
 
   Tmat <- data.frame(i,j)
-  ccc <- data.frame()
-  for(m in 1:nrow(cellTypePair))
+
+  compute_pair <- function(m)
   {
-    print(m)
     cellType1 <- cellTypePair[m,1]
     cellType2 <- cellTypePair[m,2]
 
-    cellType1_cells <- which(cellType_vec==cellType1)
-    cellType2_cells <- which(cellType_vec==cellType2)
-    n_cellType1_cells <- length(cellType1_cells)
-    n_cellType2_cells <- length(cellType2_cells)
+    cellType1_cells <- cellGroups[[cellType1]]
+    cellType2_cells <- cellGroups[[cellType2]]
 
     # all neighboring cell pair
     Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
@@ -715,7 +720,7 @@ SecAct.CCC.scST <- function(
     if(
       length(unique(Tmat_cellTypePair[,1]))/length(cellType1_cells) < 0.05 &
       length(unique(Tmat_cellTypePair[,2]))/length(cellType2_cells) < 0.05)
-    next
+    return(NULL)
 
     set.seed(123)
     Tmat_background <- data.frame(
@@ -723,12 +728,15 @@ SecAct.CCC.scST <- function(
       j=sample(cellType2_cells, n_neighbor*1000, replace=T)
     )
 
+    out <- list()
+
     for(SP in olp)
     {
-      print(SP)
+      exp_SP <- exp[SP,]
+      act_SP <- act[SP,]
 
       # exp(1) * act(2)
-      CCC_vec <- exp[SP, Tmat_cellTypePair[,1]] * act[SP, Tmat_cellTypePair[,2]]
+      CCC_vec <- exp_SP[Tmat_cellTypePair[,1]] * act_SP[Tmat_cellTypePair[,2]]
 
       # ratio interacting pairs vs neighboring pairs
       n_communication <- sum(CCC_vec>0)
@@ -736,55 +744,65 @@ SecAct.CCC.scST <- function(
 
       if(posRatio > ratio_cutoff)
       {
-        CCC1000_vec <- exp[SP, Tmat_background[,1]] * act[SP, Tmat_background[,2]]
-
         CCC_raw <- mean(CCC_vec)
-        CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
 
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender"] <- cellType1
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"secretedProtein"] <- SP
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver"] <- cellType2
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"sender_count"] <- n_cellType1_cells
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"receiver_count"] <- n_cellType2_cells
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"neighboringCellPairs"] <- n_neighbor
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"communicatingCellPairs"] <- n_communication
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"ratio"] <- posRatio
-        #ccc[paste0(cellType1,"_",SP,"_",cellType2),"score"] <- CCC_raw/mean(CCC1000)
-        ccc[paste0(cellType1,"_",SP,"_",cellType2),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
+        CCC1000_vec <- exp_SP[Tmat_background[,1]] * act_SP[Tmat_background[,2]]
+        CCC1000 <- colMeans(matrix(CCC1000_vec, nrow = n_neighbor))
+
+        out[[paste0(cellType1,"_",SP,"_",cellType2)]] <- c(
+          sender = cellType1,
+          secretedProtein = SP,
+          receiver = cellType2,
+          sender_count = length(cellType1_cells),
+          receiver_count = length(cellType2_cells),
+          neighboringCellPairs = n_neighbor,
+          communicatingCellPairs = n_communication,
+          ratio = posRatio,
+          #score = CCC_raw/mean(CCC1000),
+          pv = (sum(CCC1000 >= CCC_raw) + 1) / 1001
+        )
       }
 
 
-      if(cellType1==cellType2) next
-
       # exp(2) * act(1)
-      CCC_vec <- exp[SP, Tmat_cellTypePair[,2]] * act[SP, Tmat_cellTypePair[,1]]
+      CCC_vec <- exp_SP[Tmat_cellTypePair[,2]] * act_SP[Tmat_cellTypePair[,1]]
 
       n_communication <- sum(CCC_vec>0)
       posRatio <- n_communication/n_neighbor
 
       if(posRatio > ratio_cutoff)
       {
-        CCC1000_vec <- exp[SP, Tmat_background[,2]] * act[SP, Tmat_background[,1]]
-
         CCC_raw <- mean(CCC_vec)
-        CCC1000 <- sapply(1:1000, function(x) mean(CCC1000_vec[((x-1)*n_neighbor+1):(x*n_neighbor)]) )
 
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender"] <- cellType2
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"secretedProtein"] <- SP
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver"] <- cellType1
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"sender_count"] <- n_cellType2_cells
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"receiver_count"] <- n_cellType1_cells
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"neighboringCellPairs"] <- n_neighbor
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"communicatingCellPairs"] <- n_communication
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"ratio"] <- posRatio
-        #ccc[paste0(cellType2,"_",SP,"_",cellType1),"score"] <- CCC_raw/mean(CCC1000)
-        ccc[paste0(cellType2,"_",SP,"_",cellType1),"pv"] <- (sum(CCC1000>=CCC_raw)+1)/1001
+        CCC1000_vec <- exp_SP[Tmat_background[,2]] * act_SP[Tmat_background[,1]]
+        CCC1000 <- colMeans(matrix(CCC1000_vec, nrow = n_neighbor))
+
+        out[[paste0(cellType2,"_",SP,"_",cellType1)]] <- c(
+          sender = cellType2,
+          secretedProtein = SP,
+          receiver = cellType1,
+          sender_count = length(cellType2_cells),
+          receiver_count = length(cellType1_cells),
+          neighboringCellPairs = n_neighbor,
+          communicatingCellPairs = n_communication,
+          ratio = posRatio,
+          #score = CCC_raw/mean(CCC1000),
+          pv = (sum(CCC1000 >= CCC_raw) + 1) / 1001
+        )
       }
 
     } # SP
+
+    return(out)
   } #m
 
-  ccc[,"pv.adj"] <- p.adjust(ccc[,"pv"], method="BH")
+  results <- parallel::mclapply(1:nrow(cellTypePair), compute_pair, mc.cores = coreNo)
+  ccc_list <- do.call(c, results)
+  ccc <- do.call(rbind, ccc_list)
+  ccc <- as.data.frame(ccc)
+  ccc[,4:9] <- apply(ccc[,4:9], 2, as.numeric)
+
+  ccc <- cbind(ccc, pv.adj=p.adjust(ccc[,"pv"], method="BH"))
   ccc <- ccc[ccc[,"pv.adj"]<padj_cutoff,]
 
   ccc <- ccc[order(ccc[,"pv.adj"]),]
@@ -798,7 +816,7 @@ SecAct.CCC.scST <- function(
 
 #' @title Cell-cell communication from single cell data
 #' @description Calculate condition-specific cell-cell communication mediated by secreted proteins from scRNA-Seq data.
-#' @param data A Seurat object.
+#' @param Seurat_obj A Seurat object.
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param condition_meta Column name in meta data that includes condition information.
 #' @param conditionCase Case condition.

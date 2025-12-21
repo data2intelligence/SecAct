@@ -23,6 +23,8 @@ Imports:
     ggalluvial,
     networkD3,
     survival,
-    survminer
+    survminer,
+    parallel,
+    ComplexHeatmap
 biocViews:
     ComplexHeatmap

@@ -13,7 +13,7 @@ SecAct.inference.gsl(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
 
 \item{lambda}{Penalty factor in the ridge regression.}
 
-\item{nrand}{Number of randomizations in the permutation test, with a default value 1000.}
+\item{nrand}{Number of randomization in the permutation test, with a default value 1000.}
 }
 \value{
 A list with four items, each is a matrix.

@@ -64,7 +64,7 @@ head(act)
 
 The inferred protein activity is a relative measure. A positive value indicates high activity in the corresponding cell states, while a negative value signifies low activity.
 
-## Visualize activity score
+## Visualize activity
 
 User can visualize any secreted proteins of interest using `SecAct.heatmap.plot`. Here, we select the top active secreted proteins (SPs) for each cell state.
 

@@ -11,6 +11,7 @@ SecAct.signaling.velocity.scST(
   receiver,
   cellType_meta,
   scale.factor = 1e+05,
+  CustomizedAreaCoordinates = NULL,
   radius = 20
 )
 }
@@ -24,6 +25,8 @@ SecAct.signaling.velocity.scST(
 \item{receiver}{Receiver cell types.}
 
 \item{scale.factor}{Sets the scale factor for spot-level normalization.}
+
+\item{radius}{Radius cut off (unit: um).}
 }
 \value{
 A ggplot2 object.
@@ -36,5 +39,6 @@ The velocity direction starts from the source cell producing a secreted protein 
 }
 \examples{
 SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="THBS2", receiver="Tumor_boundary", cellType_meta="cellType")
+SecAct.signaling.velocity.scST(SpaCET_obj, sender="Fibroblast", secretedProtein="THBS2", receiver="Tumor_boundary", cellType_meta="cellType", CustomizedAreaCoordinates=c(8290,8366,1100,1400))
 
 }

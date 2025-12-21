@@ -81,15 +81,16 @@
     
     
 <p>This tutorial demonstrates how to infer the signaling activity of
-secreted proteins from a large data cohort, and then calculate their
-activity relevance with clinical information. The input expression
+secreted proteins from a large data cohort, and then calculate the
+relevance of their activity to clinical variables. The input expression
 values, from either RNA sequencing or MicroArray, should be transformed
 by log2(x+1). Of note, x could be FPKM, RPKM, or TPM for RNA-Seq
 data.</p>
-<p>For this demonstration, we employ an immunotherapy
+<p>For this demonstration, we use an immunotherapy
 <a href="https://github.com/ParkerICI/prince-trial-data" target="_blank" class="external-link">cohort</a>
-of pancreatic cancer patients. Using the SecAct framework, we will
-identify secreted proteins associated with clinical outcomes.</p>
+of patients with pancreatic cancer. Using the SecAct framework, we
+identify secreted proteins whose activity levels are associated with
+clinical outcomes.</p>
 <div class="section level2">
 <h2 id="prepare-expression-data">Prepare expression data<a class="anchor" aria-label="anchor" href="#prepare-expression-data"></a>
 </h2>
@@ -106,11 +107,11 @@ environment.</p>
 <h2 id="infer-secreted-protein-activity">Infer secreted protein activity<a class="anchor" aria-label="anchor" href="#infer-secreted-protein-activity"></a>
 </h2>
 <p>We use <code>SecAct.activity.inference</code> to infer the signaling
-activity of secreted proteins across patient samples.</p>
+activity of secreted proteins across patients.</p>
 <p>If your data have control samples (e.g., normal patients), you can
 assign them to <code>inputProfile_control</code>. <code>SecAct</code>
 would normalize each gene’s expression values with the control samples,
-i.e., substracting the mean gene expression of control samples.</p>
+i.e., subtracting the mean gene expression of control samples.</p>
 <p>If not available, just set <code>inputProfile_control=NULL</code>
 (default). <code>SecAct</code> would normalize the expression values of
 each gene to zero mean across all input profiles. In other words, the
@@ -131,14 +132,14 @@ value signifies low activity.</p>
 <div class="section level2">
 <h2 id="calculate-clinical-relevance">Calculate clinical relevance<a class="anchor" aria-label="anchor" href="#calculate-clinical-relevance"></a>
 </h2>
-<p>We next calculate the signaling risk score z for each secreted
-protein by linking their activity levels with clinical data. For the
-clinical file, please make sure the name of the 1st and 2nd columns are
-“Time” and “Event”, respectively. <code>SecAct.coxph.regression</code>
-will conduct Cox proportional hazard (PH) regression, with risk scores
-represented as z-scores (Coef / StdErr) from the two-sided Wald test. Of
-note, clinical covariates (e.g., age, gender, stage) would also be
-considered in regression if available.</p>
+<p>We next calculate the risk score for each secreted protein by linking
+their activity levels with clinical information. For the clinical file,
+please make sure the name of the 1st and 2nd columns are “Time” and
+“Event”, respectively. <code>SecAct.coxph.regression</code> will conduct
+Cox proportional hazard (PH) regression, with risk scores represented as
+z-scores (Coef / StdErr) from the two-sided Wald test. Of note, clinical
+covariates (e.g., age, gender, stage) would also be considered in
+regression if available.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># read clinical infomation</span></span>
 <span><span class="va">clinical</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.table</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">dataPath</span>,<span class="st">"Pancreatic_Nivolumab_Padron2022.OS_Nivo+Sotiga+Chemo"</span><span class="op">)</span><span class="op">)</span></span>

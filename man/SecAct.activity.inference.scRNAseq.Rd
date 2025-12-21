@@ -8,6 +8,7 @@ SecAct.activity.inference.scRNAseq(
   inputProfile,
   cellType_meta,
   sigMatrix = "SecAct",
+  is.singleCellLevel = FALSE,
   is.group.sig = TRUE,
   is.group.cor = 0.9,
   lambda = 5e+05,
@@ -21,6 +22,8 @@ SecAct.activity.inference.scRNAseq(
 \item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
 
 \item{sigMatrix}{Secreted protein signature matrix.}
+
+\item{is.singleCellLevel}{A logical indicating whether to calculate for each single cell.}
 
 \item{is.group.sig}{A logical indicating whether to group similar signatures.}
 

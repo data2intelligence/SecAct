@@ -57,10 +57,11 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.CCC.scST</span><span class="op">(</span></span>
 <span>  <span class="va">SpaCET_obj</span>,</span>
 <span>  <span class="va">cellType_meta</span>,</span>
-<span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span>,</span>
+<span>  scale.factor <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  radius <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  ratio_cutoff <span class="op">=</span> <span class="fl">0.2</span>,</span>
-<span>  padj_cutoff <span class="op">=</span> <span class="fl">0.01</span></span>
+<span>  padj_cutoff <span class="op">=</span> <span class="fl">0.01</span>,</span>
+<span>  coreNo <span class="op">=</span> <span class="fl">6</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -81,7 +82,7 @@
 
 
 <dt id="arg-radius">radius<a class="anchor" aria-label="anchor" href="#arg-radius"></a></dt>
-<dd><p>Radius cut off.</p></dd>
+<dd><p>Radius cut off (unit: um).</p></dd>
 
 
 <dt id="arg-ratio-cutoff">ratio_cutoff<a class="anchor" aria-label="anchor" href="#arg-ratio-cutoff"></a></dt>
@@ -90,6 +91,10 @@
 
 <dt id="arg-padj-cutoff">padj_cutoff<a class="anchor" aria-label="anchor" href="#arg-padj-cutoff"></a></dt>
 <dd><p>Adjusted p value cut off.</p></dd>
+
+
+<dt id="arg-coreno">coreNo<a class="anchor" aria-label="anchor" href="#arg-coreno"></a></dt>
+<dd><p>Core number in parallel computation.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -55,18 +55,27 @@ SpaCET.visualize.spatialFeature(
 After loading ST data, user can run `SecAct.activity.inference.ST` to infer the activities of >1,000 secreted proteins for each spot. The output are stored in `SpaCET_obj @results $SecAct_output $SecretedProteinActivity`, which includes four items, (1) beta: regression coefficients; (2) se: standard error; (3) zscore: beta/se; (4): pvalue: two-sided test p value of z score from permutation test.
 
 ``` r
-# infer activity; ~0.5 hrs
+# infer activity; ~10 mins
 SpaCET_obj <- SecAct.activity.inference.ST(
   inputProfile = SpaCET_obj,
   scale.factor = 1e+05
 )
-# The running times mentioned here and onwards were obtained
-# from our HPC with 20 cores and 200 GB of memory.
 
 # show activity
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
 
+# visualize HDGF and MYDGF signaling activity
+SpaCET.visualize.spatialFeature(
+     SpaCET_obj, 
+     spatialType = "SecretedProteinActivity", 
+     spatialFeatures=c("HDGF","MYDGF"),
+     imageBg=FALSE,
+     colors=c("#1A9850","#1A9850","#1A9850","#1A9850","#FDAE61","#FC8D59","#D7191C"),
+     pointSize=0.8
+ )
+
 ``` 
+<img src="img/HCC_visium_HDGF.png" width="100%" style="border:none" />
 
 ## Estimate signaling pattern
 After calculating the secreted protein activity, SecAct could further estimate the consensus pattern from these inferred signaling activities across the whole tissue slide. This module contains two steps.
@@ -76,7 +85,7 @@ First, `SecAct` filters >1,000 secreted proteins to identify the significant sec
 Second, `SecAct` employs Non-negative Matrix Factorization ([NMF](https://cran.r-project.org/web/packages/NMF/vignettes/NMF-vignette.pdf){target="_blank"}) to estimate the consensus signaling patterns. A critical parameter in NMF is the factorization rank `k`. User can assign a number vector to `k`, e.g., `k=2:5`. Then, `SecAct.signaling.pattern` would find the optimal number of factors determined as the point preceding the largest decrease in the silhouette value. This will take a while. Based on our pre-calculation, `k=3` is the optimal number of factors. To save time, we directly run against `k=3`.
 
 ``` r
-# estimate signaling pattern; 3 minutes
+# estimate signaling pattern; ~3 mins
 SpaCET_obj <- SecAct.signaling.pattern(SpaCET_obj, k=3)
 
 
@@ -111,8 +120,17 @@ head(pattern.gene)
 Several secreted proteins with pattern 3 are related to epithelial-mesenchymal transition process, such as COL1A1, TGFB1, and SPARC. By integrating secreted protein-coding gene expression and signaling activity, SecAct can also infer signaling velocity at each spatial spot, indicating the direction and strength of secreted signaling. Let's take SPARC as an example.
 
 ``` r
-# show SPARC signaling velocity 
-SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC") 
+# show SPARC signaling velocity as contour map
+SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC",contourMap = TRUE) 
+
+```
+
+<img src="img/HCC_visium_SPARC_contourMap.png" width="100%" style="border:none" />
+
+
+``` r
+# show SPARC signaling velocity at spot level
+SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC",contourMap = FALSE) 
 
 ``` 
 

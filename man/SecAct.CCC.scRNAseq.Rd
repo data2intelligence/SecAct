@@ -24,6 +24,8 @@ SecAct.CCC.scRNAseq(
 )
 }
 \arguments{
+\item{Seurat_obj}{A Seurat object.}
+
 \item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
 
 \item{condition_meta}{Column name in meta data that includes condition information.}
@@ -51,8 +53,6 @@ SecAct.CCC.scRNAseq(
 \item{lambda}{Penalty factor in the ridge regression.}
 
 \item{nrand}{Number of randomization in the permutation test, with a default value 1000.}
-
-\item{data}{A Seurat object.}
 }
 \value{
 A Seurat object.
