@@ -101,6 +101,13 @@ following tutorials demonstrate its applications across each data type.
 - [Secreted protein signaling activity change between two
   phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkChange.html)
 
+## Contact
+
+For questions, bug reports, or feature requests, please submit an
+[issue](https://github.com/data2intelligence/SecAct/issues). To keep the
+issue tracker focused and constructive, advertising or promotional
+content is not permitted.
+
 ## Citation
 
 Beibei Ru, Lanqi Gong, Emily Yang, Seongyong Park, George Zaki, Kenneth
