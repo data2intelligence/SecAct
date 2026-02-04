@@ -57,13 +57,13 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.activity.inference.scRNAseq</span><span class="op">(</span></span>
 <span>  <span class="va">inputProfile</span>,</span>
 <span>  <span class="va">cellType_meta</span>,</span>
-<span>  sigMatrix <span class="op">=</span> <span class="st">"SecAct"</span>,</span>
 <span>  is.singleCellLevel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  sigMatrix <span class="op">=</span> <span class="st">"SecAct"</span>,</span>
+<span>  is.filter.sig <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  is.group.sig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  is.group.cor <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  lambda <span class="op">=</span> <span class="fl">5e+05</span>,</span>
-<span>  nrand <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  sigFilter <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  nrand <span class="op">=</span> <span class="fl">1000</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -79,20 +79,24 @@
 <dd><p>Column name in meta data that includes cell-type annotations.</p></dd>
 
 
+<dt id="arg-is-singlecelllevel">is.singleCellLevel<a class="anchor" aria-label="anchor" href="#arg-is-singlecelllevel"></a></dt>
+<dd><p>A logical flag indicating whether to calculate for each single cell (Default: FALSE).</p></dd>
+
+
 <dt id="arg-sigmatrix">sigMatrix<a class="anchor" aria-label="anchor" href="#arg-sigmatrix"></a></dt>
 <dd><p>Secreted protein signature matrix.</p></dd>
 
 
-<dt id="arg-is-singlecelllevel">is.singleCellLevel<a class="anchor" aria-label="anchor" href="#arg-is-singlecelllevel"></a></dt>
-<dd><p>A logical indicating whether to calculate for each single cell.</p></dd>
+<dt id="arg-is-filter-sig">is.filter.sig<a class="anchor" aria-label="anchor" href="#arg-is-filter-sig"></a></dt>
+<dd><p>A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.</p></dd>
 
 
 <dt id="arg-is-group-sig">is.group.sig<a class="anchor" aria-label="anchor" href="#arg-is-group-sig"></a></dt>
-<dd><p>A logical indicating whether to group similar signatures.</p></dd>
+<dd><p>A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.</p></dd>
 
 
 <dt id="arg-is-group-cor">is.group.cor<a class="anchor" aria-label="anchor" href="#arg-is-group-cor"></a></dt>
-<dd><p>Correlation cutoff of similar signatures.</p></dd>
+<dd><p>A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r &gt; 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.</p></dd>
 
 
 <dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
@@ -101,10 +105,6 @@
 
 <dt id="arg-nrand">nrand<a class="anchor" aria-label="anchor" href="#arg-nrand"></a></dt>
 <dd><p>Number of randomization in the permutation test, with a default value 1000.</p></dd>
-
-
-<dt id="arg-sigfilter">sigFilter<a class="anchor" aria-label="anchor" href="#arg-sigfilter"></a></dt>
-<dd><p>A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -46,15 +46,14 @@ expr.control <- expr[, meta[,"Treatment"]=="Control"]
 
 ## Infer activity change
 
-We input `expr.treatment` and `expr.control` into `SecAct.activity.inference` to infer the activity change of secreted proteins between treatment and control groups. `SecAct` calculates the OVERALL activity change between two groups with default setting `is.singleSampleLevel = FALSE`. You can also obtain the activity change for each SINGLE sample in `expr.treatment` by setting `is.singleSampleLevel = TRUE`. Of note, if your samples are paired, just change the default setting `is.paired = FALSE` to `is.paired = TRUE`.
+We input `expr.treatment` and `expr.control` into `SecAct.activity.inference` to infer the activity change of secreted proteins between treatment and control groups. `SecAct` calculates the OVERALL activity change between two groups with default setting `is.singleSampleLevel = FALSE`. You can also obtain the activity change for each SINGLE sample in `expr.treatment` by setting `is.singleSampleLevel = TRUE`.
 
 ``` r
 # infer activity change; ~2 mins
 res <- SecAct.activity.inference(
   inputProfile = expr.treatment, 
   inputProfile_control = expr.control,
-  is.singleSampleLevel = FALSE,
-  is.paired = FALSE
+  is.singleSampleLevel = FALSE
 )
 
 # res$zscore stores activity change
@@ -128,3 +127,34 @@ act.change <- res$zscore
 head(act.change)
 
 ``` 
+
+## Run on paired samples
+
+If your samples are paired, just set `is.paired = TRUE`. `SecAct` will normalize each patient by subtracting the control sample from the treatment sample.
+
+``` r
+# Subset paired samples
+expr.treatment.paired <- expr.treatment[,1:8]
+expr.control.paired <- expr.control[,1:8]
+
+# Each paired samples MUST have the same name.
+colnames(expr.treatment.paired) <- paste0("Patient",1:8)
+colnames(expr.control.paired) <- paste0("Patient",1:8)
+
+# Run a differential profile; ~2 mins
+res <- SecAct.activity.inference(
+  inputProfile = expr.treatment.paired, 
+  inputProfile_control = expr.control.paired,
+  is.paired = TRUE,
+  is.singleSampleLevel = TRUE
+)
+
+# res$zscore stores activity change
+act.change <- res$zscore
+
+# show activity change
+head(act.change)
+
+``` 
+
+A positive value means the secreted protein has high activity in the treatment sample while a negative value means the secreted protein has high activity in the control sample.

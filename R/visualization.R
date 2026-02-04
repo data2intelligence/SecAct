@@ -137,7 +137,9 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
       col = col_mat,
       annotationTrack = c("name", "grid"),
       direction.type = c("diffHeight", "arrows"),
-      link.arr.type = "big.arrow"
+      link.arr.type = "big.arrow",
+      link.arr.length = 0.1,
+      link.arr.width = 0.1
     )
 
 

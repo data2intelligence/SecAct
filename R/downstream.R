@@ -146,8 +146,8 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 #' @param gene Gene symbol coding a secreted protein.
 #' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
 #' @param radius Radius cut off.
-#' @param contourMap A logical indicating whether transform as contour map.
-#' @param animated A logical indicating whether generate animated figure.
+#' @param contourMap A logical flag indicating whether to transform as contour map.
+#' @param animated A logical flag indicating whether to generate animated figure.
 #' @return A ggplot2 object.
 #' @details
 #' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
@@ -827,7 +827,7 @@ SecAct.CCC.scST <- function(
 #' @param exp_fraction_case_cutoff Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.
 #' @param padj_cutoff Adjusted p value cut off.
 #' @param sigMatrix Secreted protein signature matrix.
-#' @param is.group.sig A logical indicating whether to group similar signatures.
+#' @param is.group.sig A logical flag indicating whether to group similar signatures.
 #' @param is.group.cor Correlation cutoff of similar signatures.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.

@@ -9,11 +9,11 @@ SecAct.activity.inference.ST(
   inputProfile_control = NULL,
   scale.factor = 1e+05,
   sigMatrix = "SecAct",
+  is.filter.sig = FALSE,
   is.group.sig = TRUE,
   is.group.cor = 0.9,
   lambda = 5e+05,
-  nrand = 1000,
-  sigFilter = FALSE
+  nrand = 1000
 )
 }
 \arguments{
@@ -25,15 +25,15 @@ SecAct.activity.inference.ST(
 
 \item{sigMatrix}{Secreted protein signature matrix.}
 
-\item{is.group.sig}{A logical indicating whether to group similar signatures.}
+\item{is.filter.sig}{A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.}
 
-\item{is.group.cor}{Correlation cutoff of similar signatures.}
+\item{is.group.sig}{A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.}
+
+\item{is.group.cor}{A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 
 \item{nrand}{Number of randomization in the permutation test, with a default value 1000.}
-
-\item{sigFilter}{A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.}
 }
 \value{
 A SpaCET object.

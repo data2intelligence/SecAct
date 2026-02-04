@@ -46,7 +46,7 @@ SecAct.CCC.scRNAseq(
 
 \item{sigMatrix}{Secreted protein signature matrix.}
 
-\item{is.group.sig}{A logical indicating whether to group similar signatures.}
+\item{is.group.sig}{A logical flag indicating whether to group similar signatures.}
 
 \item{is.group.cor}{Correlation cutoff of similar signatures.}
 

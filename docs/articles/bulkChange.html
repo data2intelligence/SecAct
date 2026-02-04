@@ -122,16 +122,13 @@ of secreted proteins between treatment and control groups.
 groups with default setting <code>is.singleSampleLevel = FALSE</code>.
 You can also obtain the activity change for each SINGLE sample in
 <code>expr.treatment</code> by setting
-<code>is.singleSampleLevel = TRUE</code>. Of note, if your samples are
-paired, just change the default setting <code>is.paired = FALSE</code>
-to <code>is.paired = TRUE</code>.</p>
+<code>is.singleSampleLevel = TRUE</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># infer activity change; ~2 mins</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>
 <span>  inputProfile <span class="op">=</span> <span class="va">expr.treatment</span>, </span>
 <span>  inputProfile_control <span class="op">=</span> <span class="va">expr.control</span>,</span>
-<span>  is.singleSampleLevel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  is.paired <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  is.singleSampleLevel <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># res$zscore stores activity change</span></span>
@@ -203,6 +200,38 @@ the expression matrix from two phenotypes, you can directly run
 <span></span>
 <span><span class="co"># show activity change</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">act.change</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="run-on-paired-samples">Run on paired samples<a class="anchor" aria-label="anchor" href="#run-on-paired-samples"></a>
+</h2>
+<p>If your samples are paired, just set <code>is.paired = TRUE</code>.
+<code>SecAct</code> will normalize each patient by subtracting the
+control sample from the treatment sample.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Subset paired samples</span></span>
+<span><span class="va">expr.treatment.paired</span> <span class="op">&lt;-</span> <span class="va">expr.treatment</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
+<span><span class="va">expr.control.paired</span> <span class="op">&lt;-</span> <span class="va">expr.control</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">]</span></span>
+<span></span>
+<span><span class="co"># Each paired samples MUST have the same name.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr.treatment.paired</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Patient"</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">expr.control.paired</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Patient"</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Run a differential profile; ~2 mins</span></span>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>
+<span>  inputProfile <span class="op">=</span> <span class="va">expr.treatment.paired</span>, </span>
+<span>  inputProfile_control <span class="op">=</span> <span class="va">expr.control.paired</span>,</span>
+<span>  is.paired <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  is.singleSampleLevel <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># res$zscore stores activity change</span></span>
+<span><span class="va">act.change</span> <span class="op">&lt;-</span> <span class="va">res</span><span class="op">$</span><span class="va">zscore</span></span>
+<span></span>
+<span><span class="co"># show activity change</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">act.change</span><span class="op">)</span></span></code></pre></div>
+<p>A positive value means the secreted protein has high activity in the
+treatment sample while a negative value means the secreted protein has
+high activity in the control sample.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

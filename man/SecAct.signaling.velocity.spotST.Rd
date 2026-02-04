@@ -26,9 +26,9 @@ SecAct.signaling.velocity.spotST(
 
 \item{radius}{Radius cut off.}
 
-\item{contourMap}{A logical indicating whether transform as contour map.}
+\item{contourMap}{A logical flag indicating whether to transform as contour map.}
 
-\item{animated}{A logical indicating whether generate animated figure.}
+\item{animated}{A logical flag indicating whether to generate animated figure.}
 }
 \value{
 A ggplot2 object.

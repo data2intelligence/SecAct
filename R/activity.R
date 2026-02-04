@@ -156,18 +156,18 @@ SecAct.inference.r <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 
 
 #' @title Secreted protein activity inference
-#' @description Infer the signaling activity of 1248 secreted proteins from gene expression profiles.
+#' @description Infer the signaling activity of over 1000 secreted proteins from gene expression profiles.
 #' @param inputProfile Gene expression matrix with gene symbol (row) x sample (column).
 #' @param inputProfile_control Gene expression matrix with gene symbol (row) x sample (column).
-#' @param is.differential A logical indicating whether inputProfile has been differential profiles against to control.
-#' @param is.paired A logical indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired.
-#' @param is.singleSampleLevel A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.
-#' @param sigMatrix Secreted protein signature matrix.
-#' @param is.group.sig A logical indicating whether group similar signatures.
-#' @param is.group.cor Correlation cutoff of similar signatures.
+#' @param is.differential A logical flag indicating whether inputProfile has been differential profiles against the control (Default: FALSE).
+#' @param is.paired A logical flag indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired (Default: FALSE).
+#' @param is.singleSampleLevel A logical flag indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control (Default: FALSE). If FALSE, calculate the overall activity change between two phenotypes .
+#' @param sigMatrix Secreted protein signature matrix. Default: SecAct.
+#' @param is.filter.sig A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.
+#' @param is.group.sig A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.
+#' @param is.group.cor A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.
 #' @param lambda Penalty factor in the ridge regression.
-#' @param nrand Number of randomization in the permutation test, with a default value 1000.
-#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
+#' @param nrand Number of randomization in the permutation test, with a default value of 1000.
 #' @return
 #'
 #' A list with four items, each is a matrix.
@@ -186,11 +186,11 @@ SecAct.activity.inference <- function(
   is.paired=FALSE,
   is.singleSampleLevel=FALSE,
   sigMatrix="SecAct",
+  is.filter.sig=FALSE,
   is.group.sig=TRUE,
   is.group.cor=0.9,
   lambda=5e+05,
-  nrand=1000,
-  sigFilter=FALSE
+  nrand=1000
 )
 {
   if(class(inputProfile)[1]=="SpaCET")
@@ -210,7 +210,9 @@ SecAct.activity.inference <- function(
   }else{
     if(is.null(inputProfile_control))
     {
+      if(ncol(inputProfile)==1) stop("Please include at least two samples in 'inputProfile' or set 'inputProfile_control'.")
       Y <- inputProfile - rowMeans(inputProfile)
+
     }else{
       if(is.paired)
       {
@@ -235,7 +237,7 @@ SecAct.activity.inference <- function(
     X <- read.table(sigMatrix,sep="\t",check.names=F)
   }
 
-  if(sigFilter==TRUE)
+  if(is.filter.sig==TRUE)
   {
     X <- X[,colnames(X)%in%row.names(Y)]
   }
@@ -316,11 +318,11 @@ SecAct.activity.inference <- function(
 #' @param inputProfile_control A SpaCET object.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param sigMatrix Secreted protein signature matrix.
-#' @param is.group.sig A logical indicating whether to group similar signatures.
-#' @param is.group.cor Correlation cutoff of similar signatures.
+#' @param is.filter.sig A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.
+#' @param is.group.sig A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.
+#' @param is.group.cor A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
-#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
 #' @return A SpaCET object.
 #' @rdname SecAct.activity.inference.ST
 #' @export
@@ -330,11 +332,11 @@ SecAct.activity.inference.ST <- function(
     inputProfile_control = NULL,
     scale.factor = 1e+05,
     sigMatrix="SecAct",
+    is.filter.sig=FALSE,
     is.group.sig=TRUE,
     is.group.cor=0.9,
     lambda=5e+05,
-    nrand=1000,
-    sigFilter=FALSE
+    nrand=1000
 )
 {
   if(!class(inputProfile)[1]=="SpaCET")
@@ -384,11 +386,11 @@ SecAct.activity.inference.ST <- function(
     inputProfile = expr.diff,
     is.differential = TRUE,
     sigMatrix = sigMatrix,
+    is.filter.sig = is.filter.sig,
     is.group.sig = is.group.sig,
     is.group.cor = is.group.cor,
     lambda = lambda,
-    nrand = nrand,
-    sigFilter = sigFilter
+    nrand = nrand
   )
 
   inputProfile @results $SecAct_output $SecretedProteinActivity <- res
@@ -401,13 +403,13 @@ SecAct.activity.inference.ST <- function(
 #' @description Calculate secreted protein signaling activity of cell states from single cell RNA-Sequencing data.
 #' @param inputProfile A Seurat object.
 #' @param cellType_meta Column name in meta data that includes cell-type annotations.
+#' @param is.singleCellLevel A logical flag indicating whether to calculate for each single cell (Default: FALSE).
 #' @param sigMatrix Secreted protein signature matrix.
-#' @param is.singleCellLevel A logical indicating whether to calculate for each single cell.
-#' @param is.group.sig A logical indicating whether to group similar signatures.
-#' @param is.group.cor Correlation cutoff of similar signatures.
+#' @param is.filter.sig A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.
+#' @param is.group.sig A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.
+#' @param is.group.cor A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
-#' @param sigFilter A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.
 #' @return A Seurat object.
 #' @rdname SecAct.activity.inference.scRNAseq
 #' @export
@@ -415,13 +417,13 @@ SecAct.activity.inference.ST <- function(
 SecAct.activity.inference.scRNAseq <- function(
     inputProfile,
     cellType_meta,
-    sigMatrix="SecAct",
     is.singleCellLevel=FALSE,
+    sigMatrix="SecAct",
+    is.filter.sig=FALSE,
     is.group.sig=TRUE,
     is.group.cor=0.9,
     lambda=5e+05,
-    nrand=1000,
-    sigFilter=FALSE
+    nrand=1000
 )
 {
   if(!class(inputProfile)[1]=="Seurat")
@@ -474,11 +476,11 @@ SecAct.activity.inference.scRNAseq <- function(
     inputProfile = expr.diff,
     is.differential = TRUE,
     sigMatrix = sigMatrix,
+    is.filter.sig = is.filter.sig,
     is.group.sig = is.group.sig,
     is.group.cor = is.group.cor,
     lambda = lambda,
-    nrand = nrand,
-    sigFilter = sigFilter
+    nrand = nrand
   )
 
   inputProfile

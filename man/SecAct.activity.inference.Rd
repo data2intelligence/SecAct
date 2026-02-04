@@ -11,11 +11,11 @@ SecAct.activity.inference(
   is.paired = FALSE,
   is.singleSampleLevel = FALSE,
   sigMatrix = "SecAct",
+  is.filter.sig = FALSE,
   is.group.sig = TRUE,
   is.group.cor = 0.9,
   lambda = 5e+05,
-  nrand = 1000,
-  sigFilter = FALSE
+  nrand = 1000
 )
 }
 \arguments{
@@ -23,23 +23,23 @@ SecAct.activity.inference(
 
 \item{inputProfile_control}{Gene expression matrix with gene symbol (row) x sample (column).}
 
-\item{is.differential}{A logical indicating whether inputProfile has been differential profiles against to control.}
+\item{is.differential}{A logical flag indicating whether inputProfile has been differential profiles against the control (Default: FALSE).}
 
-\item{is.paired}{A logical indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired.}
+\item{is.paired}{A logical flag indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired (Default: FALSE).}
 
-\item{is.singleSampleLevel}{A logical indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control. If FALSE, calculate the overall activity change between two phenotypes.}
+\item{is.singleSampleLevel}{A logical flag indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control (Default: FALSE). If FALSE, calculate the overall activity change between two phenotypes .}
 
-\item{sigMatrix}{Secreted protein signature matrix.}
+\item{sigMatrix}{Secreted protein signature matrix. Default: SecAct.}
 
-\item{is.group.sig}{A logical indicating whether group similar signatures.}
+\item{is.filter.sig}{A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.}
 
-\item{is.group.cor}{Correlation cutoff of similar signatures.}
+\item{is.group.sig}{A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.}
+
+\item{is.group.cor}{A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.}
 
 \item{lambda}{Penalty factor in the ridge regression.}
 
-\item{nrand}{Number of randomization in the permutation test, with a default value 1000.}
-
-\item{sigFilter}{A logical indicating whether filter the secreted protein signatures with the genes from inputProfile.}
+\item{nrand}{Number of randomization in the permutation test, with a default value of 1000.}
 }
 \value{
 A list with four items, each is a matrix.
@@ -49,5 +49,5 @@ zscore: beta/se
 pvalue: statistical significance
 }
 \description{
-Infer the signaling activity of 1248 secreted proteins from gene expression profiles.
+Infer the signaling activity of over 1000 secreted proteins from gene expression profiles.
 }

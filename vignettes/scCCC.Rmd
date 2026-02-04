@@ -97,9 +97,11 @@ SecAct.CCC.heatmap(Seurat_obj, row.sorted=TRUE, column.sorted=TRUE, colors_cellT
 
 ``` r
 SecAct.CCC.circle(Seurat_obj, colors_cellType=my_cols)
+SecAct.CCC.circle(Seurat_obj, receiver="Tumor", colors_cellType=my_cols)
 ```
 
-<center><img src="img/OV_circlize.png" width="50%" style="border:none" /></center>
+<img src="img/OV_circlize.png" width="45%" style="border:none" />
+<img src="img/OV_circlize2.png" width="45%" style="border:none" />
 
 ## Visualize secreted signaling flow
 
