@@ -43,12 +43,12 @@
     <li><a class="dropdown-item" href="../articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Single-cell RNA sequencing data</h6></li>
-    <li><a class="dropdown-item" href="../articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a></li>
     <li><a class="dropdown-item" href="../articles/scState.html">Secreted protein signaling activity for various cell states</a></li>
+    <li><a class="dropdown-item" href="../articles/scCCC.html">Cell-cell communication mediated by secreted proteins</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6></li>
-    <li><a class="dropdown-item" href="../articles/bulkChange.html">Secreted protein activity change between two phenotypes</a></li>
     <li><a class="dropdown-item" href="../articles/bulkCohort.html">Clinical relevance of secreted proteins in a large patient cohort</a></li>
+    <li><a class="dropdown-item" href="../articles/bulkChange.html">Secreted protein activity change between two phenotypes</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
@@ -210,15 +210,18 @@ spatial spot, indicating the direction and strength of secreted
 signaling. Let’s take SPARC as an example.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show SPARC signaling velocity as contour map</span></span>
-<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>,contourMap <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, contourMap <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="img/HCC_visium_SPARC_contourMap.png" width="100%" style="border:none"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show SPARC signaling velocity at spot level</span></span>
-<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>,contourMap <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, contourMap <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> </span></code></pre></div>
 <p><img src="img/HCC_visium_SPARC.png" width="100%" style="border:none"></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># show animated SPARC signaling velocity</span></span>
-<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, animated<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> </span></code></pre></div>
+<span><span class="fu"><a href="../reference/SecAct.signaling.velocity.spotST.html">SecAct.signaling.velocity.spotST</a></span><span class="op">(</span><span class="va">SpaCET_obj</span>, gene <span class="op">=</span> <span class="st">"SPARC"</span>, animated<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># anim &lt;- SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", animated=TRUE)</span></span>
+<span><span class="co"># anim_save("my_animation.gif", animation = anim)</span></span></code></pre></div>
 <p><img src="img/HCC_visium_SPARC.gif" width="100%" style="border:none"></p>
 </div>
 <div class="section level2">

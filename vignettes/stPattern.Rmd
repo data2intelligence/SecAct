@@ -121,7 +121,7 @@ Several secreted proteins with pattern 3 are related to epithelial-mesenchymal t
 
 ``` r
 # show SPARC signaling velocity as contour map
-SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC",contourMap = TRUE) 
+SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", contourMap = TRUE) 
 
 ```
 
@@ -130,7 +130,7 @@ SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC",contourMap = TRUE)
 
 ``` r
 # show SPARC signaling velocity at spot level
-SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC",contourMap = FALSE) 
+SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", contourMap = FALSE) 
 
 ``` 
 
@@ -140,6 +140,8 @@ SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC",contourMap = FALSE)
 # show animated SPARC signaling velocity
 SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", animated=TRUE) 
 
+# anim <- SecAct.signaling.velocity.spotST(SpaCET_obj, gene = "SPARC", animated=TRUE)
+# anim_save("my_animation.gif", animation = anim)
 ``` 
 
 <img src="img/HCC_visium_SPARC.gif" width="100%" style="border:none" />

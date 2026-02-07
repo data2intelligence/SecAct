@@ -377,6 +377,15 @@ SecAct.signaling.velocity.spotST <- function(
       z = as.vector(interp_res$z)
     )
 
+    # remove arrow out of contour
+    grid_df_noNA <- grid_df[!is.na(grid_df$z),]
+    startend <- startend[
+      startend[,"x_start"]>min(grid_df_noNA$x) & startend[,"x_start"]<max(grid_df_noNA$x) &
+      startend[,"x_end"]>min(grid_df_noNA$x) & startend[,"x_end"]<max(grid_df_noNA$x) &
+      startend[,"y_start"]>min(grid_df_noNA$y) & startend[,"y_start"]<max(grid_df_noNA$y) &
+      startend[,"y_end"]>min(grid_df_noNA$y) & startend[,"y_end"]<max(grid_df_noNA$y)
+      ,]
+
     p <- ggplot(grid_df,aes(x=x,y=y))+
       geom_contour_filled(aes(z=z),bins = coutourBins) +
       scale_fill_brewer(palette = "RdYlGn",direction = -1)+

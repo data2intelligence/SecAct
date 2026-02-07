@@ -59,9 +59,9 @@ The package has been installed successfully on Operating Systems:
 
 - C Library: GNU Scientific Library (GSL).
 - R version \>= 4.2.0.
-- R packages: Matrix, ggplot2, reshape2, patchwork, NMF, gganimate,
-  metap, circlize, ComplexHeatmap, ggalluvial, networkD3, survival,
-  survminer.
+- R packages: Matrix, ggplot2, reshape2, patchwork, NMF, akima,
+  gganimate, metap, circlize, ComplexHeatmap, ggalluvial, networkD3,
+  survival, survminer.
 
 ## Example
 
@@ -92,17 +92,17 @@ following tutorials demonstrate its applications across each data type.
 
 #### Single-cell RNA sequencing data
 
-- [Cell-cell communication mediated by secreted
-  proteins](https://data2intelligence.github.io/SecAct/articles/scCCC.html)  
 - [Secreted protein signaling activity for distinct cell
   states](https://data2intelligence.github.io/SecAct/articles/scState.html)
+- [Cell-cell communication mediated by secreted
+  proteins](https://data2intelligence.github.io/SecAct/articles/scCCC.html)
 
 #### Bulk RNA sequencing data
 
-- [Clinical relevance of secreted proteins in a large patient
-  cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
 - [Secreted protein signaling activity change between two
   phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkChange.html)
+- [Clinical relevance of secreted proteins in a large patient
+  cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
 
 ## Contact
 

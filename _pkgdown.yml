@@ -17,16 +17,16 @@ navbar:
         href: articles/stCCC.html
       - text: ----
       - text: Single-cell RNA sequencing data
-      - text: Cell-cell communication mediated by secreted proteins
-        href: articles/scCCC.html
       - text: Secreted protein signaling activity for various cell states
         href: articles/scState.html
+      - text: Cell-cell communication mediated by secreted proteins
+        href: articles/scCCC.html
       - text: ----
       - text: Bulk RNA sequencing data
-      - text: Secreted protein activity change between two phenotypes
-        href: articles/bulkChange.html
       - text: Clinical relevance of secreted proteins in a large patient cohort
         href: articles/bulkCohort.html
+      - text: Secreted protein activity change between two phenotypes
+        href: articles/bulkChange.html
     - text: News
       href: news/index.html
 

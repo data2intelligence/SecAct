@@ -17,6 +17,7 @@ Imports:
     reshape2,
     patchwork,
     NMF,
+    akima,
     gganimate,
     metap,
     circlize,
