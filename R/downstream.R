@@ -434,7 +434,17 @@ SecAct.signaling.velocity.spotST <- function(
 #' @param secretedProtein Secreted proteins.
 #' @param receiver Receiver cell types.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
+#' @param CustomizedAreaCoordinates A vector of four numbers for coordinates of the Customized Area, i.e., x_left, x_right, y_bottom, y_top.
 #' @param radius Radius cut off (unit: um).
+#' @param show.coordinates Whether to show coordinates.
+#' @param colors A vector of colors for spots.
+#' @param pointSize Size of spots.
+#' @param pointAlpha Alpha transparency scales of spots. Must lie between 0 and 1.
+#' @param legend.position The position of the legend. Set it as "none" if you want to remove the legend.
+#' @param legend.size The size of the legend.
+#' @param arrow.color The color of the arrow.
+#' @param arrow.width The width of the arrow.
+#' @param arrow.size The size of the arrow.
 #' @return A ggplot2 object.
 #' @details
 #' The velocity direction starts from the source cell producing a secreted protein and moves to sink cells receiving the secreted protein signal. The velocity magnitude represents the product between the secreted protein-coding gene expression at source cells and signaling activities at sink cells.
@@ -454,7 +464,16 @@ SecAct.signaling.velocity.scST <- function(
     cellType_meta,
     scale.factor = 1e+05,
     CustomizedAreaCoordinates = NULL,
-    radius = 20
+    radius = 20,
+    show.coordinates = TRUE,
+    colors = NULL,
+    pointSize = 1,
+    pointAlpha = 1,
+    legend.position = "right",
+    legend.size = 1,
+    arrow.color = "#ff0099",
+    arrow.width = 1,
+    arrow.size = 0.3
 )
 {
   if(class(SpaCET_obj)!="SpaCET")
@@ -529,20 +548,29 @@ SecAct.signaling.velocity.scST <- function(
 
   if(is.null(CustomizedAreaCoordinates))
   {
-    ggplot(fg.df, aes(coordinate_x_um, coordinate_y_um)) + #sdimx, sdimy
-      geom_point(aes(colour=cellType),size=0.1) +
-      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend,
-                   arrow = arrow(length = unit(0.3, "cm")), color="#ff0099")+
-      scale_color_manual(values=my_cols)+
+    p <- ggplot(fg.df, aes(coordinate_x_um, coordinate_y_um)) + #sdimx, sdimy
+      geom_point(aes(colour=cellType), size=pointSize, alpha=pointAlpha) +
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend, color=arrow.color,
+                   arrow = arrow(length = unit(arrow.size, "cm")), linewidth=arrow.width)+
+      scale_color_manual(values=colors)+
       ggtitle(" ")+
       xlab(" ")+
-      ylab(" ")+
-      theme_classic()+
-      theme(
-        plot.background = element_blank(),
-        panel.grid = element_blank(),
-        legend.position = "right"
-      )
+      ylab(" ")
+
+    if(show.coordinates==TRUE)
+    {
+      p <- p+theme_classic()
+    }else{
+      p <- p+theme_void()
+    }
+
+    p+theme(
+      plot.background = element_blank(),
+      panel.grid = element_blank(),
+      legend.position = legend.position
+    )+
+    guides(color = guide_legend(override.aes = list(size = legend.size)))
+
   }else{
     x.left <- CustomizedAreaCoordinates[1]
     x.right <- CustomizedAreaCoordinates[2]
@@ -558,20 +586,28 @@ SecAct.signaling.velocity.scST <- function(
 
     startend_cut <- startend[startend[,1]%in%rownames(fg.df_cut) & startend[,2]%in%rownames(fg.df_cut),]
 
-    ggplot(fg.df_cut, aes(coordinate_x_um, coordinate_y_um)) +
-      geom_point(aes(color=cellType),size=8) +
-      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut,
-                   arrow = arrow(length = unit(0.7, "cm")),color="#ff0099",linewidth=4)+
-      scale_color_manual(values=my_cols)+
+    p <- ggplot(fg.df_cut, aes(coordinate_x_um, coordinate_y_um)) +
+      geom_point(aes(color=cellType), size=pointSize, alpha=pointAlpha) +
+      geom_segment(aes(x = x_start, y = y_start, xend = x_end, yend = y_end), data=startend_cut, color=arrow.color,
+                   arrow = arrow(length = unit(arrow.size, "cm")), linewidth=arrow.width)+
+      scale_color_manual(values=colors)+
       ggtitle(" ")+
       xlab(" ")+
-      ylab(" ")+
-      theme_void()+
-      theme(
+      ylab(" ")
+
+    if(show.coordinates==TRUE)
+    {
+      p <- p+theme_classic()
+    }else{
+      p <- p+theme_void()
+    }
+
+    p+theme(
         plot.background = element_blank(),
         panel.grid = element_blank(),
-        legend.position = "none"
-      )
+        legend.position = legend.position
+      )+
+      guides(color = guide_legend(override.aes = list(size = legend.size)))
   }
 }
 

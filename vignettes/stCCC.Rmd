@@ -110,7 +110,9 @@ SpaCET.visualize.spatialFeature(
   spatialType = "metaData", 
   spatialFeatures= "cellType",
   colors = my_cols,
-  pointSize = 0.1
+  pointSize = 0.1,
+  legend.position = "right",
+  legend.size = 3
 )
 ```
 
@@ -125,7 +127,7 @@ After loading ST data, user can run `SecAct.activity.inference.ST` to infer the 
 SpaCET_obj <- SecAct.activity.inference.ST(
   inputProfile = SpaCET_obj,
   scale.factor = 1000,
-  sigFilter=TRUE
+  is.filter.sig = TRUE
 )
 
 # show activity
@@ -203,7 +205,14 @@ SecAct.signaling.velocity.scST(
   sender="Fibroblast", 
   secretedProtein="THBS2", 
   receiver="Tumor_boundary", 
-  cellType_meta="cellType"
+  cellType_meta="cellType",
+  show.coordinates=TRUE,
+  colors = my_cols,
+  pointSize = 0.1,
+  legend.position = "right",
+  legend.size = 2,
+  arrow.color = "#ff0099",
+  arrow.size = 0.2
 )
 
 ```
@@ -217,7 +226,15 @@ SecAct.signaling.velocity.scST(
   secretedProtein="THBS2", 
   receiver="Tumor_boundary", 
   cellType_meta="cellType", 
-  CustomizedAreaCoordinates=c(8290,8366,1100,1400)
+  CustomizedAreaCoordinates=c(8290,8366,1100,1400),
+  show.coordinates=FALSE,
+  colors = my_cols,
+  pointSize = 5,
+  legend.position = "right",
+  legend.size = 3,
+  arrow.color = "#ff0099",
+  arrow.width = 1,
+  arrow.size = 0.7
 )
 
 ```

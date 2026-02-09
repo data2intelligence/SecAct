@@ -12,7 +12,16 @@ SecAct.signaling.velocity.scST(
   cellType_meta,
   scale.factor = 1e+05,
   CustomizedAreaCoordinates = NULL,
-  radius = 20
+  radius = 20,
+  show.coordinates = TRUE,
+  colors = NULL,
+  pointSize = 1,
+  pointAlpha = 1,
+  legend.position = "right",
+  legend.size = 1,
+  arrow.color = "#ff0099",
+  arrow.width = 1,
+  arrow.size = 0.3
 )
 }
 \arguments{
@@ -26,7 +35,27 @@ SecAct.signaling.velocity.scST(
 
 \item{scale.factor}{Sets the scale factor for spot-level normalization.}
 
+\item{CustomizedAreaCoordinates}{A vector of four numbers for coordinates of the Customized Area, i.e., x_left, x_right, y_bottom, y_top.}
+
 \item{radius}{Radius cut off (unit: um).}
+
+\item{show.coordinates}{Whether to show coordinates.}
+
+\item{colors}{A vector of colors for spots.}
+
+\item{pointSize}{Size of spots.}
+
+\item{pointAlpha}{Alpha transparency scales of spots. Must lie between 0 and 1.}
+
+\item{legend.position}{The position of the legend. Set it as "none" if you want to remove the legend.}
+
+\item{legend.size}{The size of the legend.}
+
+\item{arrow.color}{The color of the arrow.}
+
+\item{arrow.width}{The width of the arrow.}
+
+\item{arrow.size}{The size of the arrow.}
 }
 \value{
 A ggplot2 object.

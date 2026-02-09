@@ -180,7 +180,9 @@ annotation from the original study.</p>
 <span>  spatialType <span class="op">=</span> <span class="st">"metaData"</span>, </span>
 <span>  spatialFeatures<span class="op">=</span> <span class="st">"cellType"</span>,</span>
 <span>  colors <span class="op">=</span> <span class="va">my_cols</span>,</span>
-<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span></span>
+<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span>  legend.size <span class="op">=</span> <span class="fl">3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="img/HCC_CoxMx_cellType.png" width="55%" style="border:none"></p>
 </div>
@@ -199,7 +201,7 @@ of z score from permutation test.</p>
 <span><span class="va">SpaCET_obj</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.ST.html">SecAct.activity.inference.ST</a></span><span class="op">(</span></span>
 <span>  inputProfile <span class="op">=</span> <span class="va">SpaCET_obj</span>,</span>
 <span>  scale.factor <span class="op">=</span> <span class="fl">1000</span>,</span>
-<span>  sigFilter<span class="op">=</span><span class="cn">TRUE</span></span>
+<span>  is.filter.sig <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># show activity</span></span>
@@ -293,7 +295,14 @@ need to assign values to <code>sender</code>,
 <span>  sender<span class="op">=</span><span class="st">"Fibroblast"</span>, </span>
 <span>  secretedProtein<span class="op">=</span><span class="st">"THBS2"</span>, </span>
 <span>  receiver<span class="op">=</span><span class="st">"Tumor_boundary"</span>, </span>
-<span>  cellType_meta<span class="op">=</span><span class="st">"cellType"</span></span>
+<span>  cellType_meta<span class="op">=</span><span class="st">"cellType"</span>,</span>
+<span>  show.coordinates<span class="op">=</span><span class="cn">TRUE</span>,</span>
+<span>  colors <span class="op">=</span> <span class="va">my_cols</span>,</span>
+<span>  pointSize <span class="op">=</span> <span class="fl">0.1</span>,</span>
+<span>  legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span>  legend.size <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  arrow.color <span class="op">=</span> <span class="st">"#ff0099"</span>,</span>
+<span>  arrow.size <span class="op">=</span> <span class="fl">0.2</span></span>
 <span><span class="op">)</span></span></code></pre>
 <p><img src="img/HCC_CoxMx_velocity.png" width="60%" style="border:none"></p>
 <pre><code><span><span class="fu"><a href="../reference/SecAct.signaling.velocity.scST.html">SecAct.signaling.velocity.scST</a></span><span class="op">(</span></span>
@@ -302,7 +311,15 @@ need to assign values to <code>sender</code>,
 <span>  secretedProtein<span class="op">=</span><span class="st">"THBS2"</span>, </span>
 <span>  receiver<span class="op">=</span><span class="st">"Tumor_boundary"</span>, </span>
 <span>  cellType_meta<span class="op">=</span><span class="st">"cellType"</span>, </span>
-<span>  CustomizedAreaCoordinates<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8290</span>,<span class="fl">8366</span>,<span class="fl">1100</span>,<span class="fl">1400</span><span class="op">)</span></span>
+<span>  CustomizedAreaCoordinates<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">8290</span>,<span class="fl">8366</span>,<span class="fl">1100</span>,<span class="fl">1400</span><span class="op">)</span>,</span>
+<span>  show.coordinates<span class="op">=</span><span class="cn">FALSE</span>,</span>
+<span>  colors <span class="op">=</span> <span class="va">my_cols</span>,</span>
+<span>  pointSize <span class="op">=</span> <span class="fl">5</span>,</span>
+<span>  legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span>  legend.size <span class="op">=</span> <span class="fl">3</span>,</span>
+<span>  arrow.color <span class="op">=</span> <span class="st">"#ff0099"</span>,</span>
+<span>  arrow.width <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  arrow.size <span class="op">=</span> <span class="fl">0.7</span></span>
 <span><span class="op">)</span></span></code></pre>
 <p><img src="img/HCC_CoxMx_velocity_cut.png" width="50%" style="border:none"></p>
 </div>

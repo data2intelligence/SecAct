@@ -62,7 +62,16 @@
 <span>  <span class="va">cellType_meta</span>,</span>
 <span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span>,</span>
 <span>  CustomizedAreaCoordinates <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  radius <span class="op">=</span> <span class="fl">20</span></span>
+<span>  radius <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  show.coordinates <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  colors <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pointSize <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  pointAlpha <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  legend.position <span class="op">=</span> <span class="st">"right"</span>,</span>
+<span>  legend.size <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  arrow.color <span class="op">=</span> <span class="st">"#ff0099"</span>,</span>
+<span>  arrow.width <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  arrow.size <span class="op">=</span> <span class="fl">0.3</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -90,8 +99,48 @@
 <dd><p>Sets the scale factor for spot-level normalization.</p></dd>
 
 
+<dt id="arg-customizedareacoordinates">CustomizedAreaCoordinates<a class="anchor" aria-label="anchor" href="#arg-customizedareacoordinates"></a></dt>
+<dd><p>A vector of four numbers for coordinates of the Customized Area, i.e., x_left, x_right, y_bottom, y_top.</p></dd>
+
+
 <dt id="arg-radius">radius<a class="anchor" aria-label="anchor" href="#arg-radius"></a></dt>
 <dd><p>Radius cut off (unit: um).</p></dd>
+
+
+<dt id="arg-show-coordinates">show.coordinates<a class="anchor" aria-label="anchor" href="#arg-show-coordinates"></a></dt>
+<dd><p>Whether to show coordinates.</p></dd>
+
+
+<dt id="arg-colors">colors<a class="anchor" aria-label="anchor" href="#arg-colors"></a></dt>
+<dd><p>A vector of colors for spots.</p></dd>
+
+
+<dt id="arg-pointsize">pointSize<a class="anchor" aria-label="anchor" href="#arg-pointsize"></a></dt>
+<dd><p>Size of spots.</p></dd>
+
+
+<dt id="arg-pointalpha">pointAlpha<a class="anchor" aria-label="anchor" href="#arg-pointalpha"></a></dt>
+<dd><p>Alpha transparency scales of spots. Must lie between 0 and 1.</p></dd>
+
+
+<dt id="arg-legend-position">legend.position<a class="anchor" aria-label="anchor" href="#arg-legend-position"></a></dt>
+<dd><p>The position of the legend. Set it as "none" if you want to remove the legend.</p></dd>
+
+
+<dt id="arg-legend-size">legend.size<a class="anchor" aria-label="anchor" href="#arg-legend-size"></a></dt>
+<dd><p>The size of the legend.</p></dd>
+
+
+<dt id="arg-arrow-color">arrow.color<a class="anchor" aria-label="anchor" href="#arg-arrow-color"></a></dt>
+<dd><p>The color of the arrow.</p></dd>
+
+
+<dt id="arg-arrow-width">arrow.width<a class="anchor" aria-label="anchor" href="#arg-arrow-width"></a></dt>
+<dd><p>The width of the arrow.</p></dd>
+
+
+<dt id="arg-arrow-size">arrow.size<a class="anchor" aria-label="anchor" href="#arg-arrow-size"></a></dt>
+<dd><p>The size of the arrow.</p></dd>
 
 </dl></div>
     <div class="section level2">
