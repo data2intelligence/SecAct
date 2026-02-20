@@ -94,7 +94,7 @@
 
 
 <dt id="arg-sigmatrix">sigMatrix<a class="anchor" aria-label="anchor" href="#arg-sigmatrix"></a></dt>
-<dd><p>Secreted protein signature matrix. Default: SecAct.</p></dd>
+<dd><p>Secreted protein signature matrix. Could be "SecAct", "CytoSig", "SecAct-Breast", "SecAct-Colorectal", "SecAct-Glioblastoma", "SecAct-Kidney", "SecAct-Liver", "SecAct-Lung-Adeno", "SecAct-Ovarian", "SecAct-Pancreatic", "SecAct-Prostate". SecAct signatures were derived from all cancer ST samples; SecAct-XXXX signatures were derived from XXXX cancer ST samples.</p></dd>
 
 
 <dt id="arg-is-filter-sig">is.filter.sig<a class="anchor" aria-label="anchor" href="#arg-is-filter-sig"></a></dt>
@@ -110,7 +110,7 @@
 
 
 <dt id="arg-lambda">lambda<a class="anchor" aria-label="anchor" href="#arg-lambda"></a></dt>
-<dd><p>Penalty factor in the ridge regression.</p></dd>
+<dd><p>Penalty factor in the ridge regression. If NULL, lambda will be assigned as 5e+05 or 10000 when sigMatrix = "SecAct" or "CytoSig", respectively.</p></dd>
 
 
 <dt id="arg-nrand">nrand<a class="anchor" aria-label="anchor" href="#arg-nrand"></a></dt>

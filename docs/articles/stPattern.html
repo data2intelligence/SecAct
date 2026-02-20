@@ -140,14 +140,18 @@ of z score from permutation test.</p>
 <span><span class="va">SpaCET_obj</span> <span class="op">@</span><span class="va">results</span> <span class="op">$</span><span class="va">SecAct_output</span> <span class="op">$</span><span class="va">SecretedProteinActivity</span> <span class="op">$</span><span class="va">zscore</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># visualize HDGF and MYDGF signaling activity</span></span>
-<span><span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
+<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SpaCET/man/SpaCET.visualize.spatialFeature.html" class="external-link">SpaCET.visualize.spatialFeature</a></span><span class="op">(</span></span>
 <span>     <span class="va">SpaCET_obj</span>, </span>
 <span>     spatialType <span class="op">=</span> <span class="st">"SecretedProteinActivity"</span>, </span>
 <span>     spatialFeatures<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"HDGF"</span>,<span class="st">"MYDGF"</span><span class="op">)</span>,</span>
 <span>     imageBg<span class="op">=</span><span class="cn">FALSE</span>,</span>
 <span>     colors<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#1A9850"</span>,<span class="st">"#1A9850"</span>,<span class="st">"#1A9850"</span>,<span class="st">"#1A9850"</span>,<span class="st">"#FDAE61"</span>,<span class="st">"#FC8D59"</span>,<span class="st">"#D7191C"</span><span class="op">)</span>,</span>
 <span>     pointSize<span class="op">=</span><span class="fl">0.8</span></span>
-<span> <span class="op">)</span></span></code></pre></div>
+<span> <span class="op">)</span></span>
+<span></span>
+<span><span class="va">p</span></span>
+<span></span>
+<span><span class="co"># ggsave("activity.png", p, width = 18, height = 9, dpi=300, units = "cm", limitsize =FALSE)</span></span></code></pre></div>
 <p><img src="img/HCC_visium_HDGF.png" width="100%" style="border:none"></p>
 </div>
 <div class="section level2">

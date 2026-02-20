@@ -50,10 +50,15 @@ remotes::install_deps("Path_to_the_source_code", force = TRUE)
 install.packages("Path_to_the_source_code", repos = NULL, type="source")
 ```
 
-The package has been installed successfully on Operating Systems:
+The R package has been installed successfully on Operating Systems:
 
 - Red Hat Enterprise Linux 8.10 (Ootpa)
 - macOS Sequoia 15.3.1
+
+If you are not familiar with R, you can use the
+<img src="vignettes/img/Python-logo.png" width="2%" style="border:none" />
+Python version of SecAct available
+<a href="https://github.com/data2intelligence/SecActpy" target="_blank">here</a>.
 
 ## Dependencies
 
@@ -115,5 +120,6 @@ content is not permitted.
 
 Beibei Ru, Lanqi Gong, Emily Yang, Seongyong Park, George Zaki, Kenneth
 Aldape, Lalage Wakefield, Peng Jiang. Inference of secreted protein
-activities in intercellular communication.
-\[<a href="https://github.com/data2intelligence/SecAct" target="_blank">Link</a>\]
+activities in intercellular communication. **Nature Methods**, 2026.
+\[<a href="https://github.com/data2intelligence/SecAct"
+target="_blank">Full Text</a>\]

@@ -23,7 +23,7 @@ SecAct.activity.inference.scRNAseq(
 
 \item{is.singleCellLevel}{A logical flag indicating whether to calculate for each single cell (Default: FALSE).}
 
-\item{sigMatrix}{Secreted protein signature matrix.}
+\item{sigMatrix}{Secreted protein signature matrix. Could be "SecAct", "CytoSig", "SecAct-Breast", "SecAct-Colorectal", "SecAct-Glioblastoma", "SecAct-Kidney", "SecAct-Liver", "SecAct-Lung-Adeno", "SecAct-Ovarian", "SecAct-Pancreatic", "SecAct-Prostate". SecAct signatures were derived from all cancer ST samples; SecAct-XXXX signatures were derived from XXXX cancer ST samples.}
 
 \item{is.filter.sig}{A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.}
 
@@ -31,7 +31,7 @@ SecAct.activity.inference.scRNAseq(
 
 \item{is.group.cor}{A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.}
 
-\item{lambda}{Penalty factor in the ridge regression.}
+\item{lambda}{Penalty factor in the ridge regression. If NULL, lambda will be assigned as 5e+05 or 10000 when sigMatrix = "SecAct" or "CytoSig", respectively.}
 
 \item{nrand}{Number of randomization in the permutation test, with a default value 1000.}
 }

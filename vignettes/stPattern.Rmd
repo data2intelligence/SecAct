@@ -65,7 +65,7 @@ SpaCET_obj <- SecAct.activity.inference.ST(
 SpaCET_obj @results $SecAct_output $SecretedProteinActivity $zscore[1:6,1:3]
 
 # visualize HDGF and MYDGF signaling activity
-SpaCET.visualize.spatialFeature(
+p <- SpaCET.visualize.spatialFeature(
      SpaCET_obj, 
      spatialType = "SecretedProteinActivity", 
      spatialFeatures=c("HDGF","MYDGF"),
@@ -74,6 +74,9 @@ SpaCET.visualize.spatialFeature(
      pointSize=0.8
  )
 
+p
+
+# ggsave("activity.png", p, width = 18, height = 9, dpi=300, units = "cm", limitsize =FALSE)
 ``` 
 <img src="img/HCC_visium_HDGF.png" width="100%" style="border:none" />
 
