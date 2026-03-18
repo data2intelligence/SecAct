@@ -31,22 +31,22 @@ tutorials.
 
 ## Installation
 
-To install `SecAct`, we recommend using `devtools`:
+To install `SecAct` R package, we recommend using `devtools`:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("data2intelligence/SecAct")
 ```
 
-Or user can install `SecAct` from the source code. Click
+Or user can install `SecAct` R package from the source code. Click
 <a href="https://api.github.com/repos/data2intelligence/SecAct/tarball/HEAD" target="_blank">here</a>
 to download it.
 
 ``` r
-# install.packages("remotes")
+# install SecAct dependencies
 remotes::install_deps("Path_to_the_source_code", force = TRUE)
 
-# install SecAct in the R environment.
+# install SecAct R package
 install.packages("Path_to_the_source_code", repos = NULL, type="source")
 ```
 
@@ -55,10 +55,26 @@ The R package has been installed successfully on Operating Systems:
 - Red Hat Enterprise Linux 8.10 (Ootpa)
 - macOS Sequoia 15.3.1
 
-If you are not familiar with R, you can use the
-<img src="vignettes/img/Python-logo.png" width="2%" style="border:none" />
-Python version of SecAct available
-<a href="https://github.com/data2intelligence/SecActpy" target="_blank">here</a>.
+##### Alternative installation options:
+
+1.  If you are not familiar with R, you can use the
+    <img src="vignettes/img/Python-logo.png" width="2%" style="border:none" />
+    Python version of SecAct available
+    <a href="https://github.com/data2intelligence/SecActpy" target="_blank">here</a>.
+
+2.  If you prefer not to install SecAct locally, we provide a Docker
+    image for both the R and Python versions:
+
+<!-- -->
+
+    # Pull the Docker image.
+    docker pull psychemistz/secactpy:with-r
+
+3.  An online server is also available
+    <a href="https://appshare.cancer.gov/SecAct/" target="_blank">here</a>.
+    Please note that the online server currently supports only the basic
+    activity inference function. For advanced features and downstream
+    analyses, we recommend using the R version.
 
 ## Dependencies
 
