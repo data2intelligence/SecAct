@@ -72,9 +72,9 @@ The R package has been installed successfully on Operating Systems:
 
 3.  An online server is also available
     <a href="https://appshare.cancer.gov/SecAct/" target="_blank">here</a>.
-    Please note that the online server currently supports only the basic
-    activity inference function. For advanced features and downstream
-    analyses, we recommend using the R version.
+    Please note that it currently supports only the basic activity
+    inference function and is limited to datasets with fewer than 10
+    samples.
 
 ## Dependencies
 
