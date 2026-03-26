@@ -55,6 +55,8 @@ The R package has been installed successfully on Operating Systems:
 - Red Hat Enterprise Linux 8.10 (Ootpa)
 - macOS Sequoia 15.3.1
 
+<div style="border-left: 5px solid #3b82f6; padding: 0px 16px; background-color: #00000; border-radius: 6px;">
+
 ##### Alternative installation options:
 
 1.  If you are not familiar with R, you can use the
@@ -75,6 +77,8 @@ The R package has been installed successfully on Operating Systems:
     Please note that it currently supports only the basic activity
     inference function and is limited to datasets with fewer than 10
     samples.
+
+</div>
 
 ## Dependencies
 
