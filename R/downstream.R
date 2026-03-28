@@ -13,7 +13,7 @@
 #'
 SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=200, k)
 {
-  if(class(SpaCET_obj)!="SpaCET")
+  if(!inherits(SpaCET_obj, "SpaCET"))
   {
     stop("SpaCET object is requried.")
   }
@@ -31,44 +31,18 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=20
   rownames(exp) <- transferSymbol(rownames(exp))
   exp <- rm_duplicates(exp)
 
-  # normalize to TPM
-  stats <- Matrix::colSums(exp)
-  exp <- sweep_sparse(exp,2,stats,"/")
-  exp@x <- exp@x * scale.factor
+  exp <- normalize_log_sparse(exp, scale.factor)
 
-  # transform to log space
-  exp@x <- log2(exp@x + 1)
-
-  ## only need SPs
   weights <- calWeights(
     SpaCET_obj@input$spotCoordinates[,c("coordinate_x_um","coordinate_y_um")],
     radius=radius, sigma=100, diagAsZero=TRUE)
 
-  act_new <- act[,colnames(weights)] # remove spot island
-  exp_new <- exp[,colnames(weights)] # remove spot island
+  act_new <- act[,colnames(weights)]
+  exp_new <- exp[,colnames(weights)]
 
   exp_new_aggr <- exp_new %*% weights
 
-  corr <- data.frame()
-  for(gene in rownames(act_new))
-  {
-    act_gene <- act_new[gene,]
-
-    if(gene%in%rownames(exp_new))
-    {
-      exp_gene <- exp_new_aggr[gene,]
-
-      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
-
-      corr[gene,"r"] <- cor_res$estimate
-      corr[gene,"p"] <- cor_res$p.value
-    }else{
-      corr[gene,"r"] <- NA
-      corr[gene,"p"] <- NA
-    }
-  }
-
-  corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
+  corr <- compute_spatial_correlation(act_new, exp_new, exp_new_aggr)
   corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
 
   print(paste0(length(corr_genes),"/",nrow(act_new)," secreted proteins are kept to infer signaling patterns."))
@@ -77,16 +51,13 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=20
 
   print("Step 2. NMF")
 
-  suppressPackageStartupMessages({
-    library(NMF)
-  })
-  act_nneg <- nneg(act[corr_genes,])
+  act_nneg <- NMF::nneg(act[corr_genes,])
 
   if(length(k)==1)
   {
-    NMF_res <- nmf(act_nneg, k, seed=123456)
+    NMF_res <- NMF::nmf(act_nneg, k, seed=123456)
   }else{
-    estim.r <- nmf(act_nneg, k, nrun=10, seed=123456)
+    estim.r <- NMF::nmf(act_nneg, k, nrun=10, seed=123456)
     v <- estim.r$measures$silhouette.coef
 
     v_diff <- v[1:(length(v)-1)]-v[2:length(v)]
@@ -95,7 +66,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=20
 
     print(paste0("The optimal number of factors k = ", k))
 
-    NMF_res <- nmf(act_nneg, k, seed=123456)
+    NMF_res <- NMF::nmf(act_nneg, k, seed=123456)
   }
 
   weight.W <- NMF_res@fit@W
@@ -166,11 +137,11 @@ SecAct.signaling.velocity.spotST <- function(
   signalMode="receiving",
   radius=200,
   contourMap=FALSE,
-  coutourBins=11,
+  contourBins=11,
   animated=FALSE
 )
 {
-  if(class(SpaCET_obj)!="SpaCET")
+  if(!inherits(SpaCET_obj, "SpaCET"))
   {
     stop("SpaCET object is requried.")
   }
@@ -183,9 +154,6 @@ SecAct.signaling.velocity.spotST <- function(
     stop("contourMap and animated can not be TRUE simultaneously.")
   }
 
-  library(ggplot2)
-  library(patchwork)
-
   act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
   act[act<0] <- 0
 
@@ -193,13 +161,7 @@ SecAct.signaling.velocity.spotST <- function(
   rownames(exp) <- transferSymbol(rownames(exp))
   exp <- rm_duplicates(exp)
 
-  # normalize to TPM
-  stats <- Matrix::colSums(exp)
-  exp <- sweep_sparse(exp,2,stats,"/")
-  exp@x <- exp@x * scale.factor
-
-  # transform to log space
-  exp@x <- log2(exp@x + 1)
+  exp <- normalize_log_sparse(exp, scale.factor)
 
   weights <- calWeights(
     SpaCET_obj@input$spotCoordinates[,c("coordinate_x_um","coordinate_y_um")],
@@ -360,9 +322,7 @@ SecAct.signaling.velocity.spotST <- function(
 
   if(contourMap==TRUE)
   {
-    library(akima)
-    # Interpolate onto grid
-    interp_res <- interp(
+    interp_res <- akima::interp(
       x = fig.df$x,
       y = fig.df$y,
       z = fig.df$value,
@@ -387,10 +347,8 @@ SecAct.signaling.velocity.spotST <- function(
       ,]
 
     p <- ggplot(grid_df,aes(x=x,y=y))+
-      geom_contour_filled(aes(z=z),bins = coutourBins) +
+      geom_contour_filled(aes(z=z),bins = contourBins) +
       scale_fill_brewer(palette = "RdYlGn",direction = -1)+
-      #scale_fill_manual(values=c("#b8e186","#de77ae","#c51b7d"))+
-      #scale_fill_manual(values=c("#000004FF","#1C1044FF","#4F127BFF","#812581FF","#B5367AFF","#E55064FF","#FB8761FF","#FEC287FF","#FCFDBFFF"))+
       scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
       scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
       ggtitle(paste0(gene," (",signalMode,")"))+
@@ -402,10 +360,7 @@ SecAct.signaling.velocity.spotST <- function(
 
   }else{
     p <- ggplot(fig.df,aes(x=x,y=y))+
-      #annotation_custom(image$grob)+
       geom_point(aes(colour=value))+
-      #scale_color_brewer(palette = "RdYlGn",direction = -1)+
-      #scale_color_gradientn(colors=c("#a5a6ff","#ff72a1","brown"))+
       scale_color_gradientn(colors=c("#b8e186","#de77ae","#c51b7d"))+
       scale_x_continuous(limits = c(0, xDiml), expand = c(0, 0)) +
       scale_y_continuous(limits = c(0, yDiml), expand = c(0, 0)) +
@@ -419,8 +374,7 @@ SecAct.signaling.velocity.spotST <- function(
 
   if(animated==TRUE)
   {
-    library(gganimate)
-    p <- animate(p+transition_time(tim),nframes=15)
+    p <- gganimate::animate(p+gganimate::transition_time(tim),nframes=15)
   }
 
   p
@@ -476,7 +430,7 @@ SecAct.signaling.velocity.scST <- function(
     arrow.size = 0.3
 )
 {
-  if(class(SpaCET_obj)!="SpaCET")
+  if(!inherits(SpaCET_obj, "SpaCET"))
   {
     stop("SpaCET object is requried.")
   }
@@ -493,32 +447,16 @@ SecAct.signaling.velocity.scST <- function(
   cellType2_cells <- which(cellType_vec==receiver)
 
 
-  nn_result <- RANN::nn2(coordinate_mat[,c("coordinate_x_um","coordinate_y_um")], k=100, searchtype="radius", radius=radius)
-
-  neighbor_indices <- nn_result$nn.idx
-  neighbor_distances <- nn_result$nn.dists
-
-  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices)) # row indices (cell index)
-  j <- as.vector(t(neighbor_indices))
-  x <- as.vector(t(neighbor_distances))
-
-  valid <- x<=radius & x>0
-  i <- i[valid]          # Keep only valid indices
-  j <- j[valid]          # Valid neighbor indices
-  x <- x[valid]          # Valid distances
-
+  nb <- find_neighbors(coordinate_mat, radius)
 
   exp <- SpaCET_obj@input$counts
   rownames(exp) <- transferSymbol(rownames(exp))
   exp <- rm_duplicates(exp)
 
-
-  act <- SpaCET_obj @results $SecAct_output $SecretedProteinActivity$zscore
+  act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
   act[act<0] <- 0
 
-
-
-  Tmat <- data.frame(i,j)
+  Tmat <- data.frame(i=nb$i, j=nb$j)
 
   # all cell pair
   Tmat_cellTypePair <- Tmat[Tmat[,"i"]%in%cellType1_cells & Tmat[,"j"]%in%cellType2_cells, ,drop=F]
@@ -635,7 +573,7 @@ SecAct.CCC.scST <- function(
     coreNo=6
 )
 {
-  if(class(SpaCET_obj)!="SpaCET")
+  if(!inherits(SpaCET_obj, "SpaCET"))
   {
     stop("SpaCET object is requried.")
   }
@@ -660,72 +598,30 @@ SecAct.CCC.scST <- function(
   rownames(exp) <- transferSymbol(rownames(exp))
   exp <- rm_duplicates(exp)
 
-  # normalize to TPM
-  stats <- Matrix::colSums(exp)
-  exp <- sweep_sparse(exp,2,stats,"/")
-  exp@x <- exp@x * scale.factor
+  exp <- normalize_log_sparse(exp, scale.factor)
 
-  # transform to log space
-  exp@x <- log2(exp@x + 1)
+  nb <- find_neighbors(coordinate_mat, radius)
 
-
-  nn_result <- RANN::nn2(coordinate_mat[,c("coordinate_x_um","coordinate_y_um")], k=100, searchtype="radius", radius=radius)
-
-  neighbor_indices <- nn_result$nn.idx
-  neighbor_distances <- nn_result$nn.dists
-
-  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices)) # row indices (cell index)
-  j <- as.vector(t(neighbor_indices))
-  x <- as.vector(t(neighbor_distances))
-
-  valid <- x<=radius & x>0
-  i <- i[valid]          # Keep only valid indices
-  j <- j[valid]          # Valid neighbor indices
-  x <- x[valid]          # Valid distances
-
-  # Create the sparse matrix using the 'i', 'j', and 'x' vectors
-  library(Matrix)
-  distance_mat <- sparseMatrix(i=i, j=j, x=x, dims=c(nrow(neighbor_indices), nrow(neighbor_indices)), repr="T")
+  distance_mat <- Matrix::sparseMatrix(i=nb$i, j=nb$j, x=nb$x, dims=c(nb$n, nb$n), repr="T")
   rownames(distance_mat) <- rownames(coordinate_mat)
   colnames(distance_mat) <- rownames(coordinate_mat)
-
 
   weights <- distance_mat
   weights@x <- as.numeric(weights@x>0)
 
-
-  act <- SpaCET_obj @results $SecAct_output $SecretedProteinActivity$zscore
+  act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
   act[act<0] <- 0
 
-  act_new <- act[,colnames(weights)] # remove spot island
-  exp_new <- exp[,colnames(weights)] # remove spot island
-
+  act_new <- act[,colnames(weights)]
+  exp_new <- exp[,colnames(weights)]
 
   exp_new_aggr <- exp_new %*% weights
 
-  if(is.null(SpaCET_obj @results $SecAct_output $ccc.SP))
+  if(is.null(SpaCET_obj@results$SecAct_output$ccc.SP))
   {
-    corr <- data.frame()
-    for(gene in rownames(act_new))
-    {
-      act_gene <- act_new[gene,]
-
-      if(gene%in%rownames(exp_new))
-      {
-        exp_gene <- exp_new_aggr[gene,]
-
-        cor_res <- cor.test(act_gene, exp_gene, method="spearman")
-
-        corr[gene,"r"] <- cor_res$estimate
-        corr[gene,"p"] <- cor_res$p.value
-      }else{
-        corr[gene,"r"] <- NA
-        corr[gene,"p"] <- NA
-      }
-    }
-    corr <- cbind(corr, padj=p.adjust(corr[,"p"], method="BH") )
+    corr <- compute_spatial_correlation(act_new, exp_new, exp_new_aggr)
   }else{
-    SpaCET_obj @results $SecAct_output $ccc.SP -> corr
+    corr <- SpaCET_obj@results$SecAct_output$ccc.SP
   }
 
   corr_genes <- rownames(corr[!is.na(corr[,"r"])&corr[,"r"]>0.05&corr[,"padj"]<0.01,])
@@ -747,7 +643,7 @@ SecAct.CCC.scST <- function(
 
   olp <- corr_genes
 
-  Tmat <- data.frame(i,j)
+  Tmat <- data.frame(i=nb$i, j=nb$j)
 
   compute_pair <- function(m)
   {
@@ -803,7 +699,6 @@ SecAct.CCC.scST <- function(
           neighboringCellPairs = n_neighbor,
           communicatingCellPairs = n_communication,
           ratio = posRatio,
-          #score = CCC_raw/mean(CCC1000),
           pv = (sum(CCC1000 >= CCC_raw) + 1) / 1001
         )
       }
@@ -831,7 +726,6 @@ SecAct.CCC.scST <- function(
           neighboringCellPairs = n_neighbor,
           communicatingCellPairs = n_communication,
           ratio = posRatio,
-          #score = CCC_raw/mean(CCC1000),
           pv = (sum(CCC1000 >= CCC_raw) + 1) / 1001
         )
       }
@@ -899,19 +793,12 @@ SecAct.CCC.scRNAseq <- function(
   nrand=1000
 )
 {
-  if(!class(Seurat_obj)[1]=="Seurat")
+  if(!inherits(Seurat_obj, "Seurat"))
   {
     stop("Please input a Seurat object.")
   }
 
-  if(class(Seurat_obj@assays$RNA)=="Assay5")
-  {
-    counts <- Seurat_obj@assays$RNA@layers$counts
-    colnames(counts) <- rownames(Seurat_obj@assays$RNA@cells)
-    rownames(counts) <- rownames(Seurat_obj@assays$RNA@features)
-  }else{
-    counts <-  Seurat_obj@assays$RNA@counts
-  }
+  counts <- extract_seurat_counts(Seurat_obj)
 
   rownames(counts) <- transferSymbol(rownames(counts))
   counts <- rm_duplicates(counts)
@@ -950,16 +837,7 @@ SecAct.CCC.scRNAseq <- function(
     }
     if(ncol(expr)<30) next
 
-    # normalize to TPM
-    stats <- Matrix::colSums(expr)
-    expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * scale.factor
-
-    # transform to log space
-    expr@x <- log2(expr@x + 1)
-
-    expr_case <- expr
-
+    expr_case <- normalize_log_sparse(expr, scale.factor)
 
     # control
     if(is.null(condition_meta))
@@ -969,15 +847,7 @@ SecAct.CCC.scRNAseq <- function(
       expr <- counts[,meta[,condition_meta]==conditionControl&meta[,cellType_meta]==cellType,drop=FALSE]
     }
 
-    # normalize to TPM
-    stats <- Matrix::colSums(expr)
-    expr <- sweep_sparse(expr,2,stats,"/")
-    expr@x <- expr@x * scale.factor
-
-    # transform to log space
-    expr@x <- log2(expr@x + 1)
-
-    expr_control <- expr
+    expr_control <- normalize_log_sparse(expr, scale.factor)
 
 
     # case vs control
@@ -1171,10 +1041,9 @@ SecAct.CCC.scRNAseq <- function(
   {
     ccc[,"overall_strength"] <- ccc[,"sender_exp_logFC"] * ccc[,"receiver_act_diff"]
 
-    library(metap)
-    ccc[ccc[,"sender_exp_pv"]==0,"sender_exp_pv"] <- .Machine$double.xmin # sumlog requires non-zero
+    ccc[ccc[,"sender_exp_pv"]==0,"sender_exp_pv"] <- .Machine$double.xmin
 
-    ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) sumlog(x)$p)
+    ccc[,"overall_pv"] <- apply(ccc[,c("sender_exp_pv","receiver_act_pv")],1,function(x) metap::sumlog(x)$p)
     ccc[,"overall_pv.adj"] <- p.adjust(ccc[,"overall_pv"], method="BH")
     ccc <- ccc[ccc[,"overall_pv.adj"]<padj_cutoff,]
 
@@ -1208,10 +1077,9 @@ SecAct.coxph.regression <- function(mat, surv)
   {
     comb <- cbind(X_olp, Act=Y_olp[,gene])
 
-    library(survival)
     errflag <- F
     coxmodel_fit <- tryCatch(
-      coxph(Surv(Time, Event) ~ ., data = comb),
+      survival::coxph(survival::Surv(Time, Event) ~ ., data = comb),
 
       error = function(e){
         errflag <<- T

@@ -10,46 +10,21 @@
 #'
 SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colors_cellType)
 {
-  if(class(data)[1]=="SpaCET")
-  {
-    ccc <- data @results $SecAct_output $SecretedProteinCCC
-  }
-  if(class(data)[1]=="Seurat")
-  {
-    ccc <- data @misc $SecAct_output $SecretedProteinCCC
-  }
-
-  ccc <- cbind(ccc, communication=1)
-  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
-
-
-  mat = reshape2::acast( ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
-
-  cellTypes <- sort(unique(c(rownames(mat),colnames(mat))))
-  for(cellType in cellTypes)
-  {
-    if(cellType%in%rownames(mat)&cellType%in%colnames(mat))
-    {
-      mat[cellType,cellType] <- NA
-    }
-  }
-
-  suppressPackageStartupMessages({
-    library(ComplexHeatmap)
-  })
+  ccc <- extract_ccc_data(data)
+  mat <- build_ccc_matrix(ccc)
 
   if(row.sorted==TRUE) mat <- mat[order(apply(mat,1,function(x) sum(x,na.rm=T)),decreasing=T),,drop=F]
   if(column.sorted==TRUE) mat <- mat[,order(apply(mat,2,function(x) sum(x,na.rm=T)),decreasing=T),drop=F]
 
-  row_ha <- rowAnnotation(
-    Count = anno_barplot(rowSums(mat,na.rm=T),gp = gpar(fill = colors_cellType[rownames(mat)]) )
+  row_ha <- ComplexHeatmap::rowAnnotation(
+    Count = ComplexHeatmap::anno_barplot(rowSums(mat,na.rm=T),gp = grid::gpar(fill = colors_cellType[rownames(mat)]) )
   )
-  column_ha <- columnAnnotation(
-    Count = anno_barplot(colSums(mat,na.rm=T),gp = gpar(fill = colors_cellType[colnames(mat)]) ),
+  column_ha <- ComplexHeatmap::columnAnnotation(
+    Count = ComplexHeatmap::anno_barplot(colSums(mat,na.rm=T),gp = grid::gpar(fill = colors_cellType[colnames(mat)]) ),
     annotation_name_side = "left"
   )
 
-  ht <- Heatmap(as.matrix(mat),
+  ht <- ComplexHeatmap::Heatmap(as.matrix(mat),
      name = "Count",
      col = circlize::colorRamp2(c(-50, 0,50), c("green", "white", "red")),
      row_names_side = "left",
@@ -61,10 +36,10 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
      right_annotation = row_ha,
      cluster_rows = FALSE,
      cluster_columns = FALSE,
-     cell_fun = function(j, i, x, y, width, height, fill) {grid.text(mat[i, j], x, y)}
+     cell_fun = function(j, i, x, y, width, height, fill) {grid::grid.text(mat[i, j], x, y)}
   )
 
-  draw(ht)
+  ComplexHeatmap::draw(ht)
 }
 
 
@@ -78,39 +53,12 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
 #'
 SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
 {
-  if(class(data)[1]=="SpaCET")
-  {
-    ccc <- data @results $SecAct_output $SecretedProteinCCC
-  }
-  if(class(data)[1]=="Seurat")
-  {
-    ccc <- data @misc $SecAct_output $SecretedProteinCCC
-  }
-
-  ccc <- cbind(ccc, communication=1)
-  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
-
-
-  mat = reshape2::acast( ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
-
-  cellTypes <- sort(unique(c(rownames(mat),colnames(mat))))
-  for(cellType in cellTypes)
-  {
-    if(cellType%in%rownames(mat)&cellType%in%colnames(mat))
-    {
-      mat[cellType,cellType] <- NA
-    }
-  }
-
-  suppressPackageStartupMessages({
-    library(circlize)
-  })
-
-  #mat = log(mat+1)
+  ccc <- extract_ccc_data(data)
+  mat <- build_ccc_matrix(ccc)
 
   if(is.null(sender)&is.null(receiver))
   {
-    chordDiagram(
+    circlize::chordDiagram(
       mat,
       directional = 1,
       grid.col = colors_cellType,
@@ -124,16 +72,16 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
     col_mat <- mat
     for(i in 1:nrow(col_mat))
     {
-      col_mat[i,] <- my_cols[rownames(col_mat)[i]]
+      col_mat[i,] <- colors_cellType[rownames(col_mat)[i]]
     }
 
     if(!is.null(receiver)) col_mat[,!colnames(col_mat)%in%receiver] = "#00000000"
     if(!is.null(sender)) col_mat[!rownames(col_mat)%in%sender,] = "#00000000"
 
-    chordDiagram(
+    circlize::chordDiagram(
       mat,
       directional = 1,
-      grid.col = my_cols,
+      grid.col = colors_cellType,
       col = col_mat,
       annotationTrack = c("name", "grid"),
       direction.type = c("diffHeight", "arrows"),
@@ -161,30 +109,13 @@ SecAct.CCC.circle <- function(data, colors_cellType, sender=NULL, receiver=NULL)
 #'
 SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtein=NULL, receiver=NULL)
 {
-  if(class(data)[1]=="SpaCET")
-  {
-    ccc <- data @results $SecAct_output $SecretedProteinCCC
-  }
-  if(class(data)[1]=="Seurat")
-  {
-    ccc <- data @misc $SecAct_output $SecretedProteinCCC
-  }
-
-  ccc <- cbind(ccc, communication=1)
-  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
-
+  ccc <- extract_ccc_data(data)
 
   ccc_sub <- ccc[
     ccc[,"sender"]%in%sender &
     ccc[,"secretedProtein"]%in%secretedProtein &
     ccc[,"receiver"]%in%receiver
   ,]
-
-
-  suppressPackageStartupMessages({
-    library(ggalluvial)
-    library(networkD3)
-  })
 
 
   ccc_sub[,"sender"] <- factor(
@@ -197,14 +128,14 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
     levels=names(sort(table(ccc_sub[,"receiver"]),decreasing = T))
     )
 
-  ccc_sub_long <- to_lodes_form(data.frame(ccc_sub),
+  ccc_sub_long <- ggalluvial::to_lodes_form(data.frame(ccc_sub),
     key = "Demographic", value = "Group", id = "Cohort",
     axes = 1:3)
 
   ggplot(ccc_sub_long, aes(x = Demographic, stratum = Group, alluvium = Cohort, y = communication)) +
-    geom_alluvium(aes(fill=Group)) +
-    geom_stratum(aes(fill=Group)) +
-    scale_fill_manual(values=my_cols, na.value="grey88")+
+    ggalluvial::geom_alluvium(aes(fill=Group)) +
+    ggalluvial::geom_stratum(aes(fill=Group)) +
+    scale_fill_manual(values=colors_cellType, na.value="grey88")+
     geom_text(stat = "stratum", aes(label = after_stat(stratum)))+
     theme_void()+
     theme(
@@ -227,17 +158,7 @@ SecAct.CCC.sankey <- function(data, colors_cellType, sender=NULL, secretedProtei
 #'
 SecAct.CCC.dot <- function(data, sender=NULL, secretedProtein=NULL, receiver=NULL)
 {
-  if(class(data)[1]=="SpaCET")
-  {
-    ccc <- data @results $SecAct_output $SecretedProteinCCC
-  }
-  if(class(data)[1]=="Seurat")
-  {
-    ccc <- data @misc $SecAct_output $SecretedProteinCCC
-  }
-
-  ccc <- cbind(ccc, communication=1)
-  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"],"-",ccc[,"receiver"]))
+  ccc <- extract_ccc_data(data)
 
   ccc_sub <- ccc[
     ccc[,"sender"]%in%sender &
@@ -245,7 +166,7 @@ SecAct.CCC.dot <- function(data, sender=NULL, secretedProtein=NULL, receiver=NUL
       ccc[,"receiver"]%in%receiver
     ,]
 
-  if(class(data)[1]=="SpaCET")
+  if(inherits(data, "SpaCET"))
   {
     fg.df <- ccc_sub[,c("sender","secretedProtein","receiver","ratio","pv")]
 
@@ -253,7 +174,7 @@ SecAct.CCC.dot <- function(data, sender=NULL, secretedProtein=NULL, receiver=NUL
     fg.df <- cbind(fg.df, score=fg.df[,"ratio"])
     fg.df <- cbind(fg.df, logpv=-log10(fg.df[,"pv"]))
   }
-  if(class(data)[1]=="Seurat")
+  if(inherits(data, "Seurat"))
   {
     fg.df <- ccc_sub[,c("sender","secretedProtein","receiver","overall_strength","overall_pv")]
 
@@ -300,7 +221,6 @@ SecAct.heatmap.plot <- function(fg.mat, title=NULL, colors=c("#03c383","#aad962"
   fg.df[["Var1"]] <- factor(fg.df[["Var1"]], levels=rev(rownames(fg.mat)))
   fg.df[["Var2"]] <- factor(fg.df[["Var2"]], levels=colnames(fg.mat))
 
-  library(ggplot2)
   ggplot(fg.df, aes(Var2, Var1, fill=Activity)) +
     geom_tile(color = "white") +
     scale_fill_gradientn(colours = colors)+
@@ -336,7 +256,6 @@ SecAct.bar.plot <- function(fg.vec, title=NULL, colors=c("#91bfdb","#fc8d59"))
   fg.df <- cbind(fg.df, hjust=ifelse(fg.vec<0,0,1))
   fg.df[["gene"]] <- factor(fg.df[["gene"]], levels=names(sort(fg.vec)))
 
-  library(ggplot2)
   ggplot(fg.df, aes(gene, value, label=gene)) +
     geom_col(aes(fill=dir), width = .88, color = "white") +
     geom_text(aes(y = y, hjust=hjust), angle = 0) +
@@ -376,7 +295,6 @@ SecAct.lollipop.plot <- function(fg.vec, title=NULL)
   fg.df <- cbind(fg.df, hjust=ifelse(fg.vec<0,0,1))
   fg.df[["gene"]] <- factor(fg.df[["gene"]], levels=names(sort(fg.vec)))
 
-  library(ggplot2)
   ggplot(fg.df, aes(gene, value, label=gene)) +
     geom_segment(aes(x = gene, xend = gene, y = 0, yend = value), color = "grey") +
     geom_point(color = "#619CFF", size=3)+
@@ -434,7 +352,7 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
   if(length(death_rate) < 0.1) q()
 
   # split up survival and background
-  surv = Surv(survival[,1], survival[,2])
+  surv = survival::Surv(survival[,1], survival[,2])
 
   if(dim(survival)[2] > 2){
     B = survival[,3:dim(survival)[2], drop=F]
@@ -493,11 +411,10 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
 
   groups <- as.character(data[,gene]>cutoff)
 
-  library(survminer)
   surv.df <- cbind(survival,groups)
-  fit <- survfit(Surv(Time, Event) ~ groups, data = surv.df)
+  fit <- survival::survfit(survival::Surv(Time, Event) ~ groups, data = surv.df)
 
-  ggsurvplot(fit,
+  survminer::ggsurvplot(fit,
     data=surv.df,
     palette = c("blue","red"),
     legend.labs = c(paste0("Low (n=",sum(groups=="FALSE"),")"),paste0("High (n=",sum(groups=="TRUE"),")"))
