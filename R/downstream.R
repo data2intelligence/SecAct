@@ -106,7 +106,7 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 
   # identify secreted proteins with pattern n
   res <- weight.W[apply(temp,1,function(x) x[n]==max(x)),]
-  res[order(res[,3],decreasing = TRUE),]
+  res[order(res[,n],decreasing = TRUE),]
 }
 
 

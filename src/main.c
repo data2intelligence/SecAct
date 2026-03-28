@@ -2,7 +2,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_cdf.h>
 
 gsl_matrix *RVectorObject_to_gsl_matrix(double *vec, size_t nr, size_t nc)
 {

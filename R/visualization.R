@@ -340,16 +340,13 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
   data <- Y_olp[,gene,drop=F]
   survival <- X_olp
   margin <- 5
-  # align matrix names
   common = Reduce(intersect, list(rownames(data),rownames(survival)))
-  # sprintf("%s samples", length(common))
 
   data = data[common,,drop=F]
   survival = survival[common,,drop=F]
 
-  # stop at low death rate
   death_rate = sum(survival[,2])/dim(survival)[1]
-  if(length(death_rate) < 0.1) q()
+  if(death_rate < 0.1) stop("Death rate too low for survival analysis.")
 
   # split up survival and background
   surv = survival::Surv(survival[,1], survival[,2])
