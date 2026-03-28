@@ -211,6 +211,8 @@ extract_ccc_data <- function(data)
     ccc <- data@results$SecAct_output$SecretedProteinCCC
   }else if(inherits(data, "Seurat")){
     ccc <- data@misc$SecAct_output$SecretedProteinCCC
+  }else{
+    stop("Please input a SpaCET or Seurat object.")
   }
   ccc <- cbind(ccc, communication=1)
   ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"], "-", ccc[,"receiver"]))
@@ -264,23 +266,26 @@ find_neighbors <- function(coordinate_mat, radius, k = 100)
 
 compute_spatial_correlation <- function(act_new, exp_new, exp_new_aggr)
 {
-  corr <- data.frame()
-  for(gene in rownames(act_new))
-  {
-    act_gene <- act_new[gene,]
+  genes <- rownames(act_new)
+  n <- length(genes)
+  rs <- numeric(n)
+  ps <- numeric(n)
+  names(rs) <- names(ps) <- genes
 
+  for(i in seq_len(n))
+  {
+    gene <- genes[i]
     if(gene %in% rownames(exp_new))
     {
-      exp_gene <- exp_new_aggr[gene,]
-      cor_res <- cor.test(act_gene, exp_gene, method="spearman")
-      corr[gene,"r"] <- cor_res$estimate
-      corr[gene,"p"] <- cor_res$p.value
+      cor_res <- cor.test(act_new[gene,], exp_new_aggr[gene,], method="spearman")
+      rs[i] <- cor_res$estimate
+      ps[i] <- cor_res$p.value
     }else{
-      corr[gene,"r"] <- NA
-      corr[gene,"p"] <- NA
+      rs[i] <- NA
+      ps[i] <- NA
     }
   }
-  cbind(corr, padj=p.adjust(corr[,"p"], method="BH"))
+  data.frame(r=rs, p=ps, padj=p.adjust(ps, method="BH"))
 }
 
 unpack_ridge_results <- function(res, m, X_colnames, Y_colnames)

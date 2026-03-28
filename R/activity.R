@@ -20,7 +20,7 @@ SecAct.inference.gsl <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
 
-  olp <- intersect(row.names(Y),row.names(X))
+  olp <- intersect(rownames(Y),rownames(X))
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
 
@@ -70,7 +70,7 @@ SecAct.inference.r <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
 
-  olp <- intersect(row.names(Y),row.names(X))
+  olp <- intersect(rownames(Y),rownames(X))
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
 
@@ -218,7 +218,7 @@ SecAct.activity.inference <- function(
 
   if(is.filter.sig==TRUE)
   {
-    X <- X[,colnames(X)%in%row.names(Y)]
+    X <- X[,colnames(X)%in%rownames(Y)]
   }
 
   if(is.group.sig==TRUE)
@@ -239,7 +239,7 @@ SecAct.activity.inference <- function(
     X <- newsig
   }
 
-  olp <- intersect(row.names(Y),row.names(X))
+  olp <- intersect(rownames(Y),rownames(X))
 
   if(length(olp)<2) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
 
