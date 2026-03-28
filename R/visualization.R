@@ -505,3 +505,28 @@ SecAct.survival.plot <- function(mat, surv, gene, x.title="Time")
     xlab(x.title)+
     ylab("Percentage")
 }
+
+
+#' @title Launch SecAct Visualization App
+#' @description Launch the unified SecAct Shiny application for exploring
+#' secreted protein activity across bulk, single-cell, and spatial data.
+#' @param port Port to run the app on. Default NULL uses Shiny's default.
+#' @param launch.browser Whether to launch a browser window. Default TRUE.
+#' @param ... Additional arguments passed to shiny::runApp.
+#' @return Invisible NULL (runs the app).
+#' @rdname runSecActApp
+#' @export
+#'
+runSecActApp <- function(port = NULL, launch.browser = TRUE, ...) {
+  if (!requireNamespace("shiny", quietly = TRUE)) {
+    stop("The 'shiny' package is required to run the SecAct app.\n",
+         "Install it with: install.packages('shiny')")
+  }
+
+  app_dir <- system.file("shiny", "SecActApp", package = "SecAct")
+  if (app_dir == "") {
+    stop("Could not find the SecAct Shiny app. Try reinstalling the SecAct package.")
+  }
+
+  shiny::runApp(app_dir, port = port, launch.browser = launch.browser, ...)
+}
