@@ -41,3 +41,16 @@ normalize_tumor_labels <- function(cell_types) {
 format_radius_label <- function(radius) {
   if (radius == "0") "Target" else paste0(radius, " \u03bcm")
 }
+
+#' Swap a SpaCET object's counts slot with an activity matrix for visualization.
+#' SpaCET.visualize.spatialFeature() renders from @input$counts, so we temporarily
+#' replace it with the activity matrix to reuse the existing rendering pipeline.
+swap_activity_matrix <- function(spacet_obj, activity_matrix) {
+  common_spots <- intersect(colnames(activity_matrix), colnames(spacet_obj@input$counts))
+  temp_mat <- Matrix::Matrix(0, nrow = nrow(activity_matrix), ncol = ncol(spacet_obj@input$counts),
+                             sparse = TRUE,
+                             dimnames = list(rownames(activity_matrix), colnames(spacet_obj@input$counts)))
+  temp_mat[, common_spots] <- activity_matrix[, common_spots]
+  spacet_obj@input$counts <- temp_mat
+  spacet_obj
+}

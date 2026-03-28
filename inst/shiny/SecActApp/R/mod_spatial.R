@@ -165,8 +165,7 @@ spatialServer <- function(id) {
       shiny::req(input$dataUpload)
 
       file_path <- input$dataUpload$datapath
-      file_name <- input$dataUpload$name
-      ext <- tolower(tools::file_ext(file_name))
+      ext <- tolower(tools::file_ext(input$dataUpload$name))
 
       tryCatch({
         shiny::withProgress(message = "Loading dataset...", {
@@ -185,6 +184,7 @@ spatialServer <- function(id) {
               finish_load(SpaCET::convert.Seurat(obj), "Seurat object")
             } else {
               shiny::showNotification("File must contain a SpaCET or Seurat object", type = "error")
+              return()
             }
           }
         })
@@ -200,15 +200,14 @@ spatialServer <- function(id) {
       tryCatch({
         shiny::withProgress(message = "Loading Space Ranger output...", {
           zip_path <- input$spacerUpload$datapath
-          temp_dir <- tempdir()
-          extract_dir <- file.path(temp_dir, "spaceranger_upload")
+          extract_dir <- file.path(tempdir(), "spaceranger_upload")
           if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
+          on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
 
           shiny::incProgress(0.2, detail = "Extracting zip...")
           utils::unzip(zip_path, exdir = extract_dir)
 
-          # Find the Space Ranger output directory (may be nested one level)
-          # Look for the spatial/ subdirectory as a landmark
+          # Zip structure varies; search for spatial/ subdirectory to locate the data
           spatial_dirs <- list.files(extract_dir, pattern = "^spatial$",
                                      recursive = TRUE, include.dirs = TRUE, full.names = TRUE)
           if (length(spatial_dirs) == 0) {
@@ -220,7 +219,7 @@ spatialServer <- function(id) {
           shiny::incProgress(0.4, detail = "Building SpaCET object...")
           obj <- SpaCET::create.SpaCET.object.10X(visiumPath = visium_path)
 
-          shiny::incProgress(0.3, detail = "Done")
+          shiny::incProgress(0.4, detail = "Done")
           finish_load(obj, "Visium dataset")
         })
       }, error = function(e) {
@@ -256,13 +255,8 @@ spatialServer <- function(id) {
       tryCatch({
         shiny::withProgress(message = "Running SecAct inference...", detail = "This may take a few minutes", {
           shiny::incProgress(0.1)
-
-          # Run SecAct spatial inference
           rv$spacet_obj <- SecAct::SecAct.activity.inference.ST(rv$spacet_obj)
-
           shiny::incProgress(0.9)
-
-          # Refresh feature choices to include activity results
           update_features()
 
           shiny::showNotification("SecAct inference complete!", type = "message")
@@ -321,20 +315,13 @@ spatialServer <- function(id) {
           "GeneExpression"
         )
 
-        # For SecAct activity, temporarily swap the counts matrix
         if (input$spatialType == "SecActActivity") {
           act_mat <- rv$spacet_obj@results$SecAct_output$SecActTarget
           if (is.null(act_mat)) {
             return(empty_state_plot("No SecAct activity data found. Run inference first."))
           }
 
-          temp_obj <- rv$spacet_obj
-          common_spots <- intersect(colnames(act_mat), colnames(temp_obj@input$counts))
-          temp_mat <- Matrix::Matrix(0, nrow = nrow(act_mat), ncol = ncol(temp_obj@input$counts),
-                                     sparse = TRUE,
-                                     dimnames = list(rownames(act_mat), colnames(temp_obj@input$counts)))
-          temp_mat[, common_spots] <- act_mat[, common_spots]
-          temp_obj@input$counts <- temp_mat
+          temp_obj <- swap_activity_matrix(rv$spacet_obj, act_mat)
 
           SpaCET::SpaCET.visualize.spatialFeature(
             temp_obj,
