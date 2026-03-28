@@ -16,10 +16,54 @@ spatialUI <- function(id) {
         # Dataset loading
         shiny::wellPanel(
           shiny::h4("Dataset", style = paste0("color: ", UI_COLORS$primary)),
-          shiny::fileInput(ns("dataUpload"), "Upload SpaCET/Seurat Object (.RDS, .h5seurat)",
-                           accept = c(".rds", ".RDS", ".h5seurat")),
-          shiny::actionButton(ns("loadBtn"), "Load Dataset",
-                              class = "btn-primary btn-block")
+
+          shiny::tabsetPanel(
+            id = ns("loadTabs"),
+
+            # Tab: Upload pre-built object
+            shiny::tabPanel("Upload Object",
+              shiny::div(style = "margin-top: 10px;",
+                shiny::fileInput(ns("dataUpload"), "SpaCET/Seurat Object (.RDS, .h5seurat)",
+                                 accept = c(".rds", ".RDS", ".h5seurat")),
+                shiny::actionButton(ns("loadBtn"), "Load Dataset",
+                                    class = "btn-primary btn-block")
+              )
+            ),
+
+            # Tab: Upload Space Ranger output
+            shiny::tabPanel("Space Ranger",
+              shiny::div(style = "margin-top: 10px;",
+                shiny::fileInput(ns("spacerUpload"), "Space Ranger Output (.zip)",
+                                 accept = c(".zip")),
+                shiny::actionButton(ns("loadSpaceRangerBtn"), "Load Visium Data",
+                                    class = "btn-primary btn-block")
+              )
+            ),
+
+            # Tab: Demo dataset
+            shiny::tabPanel("Demo",
+              shiny::div(style = "margin-top: 10px;",
+                shiny::p("Load the bundled Visium HCC example dataset.",
+                         style = "color: #666; font-size: 0.9em;"),
+                shiny::actionButton(ns("loadDemoBtn"), "Load Visium HCC Demo",
+                                    class = "btn-info btn-block",
+                                    icon = shiny::icon("flask"))
+              )
+            )
+          )
+        ),
+
+        # SecAct inference controls (visible after data loaded, before inference run)
+        shiny::conditionalPanel(
+          condition = paste0("output['", ns("dataLoaded"), "'] && !output['", ns("hasSecActResults"), "']"),
+          shiny::wellPanel(
+            shiny::h4("Run SecAct Inference", style = paste0("color: ", UI_COLORS$warning)),
+            shiny::p("No SecAct activity results found. Run inference on this dataset.",
+                     style = "color: #666; font-size: 0.9em;"),
+            shiny::actionButton(ns("runInferenceBtn"), "Run SecAct Inference",
+                                class = "btn-warning btn-block",
+                                icon = shiny::icon("play"))
+          )
         ),
 
         # Visualization controls (visible after data loaded)
@@ -60,7 +104,7 @@ spatialUI <- function(id) {
             shiny::div(
               style = "text-align: center; max-width: 600px;",
               shiny::h2("Spatial Visualization"),
-              shiny::p("Upload a SpaCET or Seurat object to explore spatial secreted protein activity."),
+              shiny::p("Upload a SpaCET or Seurat object, a Space Ranger output zip, or try the demo dataset."),
               shiny::p("Supports: Visium, VisiumHD, CosMx, Xenium, Slide-Seq",
                        style = "color: #666;")
             )
@@ -99,11 +143,24 @@ spatialServer <- function(id) {
       dataLoaded = FALSE
     )
 
-    # Flag for conditionalPanel
+    # Flags for conditionalPanel
     output$dataLoaded <- shiny::reactive({ rv$dataLoaded })
     shiny::outputOptions(output, "dataLoaded", suspendWhenHidden = FALSE)
 
-    # Load dataset
+    output$hasSecActResults <- shiny::reactive({
+      !is.null(rv$spacet_obj) && !is.null(rv$spacet_obj@results$SecAct_output)
+    })
+    shiny::outputOptions(output, "hasSecActResults", suspendWhenHidden = FALSE)
+
+    # Helper: finalize after any load path succeeds
+    finish_load <- function(obj, source_label) {
+      rv$spacet_obj <- obj
+      rv$dataLoaded <- TRUE
+      update_features()
+      shiny::showNotification(paste(source_label, "loaded successfully"), type = "message")
+    }
+
+    # --- Load path 1: Pre-built object (.RDS / .h5seurat) ---
     shiny::observeEvent(input$loadBtn, {
       shiny::req(input$dataUpload)
 
@@ -114,35 +171,104 @@ spatialServer <- function(id) {
       tryCatch({
         shiny::withProgress(message = "Loading dataset...", {
           if (ext == "h5seurat") {
-            # Load h5seurat via SeuratDisk, convert to SpaCET
             if (!requireNamespace("SeuratDisk", quietly = TRUE)) {
               shiny::showNotification("SeuratDisk package required for .h5seurat files", type = "error")
               return()
             }
             seu <- SeuratDisk::LoadH5Seurat(file_path)
-            rv$spacet_obj <- SpaCET::convert.Seurat(seu)
+            finish_load(SpaCET::convert.Seurat(seu), "Seurat object")
           } else {
-            # Load RDS — could be SpaCET or Seurat object
             obj <- readRDS(file_path)
             if (inherits(obj, "SpaCET")) {
-              rv$spacet_obj <- obj
+              finish_load(obj, "SpaCET object")
             } else if (inherits(obj, "Seurat")) {
-              rv$spacet_obj <- SpaCET::convert.Seurat(obj)
+              finish_load(SpaCET::convert.Seurat(obj), "Seurat object")
             } else {
               shiny::showNotification("File must contain a SpaCET or Seurat object", type = "error")
-              return()
             }
           }
-
-          rv$dataLoaded <- TRUE
-
-          # Update feature choices based on spatial type
-          update_features()
-
-          shiny::showNotification("Dataset loaded successfully", type = "message")
         })
       }, error = function(e) {
         shiny::showNotification(paste("Error loading file:", e$message), type = "error")
+      })
+    })
+
+    # --- Load path 2: Space Ranger zip ---
+    shiny::observeEvent(input$loadSpaceRangerBtn, {
+      shiny::req(input$spacerUpload)
+
+      tryCatch({
+        shiny::withProgress(message = "Loading Space Ranger output...", {
+          zip_path <- input$spacerUpload$datapath
+          temp_dir <- tempdir()
+          extract_dir <- file.path(temp_dir, "spaceranger_upload")
+          if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
+
+          shiny::incProgress(0.2, detail = "Extracting zip...")
+          utils::unzip(zip_path, exdir = extract_dir)
+
+          # Find the Space Ranger output directory (may be nested one level)
+          # Look for the spatial/ subdirectory as a landmark
+          spatial_dirs <- list.files(extract_dir, pattern = "^spatial$",
+                                     recursive = TRUE, include.dirs = TRUE, full.names = TRUE)
+          if (length(spatial_dirs) == 0) {
+            shiny::showNotification("No 'spatial/' directory found in zip. Is this a Space Ranger output?", type = "error")
+            return()
+          }
+          visium_path <- dirname(spatial_dirs[1])
+
+          shiny::incProgress(0.4, detail = "Building SpaCET object...")
+          obj <- SpaCET::create.SpaCET.object.10X(visiumPath = visium_path)
+
+          shiny::incProgress(0.3, detail = "Done")
+          finish_load(obj, "Visium dataset")
+        })
+      }, error = function(e) {
+        shiny::showNotification(paste("Error loading Space Ranger data:", e$message), type = "error")
+      })
+    })
+
+    # --- Load path 3: Demo dataset ---
+    shiny::observeEvent(input$loadDemoBtn, {
+      tryCatch({
+        shiny::withProgress(message = "Loading Visium HCC demo...", {
+          demo_path <- system.file("extdata", "Visium_HCC", package = "SecAct")
+          if (demo_path == "") {
+            shiny::showNotification("Demo data not found. Is SecAct installed?", type = "error")
+            return()
+          }
+
+          shiny::incProgress(0.3, detail = "Building SpaCET object...")
+          obj <- SpaCET::create.SpaCET.object.10X(visiumPath = demo_path)
+
+          shiny::incProgress(0.6, detail = "Done")
+          finish_load(obj, "Visium HCC demo")
+        })
+      }, error = function(e) {
+        shiny::showNotification(paste("Error loading demo:", e$message), type = "error")
+      })
+    })
+
+    # --- Run SecAct inference ---
+    shiny::observeEvent(input$runInferenceBtn, {
+      shiny::req(rv$spacet_obj)
+
+      tryCatch({
+        shiny::withProgress(message = "Running SecAct inference...", detail = "This may take a few minutes", {
+          shiny::incProgress(0.1)
+
+          # Run SecAct spatial inference
+          rv$spacet_obj <- SecAct::SecAct.activity.inference.ST(rv$spacet_obj)
+
+          shiny::incProgress(0.9)
+
+          # Refresh feature choices to include activity results
+          update_features()
+
+          shiny::showNotification("SecAct inference complete!", type = "message")
+        })
+      }, error = function(e) {
+        shiny::showNotification(paste("Inference error:", e$message), type = "error")
       })
     })
 
@@ -156,7 +282,6 @@ spatialServer <- function(id) {
           if (!is.null(obj@results$SecAct_output$SecActTarget)) {
             rownames(obj@results$SecAct_output$SecActTarget)
           } else if (!is.null(obj@results$SecAct_output)) {
-            # Try alternative slot names
             nms <- names(obj@results$SecAct_output)
             mat_name <- nms[grepl("Target|activity", nms, ignore.case = TRUE)][1]
             if (!is.na(mat_name)) rownames(obj@results$SecAct_output[[mat_name]]) else character(0)
@@ -188,9 +313,8 @@ spatialServer <- function(id) {
       shiny::req(rv$spacet_obj, input$feature)
 
       tryCatch({
-        # Map app spatial types to SpaCET spatial types
         spacet_type <- switch(input$spatialType,
-          "SecActActivity" = "GeneExpression",  # SecAct stores activity like gene expression
+          "SecActActivity" = "GeneExpression",
           "GeneExpression" = "GeneExpression",
           "CellFraction" = "CellFraction",
           "CellTypeComposition" = "CellTypeComposition",
@@ -199,15 +323,12 @@ spatialServer <- function(id) {
 
         # For SecAct activity, temporarily swap the counts matrix
         if (input$spatialType == "SecActActivity") {
-          # Get the activity matrix from SecAct results
           act_mat <- rv$spacet_obj@results$SecAct_output$SecActTarget
           if (is.null(act_mat)) {
-            return(empty_state_plot("No SecAct activity data found in this object"))
+            return(empty_state_plot("No SecAct activity data found. Run inference first."))
           }
 
-          # Create a temporary SpaCET object with activity as the "counts"
           temp_obj <- rv$spacet_obj
-          # Store original counts, replace with activity matrix for visualization
           common_spots <- intersect(colnames(act_mat), colnames(temp_obj@input$counts))
           temp_mat <- Matrix::Matrix(0, nrow = nrow(act_mat), ncol = ncol(temp_obj@input$counts),
                                      sparse = TRUE,
