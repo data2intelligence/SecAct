@@ -7,6 +7,7 @@ source("global.R", local = TRUE)
 
 # Load modules
 source(file.path("R", "mod_spatial.R"), local = TRUE)
+source(file.path("R", "mod_inference.R"), local = TRUE)
 
 # --- UI ---
 ui <- shiny::fluidPage(
@@ -23,13 +24,15 @@ ui <- shiny::fluidPage(
   # Tabbed interface — Phase 1 has spatial only; more tabs added in later phases
   shiny::tabsetPanel(
     id = "mainTabs",
-    shiny::tabPanel("Spatial", spatialUI("spatial"))
+    shiny::tabPanel("Spatial", spatialUI("spatial")),
+    shiny::tabPanel("Run Inference", inferenceUI("inference"))
   )
 )
 
 # --- Server ---
 server <- function(input, output, session) {
   spatialServer("spatial")
+  inferenceServer("inference")
 }
 
 shiny::shinyApp(ui = ui, server = server)
