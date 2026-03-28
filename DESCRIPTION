@@ -27,5 +27,16 @@ Imports:
     survminer,
     parallel,
     ComplexHeatmap
+Suggests:
+    shiny,
+    shinyWidgets,
+    bslib,
+    DT,
+    SeuratObject,
+    SeuratDisk,
+    png,
+    base64enc,
+    shinyjs,
+    shinyFeedback
 biocViews:
     ComplexHeatmap
