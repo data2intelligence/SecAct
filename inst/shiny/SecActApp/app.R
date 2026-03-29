@@ -9,6 +9,7 @@ source("global.R", local = TRUE)
 source(file.path("R", "mod_spatial.R"), local = TRUE)
 source(file.path("R", "mod_inference.R"), local = TRUE)
 source(file.path("R", "mod_singlecell.R"), local = TRUE)
+source(file.path("R", "mod_bulk.R"), local = TRUE)
 
 # --- UI ---
 ui <- shiny::fluidPage(
@@ -25,6 +26,7 @@ ui <- shiny::fluidPage(
   # Tabbed interface — Phase 1 has spatial only; more tabs added in later phases
   shiny::tabsetPanel(
     id = "mainTabs",
+    shiny::tabPanel("Bulk", bulkUI("bulk")),
     shiny::tabPanel("Spatial", spatialUI("spatial")),
     shiny::tabPanel("Single Cell", singlecellUI("singlecell")),
     shiny::tabPanel("Run Inference", inferenceUI("inference"))
@@ -33,6 +35,7 @@ ui <- shiny::fluidPage(
 
 # --- Server ---
 server <- function(input, output, session) {
+  bulkServer("bulk")
   spatialServer("spatial")
   singlecellServer("singlecell")
   inferenceServer("inference")
