@@ -40,6 +40,26 @@ spatialUI <- function(id) {
               )
             ),
 
+            # Tab: Upload CosMx output
+            shiny::tabPanel("CosMx",
+              shiny::div(style = "margin-top: 10px;",
+                shiny::fileInput(ns("cosmxUpload"), "CosMx Output (.zip)",
+                                 accept = c(".zip")),
+                shiny::actionButton(ns("loadCosmxBtn"), "Load CosMx Data",
+                                    class = "btn-primary btn-block")
+              )
+            ),
+
+            # Tab: Upload Xenium output
+            shiny::tabPanel("Xenium",
+              shiny::div(style = "margin-top: 10px;",
+                shiny::fileInput(ns("xeniumUpload"), "Xenium Output (.zip)",
+                                 accept = c(".zip")),
+                shiny::actionButton(ns("loadXeniumBtn"), "Load Xenium Data",
+                                    class = "btn-primary btn-block")
+              )
+            ),
+
             # Tab: Demo dataset
             shiny::tabPanel("Demo",
               shiny::div(style = "margin-top: 10px;",
@@ -224,6 +244,72 @@ spatialServer <- function(id) {
         })
       }, error = function(e) {
         shiny::showNotification(paste("Error loading Space Ranger data:", e$message), type = "error")
+      })
+    })
+
+    # --- Load path: CosMx zip ---
+    shiny::observeEvent(input$loadCosmxBtn, {
+      shiny::req(input$cosmxUpload)
+
+      tryCatch({
+        shiny::withProgress(message = "Loading CosMx data...", {
+          zip_path <- input$cosmxUpload$datapath
+          extract_dir <- file.path(tempdir(), "cosmx_upload")
+          if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
+          on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
+
+          shiny::incProgress(0.2, detail = "Extracting zip...")
+          utils::unzip(zip_path, exdir = extract_dir)
+
+          # Find the CosMx output directory (look for metadata or expression files)
+          meta_files <- list.files(extract_dir, pattern = "metadata", recursive = TRUE, full.names = TRUE)
+          if (length(meta_files) == 0) {
+            shiny::showNotification("No metadata file found in zip. Is this CosMx output?", type = "error")
+            return()
+          }
+          cosmx_path <- dirname(meta_files[1])
+
+          shiny::incProgress(0.4, detail = "Building SpaCET object...")
+          obj <- SpaCET::create.SpaCET.object.CosMx(cosmxPath = cosmx_path)
+
+          shiny::incProgress(0.4, detail = "Done")
+          finish_load(obj, "CosMx dataset")
+        })
+      }, error = function(e) {
+        shiny::showNotification(paste("Error loading CosMx data:", e$message), type = "error")
+      })
+    })
+
+    # --- Load path: Xenium zip ---
+    shiny::observeEvent(input$loadXeniumBtn, {
+      shiny::req(input$xeniumUpload)
+
+      tryCatch({
+        shiny::withProgress(message = "Loading Xenium data...", {
+          zip_path <- input$xeniumUpload$datapath
+          extract_dir <- file.path(tempdir(), "xenium_upload")
+          if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
+          on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
+
+          shiny::incProgress(0.2, detail = "Extracting zip...")
+          utils::unzip(zip_path, exdir = extract_dir)
+
+          # Find the Xenium output directory (look for cells file)
+          cells_files <- list.files(extract_dir, pattern = "cells\\.(csv\\.gz|parquet)$", recursive = TRUE, full.names = TRUE)
+          if (length(cells_files) == 0) {
+            shiny::showNotification("No cells file found in zip. Is this Xenium output?", type = "error")
+            return()
+          }
+          xenium_path <- dirname(cells_files[1])
+
+          shiny::incProgress(0.4, detail = "Building SpaCET object...")
+          obj <- SpaCET::create.SpaCET.object.Xenium(xeniumPath = xenium_path)
+
+          shiny::incProgress(0.4, detail = "Done")
+          finish_load(obj, "Xenium dataset")
+        })
+      }, error = function(e) {
+        shiny::showNotification(paste("Error loading Xenium data:", e$message), type = "error")
       })
     })
 
