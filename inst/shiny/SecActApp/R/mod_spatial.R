@@ -216,25 +216,11 @@ spatialServer <- function(id) {
     # --- Load path 2: Space Ranger zip ---
     shiny::observeEvent(input$loadSpaceRangerBtn, {
       shiny::req(input$spacerUpload)
-
       tryCatch({
         shiny::withProgress(message = "Loading Space Ranger output...", {
-          zip_path <- input$spacerUpload$datapath
-          extract_dir <- file.path(tempdir(), "spaceranger_upload")
-          if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
-          on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
-
           shiny::incProgress(0.2, detail = "Extracting zip...")
-          utils::unzip(zip_path, exdir = extract_dir)
-
-          # Zip structure varies; search for spatial/ subdirectory to locate the data
-          spatial_dirs <- list.files(extract_dir, pattern = "^spatial$",
-                                     recursive = TRUE, include.dirs = TRUE, full.names = TRUE)
-          if (length(spatial_dirs) == 0) {
-            shiny::showNotification("No 'spatial/' directory found in zip. Is this a Space Ranger output?", type = "error")
-            return()
-          }
-          visium_path <- dirname(spatial_dirs[1])
+          visium_path <- extract_platform_zip(input$spacerUpload, "Space Ranger", "^spatial$", "dir")
+          if (is.null(visium_path)) return()
 
           shiny::incProgress(0.4, detail = "Building SpaCET object...")
           obj <- SpaCET::create.SpaCET.object.10X(visiumPath = visium_path)
@@ -250,24 +236,11 @@ spatialServer <- function(id) {
     # --- Load path: CosMx zip ---
     shiny::observeEvent(input$loadCosmxBtn, {
       shiny::req(input$cosmxUpload)
-
       tryCatch({
         shiny::withProgress(message = "Loading CosMx data...", {
-          zip_path <- input$cosmxUpload$datapath
-          extract_dir <- file.path(tempdir(), "cosmx_upload")
-          if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
-          on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
-
           shiny::incProgress(0.2, detail = "Extracting zip...")
-          utils::unzip(zip_path, exdir = extract_dir)
-
-          # Find the CosMx output directory (look for metadata or expression files)
-          meta_files <- list.files(extract_dir, pattern = "metadata", recursive = TRUE, full.names = TRUE)
-          if (length(meta_files) == 0) {
-            shiny::showNotification("No metadata file found in zip. Is this CosMx output?", type = "error")
-            return()
-          }
-          cosmx_path <- dirname(meta_files[1])
+          cosmx_path <- extract_platform_zip(input$cosmxUpload, "CosMx", "metadata", "file")
+          if (is.null(cosmx_path)) return()
 
           shiny::incProgress(0.4, detail = "Building SpaCET object...")
           obj <- SpaCET::create.SpaCET.object.CosMx(cosmxPath = cosmx_path)
@@ -283,24 +256,11 @@ spatialServer <- function(id) {
     # --- Load path: Xenium zip ---
     shiny::observeEvent(input$loadXeniumBtn, {
       shiny::req(input$xeniumUpload)
-
       tryCatch({
         shiny::withProgress(message = "Loading Xenium data...", {
-          zip_path <- input$xeniumUpload$datapath
-          extract_dir <- file.path(tempdir(), "xenium_upload")
-          if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
-          on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
-
           shiny::incProgress(0.2, detail = "Extracting zip...")
-          utils::unzip(zip_path, exdir = extract_dir)
-
-          # Find the Xenium output directory (look for cells file)
-          cells_files <- list.files(extract_dir, pattern = "cells\\.(csv\\.gz|parquet)$", recursive = TRUE, full.names = TRUE)
-          if (length(cells_files) == 0) {
-            shiny::showNotification("No cells file found in zip. Is this Xenium output?", type = "error")
-            return()
-          }
-          xenium_path <- dirname(cells_files[1])
+          xenium_path <- extract_platform_zip(input$xeniumUpload, "Xenium", "cells\\.(csv\\.gz|parquet)$", "file")
+          if (is.null(xenium_path)) return()
 
           shiny::incProgress(0.4, detail = "Building SpaCET object...")
           obj <- SpaCET::create.SpaCET.object.Xenium(xeniumPath = xenium_path)

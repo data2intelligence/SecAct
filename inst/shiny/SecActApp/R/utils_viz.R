@@ -54,3 +54,37 @@ swap_activity_matrix <- function(spacet_obj, activity_matrix) {
   spacet_obj@input$counts <- temp_mat
   spacet_obj
 }
+
+#' Extract a platform zip upload and find the output directory.
+#' Handles nested zip structures by searching for a landmark file pattern.
+#' @param upload_input The Shiny fileInput value (must have $datapath)
+#' @param platform_name Label for notifications (e.g., "Space Ranger", "CosMx")
+#' @param landmark_pattern Regex to find the platform's landmark file/dir
+#' @param landmark_type "dir" to search for directories, "file" for files
+#' @return Path to the platform output directory, or NULL on failure
+extract_platform_zip <- function(upload_input, platform_name, landmark_pattern, landmark_type = "file") {
+  zip_path <- upload_input$datapath
+  extract_dir <- file.path(tempdir(), paste0(tolower(gsub(" ", "_", platform_name)), "_upload"))
+  if (dir.exists(extract_dir)) unlink(extract_dir, recursive = TRUE)
+  on.exit(unlink(extract_dir, recursive = TRUE), add = TRUE)
+
+  utils::unzip(zip_path, exdir = extract_dir)
+
+  if (landmark_type == "dir") {
+    matches <- list.files(extract_dir, pattern = landmark_pattern,
+                          recursive = TRUE, include.dirs = TRUE, full.names = TRUE)
+  } else {
+    matches <- list.files(extract_dir, pattern = landmark_pattern,
+                          recursive = TRUE, full.names = TRUE)
+  }
+
+  if (length(matches) == 0) {
+    shiny::showNotification(
+      paste0("No '", landmark_pattern, "' found in zip. Is this ", platform_name, " output?"),
+      type = "error"
+    )
+    return(NULL)
+  }
+
+  dirname(matches[1])
+}
