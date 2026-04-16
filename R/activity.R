@@ -19,6 +19,7 @@ SecAct.inference.gsl <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 {
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
+  lambda <- sig$lambda
 
   olp <- intersect(rownames(Y),rownames(X))
   X <- as.matrix(X[olp,,drop=F])
@@ -69,6 +70,7 @@ SecAct.inference.r <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 {
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
+  lambda <- sig$lambda
 
   olp <- intersect(rownames(Y),rownames(X))
   X <- as.matrix(X[olp,,drop=F])

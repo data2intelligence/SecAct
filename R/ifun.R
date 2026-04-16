@@ -62,6 +62,23 @@ scalar1 <- function(x)
   x / sqrt(sum(x^2))
 }
 
+find_neighbors <- function(coordinate_mat, radius, k = 100)
+{
+  nn_result <- RANN::nn2(
+    coordinate_mat[,c("coordinate_x_um","coordinate_y_um")],
+    k=k, searchtype="radius", radius=radius
+  )
+
+  neighbor_indices <- nn_result$nn.idx
+  neighbor_distances <- nn_result$nn.dists
+
+  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices))
+  j <- as.vector(t(neighbor_indices))
+  x <- as.vector(t(neighbor_distances))
+
+  valid <- x <= radius & x > 0
+  list(i=i[valid], j=j[valid], x=x[valid], n=nrow(neighbor_indices))
+}
 
 calWeights <- function(spotCoordinates, radius, sigma=100, diagAsZero=TRUE)
 {
@@ -160,16 +177,6 @@ CoxPH_best_separation = function(X, Y, margin)
   return (arr_result)
 }
 
-expand_rows <- function(mat)
-{
-  new_rows <- lapply(1:nrow(mat), function(i) {
-    names <- strsplit(rownames(mat)[i], "\\|")[[1]]
-    do.call(rbind, replicate(length(names), mat[i, , drop = FALSE], simplify = FALSE)) |>
-      `rownames<-`(names)
-  })
-  do.call(rbind, new_rows)
-}
-
 load_sig_matrix <- function(sigMatrix, lambda = NULL)
 {
   if(sigMatrix == "SecAct")
@@ -193,6 +200,16 @@ load_sig_matrix <- function(sigMatrix, lambda = NULL)
   }
 
   list(X = X, lambda = lambda)
+}
+
+expand_rows <- function(mat)
+{
+  new_rows <- lapply(1:nrow(mat), function(i) {
+    names <- strsplit(rownames(mat)[i], "\\|")[[1]]
+    do.call(rbind, replicate(length(names), mat[i, , drop = FALSE], simplify = FALSE)) |>
+      `rownames<-`(names)
+  })
+  do.call(rbind, new_rows)
 }
 
 normalize_log_sparse <- function(expr, scale.factor)
@@ -244,24 +261,6 @@ extract_seurat_counts <- function(obj)
     counts <- obj@assays$RNA@counts
   }
   counts
-}
-
-find_neighbors <- function(coordinate_mat, radius, k = 100)
-{
-  nn_result <- RANN::nn2(
-    coordinate_mat[,c("coordinate_x_um","coordinate_y_um")],
-    k=k, searchtype="radius", radius=radius
-  )
-
-  neighbor_indices <- nn_result$nn.idx
-  neighbor_distances <- nn_result$nn.dists
-
-  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices))
-  j <- as.vector(t(neighbor_indices))
-  x <- as.vector(t(neighbor_distances))
-
-  valid <- x <= radius & x > 0
-  list(i=i[valid], j=j[valid], x=x[valid], n=nrow(neighbor_indices))
 }
 
 compute_spatial_correlation <- function(act_new, exp_new, exp_new_aggr)
