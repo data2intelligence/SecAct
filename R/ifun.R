@@ -6,11 +6,11 @@ sweep_sparse <- function(m, margin, stats, fun)
   {
     idx <- m@i + 1
   }else{
-    if(class(m)[1]=="dgCMatrix")
+    if(inherits(m, "dgCMatrix"))
     {
       idx <- rep(1:m@Dim[2], diff(m@p))
     }else{
-      idx <- x@j + 1
+      idx <- m@j + 1
     }
   }
 
@@ -83,8 +83,7 @@ calWeights <- function(spotCoordinates, radius, sigma=100, diagAsZero=TRUE)
   x <- exp( -x^2 / (2*sigma^2) )
 
   # Create the sparse matrix using the 'i', 'j', and 'x' vectors
-  library(Matrix)
-  W <- sparseMatrix(i=i, j=j, x=x, dims=c(nrow(neighbor_indices), nrow(neighbor_indices)), repr="T")
+  W <- Matrix::sparseMatrix(i=i, j=j, x=x, dims=c(nrow(neighbor_indices), nrow(neighbor_indices)), repr="T")
   rownames(W) <- rownames(spotCoordinates)
   colnames(W) <- rownames(spotCoordinates)
 
@@ -99,7 +98,7 @@ CoxPH_best_separation = function(X, Y, margin)
   errflag = F
 
   coxph.fit = tryCatch(
-    coxph(Y~., data=X),
+    survival::coxph(Y~., data=X),
     error = function(e) errflag <<- T,
     warning = function(w) errflag <<- T)
 
@@ -128,7 +127,7 @@ CoxPH_best_separation = function(X, Y, margin)
 
     errflag = F
     coxph.fit = tryCatch(
-      coxph(Y~., data=X),
+      survival::coxph(Y~., data=X),
       error = function(e) errflag <<- T,
       warning = function(w) errflag <<- T)
 
@@ -169,4 +168,133 @@ expand_rows <- function(mat)
       `rownames<-`(names)
   })
   do.call(rbind, new_rows)
+}
+
+load_sig_matrix <- function(sigMatrix, lambda = NULL)
+{
+  if(sigMatrix == "SecAct")
+  {
+    Xfile <- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
+    X <- read.table(Xfile, sep="\t", check.names=FALSE)
+    if(is.null(lambda)) lambda <- 5e+05
+
+  }else if(grepl("SecAct-", sigMatrix, fixed=TRUE)){
+    Xfile <- paste0("https://hpc.nih.gov/~Jiang_Lab/SecAct_Package/", sigMatrix, "_filterByPan_ds3_vst.tsv")
+    X <- read.table(Xfile, sep="\t", check.names=FALSE)
+    if(is.null(lambda)) lambda <- 5e+05
+
+  }else if(sigMatrix == "CytoSig"){
+    Xfile <- "https://raw.githubusercontent.com/data2intelligence/CytoSig/refs/heads/master/CytoSig/signature.centroid"
+    X <- read.table(Xfile, sep="\t", check.names=FALSE)
+    if(is.null(lambda)) lambda <- 10000
+
+  }else{
+    X <- read.table(sigMatrix, sep="\t", check.names=FALSE)
+  }
+
+  list(X = X, lambda = lambda)
+}
+
+normalize_log_sparse <- function(expr, scale.factor)
+{
+  stats <- Matrix::colSums(expr)
+  expr <- sweep_sparse(expr, 2, stats, "/")
+  expr@x <- expr@x * scale.factor
+  expr@x <- log2(expr@x + 1)
+  expr
+}
+
+extract_ccc_data <- function(data)
+{
+  if(inherits(data, "SpaCET"))
+  {
+    ccc <- data@results$SecAct_output$SecretedProteinCCC
+  }else if(inherits(data, "Seurat")){
+    ccc <- data@misc$SecAct_output$SecretedProteinCCC
+  }else{
+    stop("Please input a SpaCET or Seurat object.")
+  }
+  ccc <- cbind(ccc, communication=1)
+  ccc <- cbind(ccc, senderReceiver=paste0(ccc[,"sender"], "-", ccc[,"receiver"]))
+  ccc
+}
+
+build_ccc_matrix <- function(ccc)
+{
+  mat <- reshape2::acast(ccc[,c("sender","receiver","communication")], sender~receiver, length, value.var="communication")
+  cellTypes <- sort(unique(c(rownames(mat), colnames(mat))))
+  for(cellType in cellTypes)
+  {
+    if(cellType %in% rownames(mat) & cellType %in% colnames(mat))
+    {
+      mat[cellType, cellType] <- NA
+    }
+  }
+  mat
+}
+
+extract_seurat_counts <- function(obj)
+{
+  if(inherits(obj@assays$RNA, "Assay5"))
+  {
+    counts <- obj@assays$RNA@layers$counts
+    colnames(counts) <- rownames(obj@assays$RNA@cells)
+    rownames(counts) <- rownames(obj@assays$RNA@features)
+  }else{
+    counts <- obj@assays$RNA@counts
+  }
+  counts
+}
+
+find_neighbors <- function(coordinate_mat, radius, k = 100)
+{
+  nn_result <- RANN::nn2(
+    coordinate_mat[,c("coordinate_x_um","coordinate_y_um")],
+    k=k, searchtype="radius", radius=radius
+  )
+
+  neighbor_indices <- nn_result$nn.idx
+  neighbor_distances <- nn_result$nn.dists
+
+  i <- rep(1:nrow(neighbor_indices), each=ncol(neighbor_indices))
+  j <- as.vector(t(neighbor_indices))
+  x <- as.vector(t(neighbor_distances))
+
+  valid <- x <= radius & x > 0
+  list(i=i[valid], j=j[valid], x=x[valid], n=nrow(neighbor_indices))
+}
+
+compute_spatial_correlation <- function(act_new, exp_new, exp_new_aggr)
+{
+  genes <- rownames(act_new)
+  n <- length(genes)
+  rs <- numeric(n)
+  ps <- numeric(n)
+  names(rs) <- names(ps) <- genes
+
+  for(i in seq_len(n))
+  {
+    gene <- genes[i]
+    if(gene %in% rownames(exp_new))
+    {
+      cor_res <- cor.test(act_new[gene,], exp_new_aggr[gene,], method="spearman")
+      rs[i] <- cor_res$estimate
+      ps[i] <- cor_res$p.value
+    }else{
+      rs[i] <- NA
+      ps[i] <- NA
+    }
+  }
+  data.frame(r=rs, p=ps, padj=p.adjust(ps, method="BH"))
+}
+
+unpack_ridge_results <- function(res, m, X_colnames, Y_colnames)
+{
+  dims <- list(X_colnames, Y_colnames)
+  list(
+    beta   = matrix(res$beta,   byrow=TRUE, ncol=m, dimnames=dims),
+    se     = matrix(res$se,     byrow=TRUE, ncol=m, dimnames=dims),
+    zscore = matrix(res$zscore, byrow=TRUE, ncol=m, dimnames=dims),
+    pvalue = matrix(res$pvalue, byrow=TRUE, ncol=m, dimnames=dims)
+  )
 }

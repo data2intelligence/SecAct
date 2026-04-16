@@ -15,17 +15,27 @@ Imports:
     Matrix,
     ggplot2,
     reshape2,
-    patchwork,
     NMF,
     akima,
     gganimate,
     metap,
     circlize,
     ggalluvial,
-    networkD3,
     survival,
     survminer,
     parallel,
-    ComplexHeatmap
+    ComplexHeatmap,
+    RANN
+Suggests:
+    shiny,
+    shinyWidgets,
+    bslib,
+    DT,
+    SeuratObject,
+    SeuratDisk,
+    png,
+    base64enc,
+    shinyjs,
+    shinyFeedback
 biocViews:
     ComplexHeatmap

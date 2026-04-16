@@ -17,15 +17,10 @@
 #'
 SecAct.inference.gsl <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 {
-  if(SigMat=="SecAct")
-  {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
-    X <- read.table(Xfile,sep="\t",check.names=F)
-  }else{
-    X <- read.table(SigMat,sep="\t",check.names=F)
-  }
+  sig <- load_sig_matrix(SigMat, lambda)
+  X <- sig$X
 
-  olp <- intersect(row.names(Y),row.names(X))
+  olp <- intersect(rownames(Y),rownames(X))
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
 
@@ -50,14 +45,7 @@ SecAct.inference.gsl <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
             pvalue=double(p*m)
   )
 
-  beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-
-  res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
-
-  res
+  unpack_ridge_results(res, m, colnames(X), colnames(Y))
 }
 
 #' @title Secreted protein activity inference
@@ -79,15 +67,10 @@ SecAct.inference.gsl <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 #'
 SecAct.inference.r <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 {
-  if(SigMat=="SecAct")
-  {
-    Xfile<- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
-    X <- read.table(Xfile,sep="\t",check.names=F)
-  }else{
-    X <- read.table(SigMat,sep="\t",check.names=F)
-  }
+  sig <- load_sig_matrix(SigMat, lambda)
+  X <- sig$X
 
-  olp <- intersect(row.names(Y),row.names(X))
+  olp <- intersect(rownames(Y),rownames(X))
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
 
@@ -193,11 +176,11 @@ SecAct.activity.inference <- function(
   nrand=1000
 )
 {
-  if(class(inputProfile)[1]=="SpaCET")
+  if(inherits(inputProfile, "SpaCET"))
   {
     stop("Please use 'SecAct.activity.inference.ST'.")
   }
-  if(class(inputProfile)[1]=="Seurat")
+  if(inherits(inputProfile, "Seurat"))
   {
     stop("Please use 'SecAct.activity.inference.scRNAseq'.")
   }
@@ -229,29 +212,13 @@ SecAct.activity.inference <- function(
     }
   }
 
-  if(sigMatrix=="SecAct")
-  {
-    Xfile <- file.path(system.file(package = "SecAct"), "extdata/SecAct.tsv.gz")
-    X <- read.table(Xfile,sep="\t",check.names=F)
-    if(is.null(lambda)) lambda <- 5e+05
-
-  }else if(grepl("SecAct-",sigMatrix,fixed=TRUE)){
-    Xfile <- paste0("https://hpc.nih.gov/~Jiang_Lab/SecAct_Package/",sigMatrix,"_filterByPan_ds3_vst.tsv")
-    X <- read.table(Xfile,sep="\t",check.names=F)
-    if(is.null(lambda)) lambda <- 5e+05
-
-  }else if(sigMatrix=="CytoSig"){
-    Xfile <- "https://raw.githubusercontent.com/data2intelligence/CytoSig/refs/heads/master/CytoSig/signature.centroid"
-    X <- read.table(Xfile,sep="\t",check.names=F)
-    if(is.null(lambda)) lambda <- 10000
-
-  }else{
-    X <- read.table(sigMatrix,sep="\t",check.names=F)
-  }
+  sig <- load_sig_matrix(sigMatrix, lambda)
+  X <- sig$X
+  lambda <- sig$lambda
 
   if(is.filter.sig==TRUE)
   {
-    X <- X[,colnames(X)%in%row.names(Y)]
+    X <- X[,colnames(X)%in%rownames(Y)]
   }
 
   if(is.group.sig==TRUE)
@@ -272,7 +239,7 @@ SecAct.activity.inference <- function(
     X <- newsig
   }
 
-  olp <- intersect(row.names(Y),row.names(X))
+  olp <- intersect(rownames(Y),rownames(X))
 
   if(length(olp)<2) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
 
@@ -300,25 +267,14 @@ SecAct.activity.inference <- function(
             pvalue=double(p*m)
   )
 
-  beta <- matrix(res$beta,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  se <- matrix(res$se,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  zscore <- matrix(res$zscore,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
-  pvalue <- matrix(res$pvalue,byrow=T,ncol=m,dimnames=list(colnames(X),colnames(Y)))
+  res <- unpack_ridge_results(res, m, colnames(X), colnames(Y))
 
   if(is.group.sig==TRUE)
   {
-    beta <- expand_rows(beta)
-    se <- expand_rows(se)
-    zscore <- expand_rows(zscore)
-    pvalue <- expand_rows(pvalue)
-
-    beta <- beta[sort(rownames(beta)),,drop=F]
-    se <- se[sort(rownames(beta)),,drop=F]
-    zscore <- zscore[sort(rownames(beta)),,drop=F]
-    pvalue <- pvalue[sort(rownames(beta)),,drop=F]
+    for(nm in names(res)) res[[nm]] <- expand_rows(res[[nm]])
+    idx <- sort(rownames(res$beta))
+    for(nm in names(res)) res[[nm]] <- res[[nm]][idx,,drop=F]
   }
-
-  res <- list(beta=beta, se=se, zscore=zscore, pvalue=pvalue)
 
   res
 }
@@ -351,7 +307,7 @@ SecAct.activity.inference.ST <- function(
     nrand=1000
 )
 {
-  if(!class(inputProfile)[1]=="SpaCET")
+  if(!inherits(inputProfile, "SpaCET"))
   {
     stop("Please input a SpaCET object.")
   }
@@ -362,33 +318,19 @@ SecAct.activity.inference.ST <- function(
   rownames(expr) <- transferSymbol(rownames(expr))
   expr <- rm_duplicates(expr)
 
-  # normalize to TPM
-  stats <- Matrix::colSums(expr)
-  expr <- sweep_sparse(expr,2,stats,"/")
-  expr@x <- expr@x * scale.factor
-
-  # transform to log space
-  expr@x <- log2(expr@x + 1)
+  expr <- normalize_log_sparse(expr, scale.factor)
 
   if(is.null(inputProfile_control))
   {
-    # normalized with the control samples
     expr.diff <- expr - Matrix::rowMeans(expr)
 
   }else{
-    # extract count matrix
     expr_control <- inputProfile_control@input$counts
     expr_control <- expr_control[Matrix::rowSums(expr_control)>0,]
     rownames(expr_control) <- transferSymbol(rownames(expr_control))
     expr_control <- rm_duplicates(expr_control)
 
-    # normalize to TPM
-    stats <- Matrix::colSums(expr_control)
-    expr_control <- sweep_sparse(expr_control,2,stats,"/")
-    expr_control@x <- expr_control@x * scale.factor
-
-    # transform to log space
-    expr_control@x <- log2(expr_control@x + 1)
+    expr_control <- normalize_log_sparse(expr_control, scale.factor)
 
     olp <- intersect(rownames(expr), rownames(expr_control))
     expr.diff <- expr[olp,] - Matrix::rowMeans(expr_control[olp,])
@@ -438,19 +380,12 @@ SecAct.activity.inference.scRNAseq <- function(
     nrand=1000
 )
 {
-  if(!class(inputProfile)[1]=="Seurat")
+  if(!inherits(inputProfile, "Seurat"))
   {
     stop("Please input a Seurat object.")
   }
 
-  if(class(inputProfile@assays$RNA)=="Assay5")
-  {
-    counts <- inputProfile@assays$RNA@layers$counts
-    colnames(counts) <- rownames(inputProfile@assays$RNA@cells)
-    rownames(counts) <- rownames(inputProfile@assays$RNA@features)
-  }else{
-    counts <-  inputProfile@assays$RNA@counts
-  }
+  counts <- extract_seurat_counts(inputProfile)
 
   rownames(counts) <- transferSymbol(rownames(counts))
   counts <- rm_duplicates(counts)

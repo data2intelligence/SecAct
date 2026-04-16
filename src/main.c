@@ -2,19 +2,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_cdf.h>
-
-/*
-void hello(int *n)
-{
-  int i;
-  for(i=0; i < *n; i++)
-  {
-    Rprintf("Hello, world!\n");
-    fprintf( stdout, "p = %d\n", *p);
-  }
-}
-*/
 
 gsl_matrix *RVectorObject_to_gsl_matrix(double *vec, size_t nr, size_t nc)
 {
