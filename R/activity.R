@@ -8,16 +8,15 @@
 #' @param SigMat Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomizations in the permutation test.
-#' @param mode \code{"canonical"} (default) uses GSL-compatible MT19937 so
-#'   results are bit-identical to RidgeRegFast / RidgeRegCuda in canonical
-#'   mode. \code{"fast"} uses R's builtin RNG per-permutation.
+#' @param rng_method RNG for permutations. Only \code{"mt19937"} is
+#'   supported by the pure-R path; it gives bit-identical results to
+#'   the accelerator backends with \code{ncores=1}.
 #' @return list(beta, se, zscore, pvalue).
 #' @rdname SecAct.inference.r
 #' @export
 SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000,
-                               mode = c("canonical", "fast"))
+                               rng_method = "mt19937")
 {
-  mode <- match.arg(mode)
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
   lambda <- sig$lambda
@@ -29,7 +28,7 @@ SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 100
   X <- scale(X)
   Y <- scale(Y)
 
-  res <- .ridge_pureR(X, Y, lambda, nrand, mode = mode)
+  res <- .ridge_pureR(X, Y, lambda, nrand, rng_method = rng_method)
 
   for (nm in names(res)) res[[nm]] <- expand_rows(res[[nm]])
   idx <- sort(rownames(res$beta))
@@ -56,9 +55,10 @@ SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 100
 #' @param backend One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
 #'   \code{"auto"} picks GPU (RidgeRegCuda) > CPU-fast (RidgeRegFast) > CPU-pure
 #'   depending on what is installed. Default \code{"auto"}.
-#' @param mode \code{"canonical"} (default) uses GSL-compatible MT19937 so
-#'   results are bit-identical across backends. \code{"fast"} uses native
-#'   RNG per backend, faster, not reproducible across backends.
+#' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
+#'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
+#'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
+#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
 #' @return
 #'
 #' A list with four items, each is a matrix.
@@ -84,7 +84,7 @@ SecAct.activity.inference <- function(
   nrand=1000,
   ncores=1L,
   backend="auto",
-  mode="canonical"
+  rng_method="mt19937"
 )
 {
   if(inherits(inputProfile, "SpaCET"))
@@ -161,7 +161,7 @@ SecAct.activity.inference <- function(
   Y <- scale(Y)
 
   res <- .ridge_dispatch(X, Y, lambda, nrand,
-                         ncores = ncores, mode = mode, backend = backend)
+                         ncores = ncores, rng_method = rng_method, backend = backend)
 
   if(is.group.sig==TRUE)
   {
@@ -201,7 +201,7 @@ SecAct.activity.inference.ST <- function(
     nrand=1000,
     ncores=1L,
     backend="auto",
-    mode="canonical"
+    rng_method="mt19937"
 )
 {
   if(!inherits(inputProfile, "SpaCET"))
@@ -244,7 +244,7 @@ SecAct.activity.inference.ST <- function(
     nrand = nrand,
     ncores = ncores,
     backend = backend,
-    mode = mode
+    rng_method = rng_method
   )
 
   inputProfile @results $SecAct_output $SecretedProteinActivity <- res
@@ -280,7 +280,7 @@ SecAct.activity.inference.scRNAseq <- function(
     nrand=1000,
     ncores=1L,
     backend="auto",
-    mode="canonical"
+    rng_method="mt19937"
 )
 {
   if(!inherits(inputProfile, "Seurat"))
@@ -333,7 +333,7 @@ SecAct.activity.inference.scRNAseq <- function(
     nrand = nrand,
     ncores = ncores,
     backend = backend,
-    mode = mode
+    rng_method = rng_method
   )
 
   inputProfile
