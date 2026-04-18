@@ -287,13 +287,3 @@ compute_spatial_correlation <- function(act_new, exp_new, exp_new_aggr)
   data.frame(r=rs, p=ps, padj=p.adjust(ps, method="BH"))
 }
 
-unpack_ridge_results <- function(res, m, X_colnames, Y_colnames)
-{
-  dims <- list(X_colnames, Y_colnames)
-  list(
-    beta   = matrix(res$beta,   byrow=TRUE, ncol=m, dimnames=dims),
-    se     = matrix(res$se,     byrow=TRUE, ncol=m, dimnames=dims),
-    zscore = matrix(res$zscore, byrow=TRUE, ncol=m, dimnames=dims),
-    pvalue = matrix(res$pvalue, byrow=TRUE, ncol=m, dimnames=dims)
-  )
-}
