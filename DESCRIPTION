@@ -28,6 +28,7 @@ Imports:
 Suggests:
     RidgeFast,
     RidgeCuda,
+    rhdf5,
     shiny,
     shinyWidgets,
     bslib,
