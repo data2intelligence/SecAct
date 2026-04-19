@@ -64,9 +64,36 @@ docker pull psychemistz/secactpy:with-r
 
 ## Dependencies
 
-* C Library: GNU Scientific Library (GSL).
-* R version >= 4.2.0. 
+* R version >= 4.2.0.
 * R packages: Matrix, ggplot2, reshape2, patchwork, NMF, akima, gganimate, metap, circlize, ComplexHeatmap, ggalluvial, networkD3, survival, survminer.
+* Optional accelerators (see below): [RidgeFast](https://github.com/psychemistz/RidgeFast) (CPU, requires GSL) and/or [RidgeCuda](https://github.com/psychemistz/RidgeCuda) (GPU, requires NVIDIA CUDA Toolkit).
+* Optional `rhdf5` for HDF5 streaming of large inputs/outputs in batch mode.
+
+
+## Accelerators and batch mode
+
+The default ridge + permutation kernel is pure R with no compiled dependencies — SecAct installs and runs anywhere R runs. For large datasets, two optional accelerator packages provide drop-in speed-ups:
+
+* [RidgeFast](https://github.com/psychemistz/RidgeFast) — multi-threaded CPU (GSL + OpenMP)
+* [RidgeCuda](https://github.com/psychemistz/RidgeCuda) — NVIDIA GPU (CUDA)
+
+With either installed, `SecAct.activity.inference(..., backend = "auto")` (the default) picks GPU > CPU-fast > pure-R automatically. At `rng_method = "mt19937"` (default) and `ncores = 1`, output is bit-identical across all three backends.
+
+For memory-constrained workflows, set `batch_size` to process samples in column-batches:
+
+``` r
+# Memory-bounded inference on 100k samples
+res <- SecAct.activity.inference(inputProfile = Y_large,
+                                 is.differential = TRUE,
+                                 batch_size = 5000)
+
+# Stream results to HDF5 when even the result matrices don't fit in RAM
+SecAct.activity.inference(inputProfile = Y_large,
+                          is.differential = TRUE,
+                          batch_size = 5000,
+                          output_h5 = "results.h5",
+                          is.group.sig = FALSE)
+```
 
 
 ## Example
