@@ -4,6 +4,14 @@
 # CANONICAL SOURCE for this file. A copy lives in
 # RidgeRegCuda/R/mt19937.R — keep them in sync.
 #
+# Drift canary: tests/testthat/test-backend-parity.R calls
+# .ridge_dispatch with backend="cpu-pure" and backend="cpu-fast"
+# and asserts bit-identical outputs. If this file drifts from
+# the GSL MT19937 (seed 0) contract the cpu-pure output diverges
+# from RidgeRegFast's C-side build_perm_table and the test fails.
+# The RidgeRegCuda copy is not exercised by SecAct's tests — run
+# RidgeRegCuda/tests/test_gpu_parity.sbatch after editing it.
+#
 # Produces output identical to gsl_rng_mt19937 with seed 0.
 # Algorithm: Matsumoto & Nishimura (1998) with 2002 init.
 # =========================================================
