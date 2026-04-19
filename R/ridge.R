@@ -55,22 +55,22 @@
   backend <- match.arg(backend)
   if (backend != "auto") return(backend)
 
-  if (requireNamespace("RidgeRegCuda", quietly = TRUE)) {
+  if (requireNamespace("RidgeCuda", quietly = TRUE)) {
     gpu_ok <- tryCatch(
-      RidgeRegCuda::check_cuda_available(),
+      RidgeCuda::check_cuda_available(),
       error = function(e) FALSE
     )
     if (isTRUE(gpu_ok)) return("gpu")
   }
-  if (requireNamespace("RidgeRegFast", quietly = TRUE)) return("cpu-fast")
+  if (requireNamespace("RidgeFast", quietly = TRUE)) return("cpu-fast")
   "cpu-pure"
 }
 
 #' Dispatch ridge+permutation call to installed backend
 #'
-#' Picks GPU (RidgeRegCuda) > CPU-fast (RidgeRegFast) > CPU-pure (this
+#' Picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure (this
 #' package) based on \code{backend}. All three accelerators share the
-#' API \code{Ridge.Reg.Fast(X, Y, lambda, nrand, ncores, rng_method)}.
+#' API \code{ridge(X, Y, lambda, nrand, ncores, rng_method)}.
 #' With \code{rng_method="mt19937"} and \code{ncores=1}, results are
 #' bit-identical across backends.
 #'
@@ -87,14 +87,14 @@
   }
 
   if (chosen == "gpu") {
-    RidgeRegCuda::Ridge.Reg.Fast(X = X, Y = Y, lambda = lambda, nrand = nrand,
+    RidgeCuda::ridge(X = X, Y = Y, lambda = lambda, nrand = nrand,
                                  ncores = ncores, rng_method = rng_method)
   } else if (chosen == "cpu-fast") {
-    RidgeRegFast::Ridge.Reg.Fast(X = X, Y = Y, lambda = lambda, nrand = nrand,
+    RidgeFast::ridge(X = X, Y = Y, lambda = lambda, nrand = nrand,
                                  ncores = ncores, rng_method = rng_method)
   } else {
     if (rng_method != "mt19937") {
-      stop("rng_method='", rng_method, "' requires RidgeRegFast or RidgeRegCuda; ",
+      stop("rng_method='", rng_method, "' requires RidgeFast or RidgeCuda; ",
            "pure-R supports only 'mt19937'.")
     }
     .ridge_pureR(X, Y, lambda, nrand)

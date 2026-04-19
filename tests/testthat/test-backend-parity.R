@@ -1,5 +1,5 @@
 test_that("cpu-pure and cpu-fast backends produce identical z-scores in mt19937 mode", {
-  skip_if_not_installed("RidgeRegFast")
+  skip_if_not_installed("RidgeFast")
 
   set.seed(7)
   n <- 60; p <- 10; m <- 4

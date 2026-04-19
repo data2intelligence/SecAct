@@ -26,8 +26,8 @@ Imports:
     ComplexHeatmap,
     RANN
 Suggests:
-    RidgeRegFast,
-    RidgeRegCuda,
+    RidgeFast,
+    RidgeCuda,
     shiny,
     shinyWidgets,
     bslib,

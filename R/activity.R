@@ -1,8 +1,8 @@
 #' @title Secreted protein activity inference (pure R)
 #' @description Infer the activity of over 1000 secreted proteins from gene
 #'   expression profiles using a pure-R ridge + permutation kernel. No GSL
-#'   or OpenMP required. For large datasets, install \code{RidgeRegFast}
-#'   (CPU accelerator) or \code{RidgeRegCuda} (GPU accelerator) and use
+#'   or OpenMP required. For large datasets, install \code{RidgeFast}
+#'   (CPU accelerator) or \code{RidgeCuda} (GPU accelerator) and use
 #'   \code{SecAct.activity.inference} with \code{backend="auto"}.
 #' @param Y Gene expression matrix with gene symbol (row) x sample (column).
 #' @param SigMat Secreted protein signature matrix.
@@ -49,7 +49,7 @@ SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 100
 #' @param nrand Number of randomization in the permutation test, with a default value of 1000.
 #' @param ncores Number of threads for accelerator backends (ignored by pure R). Default 1.
 #' @param backend One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
-#'   \code{"auto"} picks GPU (RidgeRegCuda) > CPU-fast (RidgeRegFast) > CPU-pure
+#'   \code{"auto"} picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure
 #'   depending on what is installed. Default \code{"auto"}.
 #' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
 #'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
