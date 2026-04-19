@@ -1,11 +1,11 @@
 # =========================================================
 # Pure R implementation of GSL's MT19937 (Mersenne Twister)
 #
+# CANONICAL SOURCE for this file. A copy lives in
+# RidgeRegCuda/R/mt19937.R — keep them in sync.
+#
 # Produces output identical to gsl_rng_mt19937 with seed 0.
 # Algorithm: Matsumoto & Nishimura (1998) with 2002 init.
-# No external dependency — uses doubles for 32-bit unsigned
-# arithmetic. Bitwise ops decompose into 16-bit halves
-# (each in [0,65535], safe as R signed int32).
 # =========================================================
 
 #' @keywords internal

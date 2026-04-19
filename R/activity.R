@@ -8,14 +8,10 @@
 #' @param SigMat Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
 #' @param nrand Number of randomizations in the permutation test.
-#' @param rng_method RNG for permutations. Only \code{"mt19937"} is
-#'   supported by the pure-R path; it gives bit-identical results to
-#'   the accelerator backends with \code{ncores=1}.
 #' @return list(beta, se, zscore, pvalue).
 #' @rdname SecAct.inference.r
 #' @export
-SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000,
-                               rng_method = "mt19937")
+SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
 {
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
@@ -28,7 +24,7 @@ SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 100
   X <- scale(X)
   Y <- scale(Y)
 
-  res <- .ridge_pureR(X, Y, lambda, nrand, rng_method = rng_method)
+  res <- .ridge_pureR(X, Y, lambda, nrand)
 
   for (nm in names(res)) res[[nm]] <- expand_rows(res[[nm]])
   idx <- sort(rownames(res$beta))

@@ -29,17 +29,20 @@ test_that("pure-R backend is deterministic across runs", {
   Y <- scale(matrix(rnorm(n * m), n, m))
   colnames(X) <- paste0("sig", 1:p); colnames(Y) <- paste0("s", 1:m)
 
-  r1 <- SecAct:::.ridge_pureR(X, Y, lambda = 50, nrand = 100, rng_method = "mt19937")
-  r2 <- SecAct:::.ridge_pureR(X, Y, lambda = 50, nrand = 100, rng_method = "mt19937")
+  r1 <- SecAct:::.ridge_pureR(X, Y, lambda = 50, nrand = 100)
+  r2 <- SecAct:::.ridge_pureR(X, Y, lambda = 50, nrand = 100)
 
   expect_identical(r1, r2)
 })
 
-test_that("pure-R rejects unsupported rng_method", {
+test_that("dispatcher rejects unsupported rng_method on cpu-pure", {
   X <- scale(matrix(rnorm(30), 10, 3))
   Y <- scale(matrix(rnorm(20), 10, 2))
+  colnames(X) <- paste0("s", 1:3); colnames(Y) <- paste0("y", 1:2)
   expect_error(
-    SecAct:::.ridge_pureR(X, Y, 1, 10, rng_method = "srand"),
-    "mt19937"
+    SecAct:::.ridge_dispatch(X, Y, lambda = 1, nrand = 10,
+                             ncores = 1L, rng_method = "srand",
+                             backend = "cpu-pure"),
+    "pure-R supports only 'mt19937'"
   )
 })
