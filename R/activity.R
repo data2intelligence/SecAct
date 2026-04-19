@@ -55,6 +55,16 @@ SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 100
 #'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
 #'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
 #'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#' @param batch_size Optional positive integer. When supplied,
+#'   permutation inference is performed over column-batches of \code{Y}
+#'   via the backend's \code{ridge_batch} (memory-efficient path for
+#'   large sample counts). Default \code{NULL} (no batching).
+#' @param output_h5 Optional path to an HDF5 file. When supplied
+#'   (requires \code{batch_size} and the \pkg{rhdf5} package), the four
+#'   result matrices are streamed to HDF5 datasets
+#'   \code{beta/se/zscore/pvalue} and the function returns metadata in
+#'   place of the matrices. Use when even the result matrices do not fit
+#'   in RAM. Not compatible with \code{is.group.sig=TRUE}.
 #' @return
 #'
 #' A list with four items, each is a matrix.
@@ -80,7 +90,9 @@ SecAct.activity.inference <- function(
   nrand=1000,
   ncores=1L,
   backend="auto",
-  rng_method="mt19937"
+  rng_method="mt19937",
+  batch_size=NULL,
+  output_h5=NULL
 )
 {
   if(inherits(inputProfile, "SpaCET"))
@@ -156,8 +168,21 @@ SecAct.activity.inference <- function(
   X <- scale(X)
   Y <- scale(Y)
 
-  res <- .ridge_dispatch(X, Y, lambda, nrand,
-                         ncores = ncores, rng_method = rng_method, backend = backend)
+  if (!is.null(batch_size)) {
+    if (!is.null(output_h5) && isTRUE(is.group.sig)) {
+      stop("output_h5 cannot be combined with is.group.sig=TRUE (group ",
+           "expansion requires matrices in memory).")
+    }
+    res <- .ridge_batch_dispatch(X, Y, lambda, nrand,
+                                 ncores = ncores, rng_method = rng_method,
+                                 backend = backend,
+                                 batch_size = as.integer(batch_size),
+                                 output_h5 = output_h5)
+    if (!is.null(output_h5)) return(invisible(res))
+  } else {
+    res <- .ridge_dispatch(X, Y, lambda, nrand,
+                           ncores = ncores, rng_method = rng_method, backend = backend)
+  }
 
   if(is.group.sig==TRUE)
   {
