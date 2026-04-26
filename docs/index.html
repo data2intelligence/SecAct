@@ -87,20 +87,23 @@
 <span></span>
 <span><span class="co"># install SecAct R package</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"Path_to_the_source_code"</span>, repos <span class="op">=</span> <span class="cn">NULL</span>, type<span class="op">=</span><span class="st">"source"</span><span class="op">)</span></span></code></pre></div>
-<div class="section level5" style="border-left: 5px solid #ef6a32; padding: 0px 16px; background-color: #00000; border-radius: 0px;">
-<h5 id="optional-accelerator">Optional accelerator:<a class="anchor" aria-label="anchor" href="#optional-accelerator"></a>
+<!--
+<div style="border-left: 5px solid #ef6a32; padding: 0px 16px; background-color: #FFFFFF; border-radius: 0px;">
+-->
+<div class="section level5">
+<h5 id="red_square-optional-accelerator">🟥 Optional accelerator<a class="anchor" aria-label="anchor" href="#red_square-optional-accelerator"></a>
 </h5>
-<p>After installing the SecAct R package, you can complete all analyses in the tutorial sections. Note that the activity inference functions (<code>SecAct.activity.inference</code> and its <code>*.ST</code> and <code>*.scRNAseq</code> variants) rely on ridge regression and permutation in R language, and may run relatively slowly.</p>
-<ol style="list-style-type: decimal">
-<li>If you are working with thousands of samples, spots, or cells and would like to speed up these functions, please visit <a href="https://data2intelligence.github.io/SecAct/articles/accelerator.html" target="_blank" class="external-link">here</a> to install the accelerator R package.</li>
-<li>If your input includes only hundreds of samples, spots, or cells, installing the accelerator package is generally unnecessary.</li>
-</ol>
+<p>After installing the SecAct R package, you can complete all analyses in the tutorial sections. Note that the activity inference functions (<code>SecAct.activity.inference</code> and its <code>*.ST</code> and <code>*.scRNAseq</code> variants) rely on ridge regression and permutation in R language, and may run relatively slowly. If you would like to speed up these functions, please visit <a href="https://data2intelligence.github.io/SecAct/articles/accelerator.html" target="_blank" class="external-link">here</a> to install the accelerator R package additionally.</p>
+<!--
 </div>
-<div class="section level5" style="border-left: 5px solid #3b82f6; padding: 0px 16px; background-color: #00000; border-radius: 0px;">
-<h5 id="alternative-installation-options">Alternative installation options:<a class="anchor" aria-label="anchor" href="#alternative-installation-options"></a>
+<div style="border-left: 5px solid #3b82f6; padding: 0px 16px; background-color: #FFFFFF; border-radius: 0px;">
+-->
+</div>
+<div class="section level5">
+<h5 id="purple_square-alternative-installation-options">🟪 Alternative installation options<a class="anchor" aria-label="anchor" href="#purple_square-alternative-installation-options"></a>
 </h5>
 <ol style="list-style-type: decimal">
-<li><p>If you are not familiar with R, you can use the Python version <img src="articles/img/Python-logo.png" width="2%" style="border:none"> of SecAct available <a href="https://github.com/data2intelligence/SecActpy" target="_blank" class="external-link">here</a>.</p></li>
+<li><p>If you are not familiar with R, you can use the Python version of SecAct available <a href="https://github.com/data2intelligence/SecActpy" target="_blank" class="external-link">here</a>.</p></li>
 <li><p>If you prefer not to install SecAct locally, a Docker image is available for both the R and Python versions:</p></li>
 </ol>
 <!-- --><div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Pull the Docker image.</span></span>
@@ -108,6 +111,9 @@
 <ol start="3" style="list-style-type: decimal">
 <li>An online server is also available <a href="https://appshare.cancer.gov/SecAct/" target="_blank" class="external-link">here</a>. Please note that it currently supports the basic activity inference function only and is limited to datasets with fewer than 10 samples.</li>
 </ol>
+<!--
+</div>
+-->
 </div>
 </div>
 <div class="section level2">
