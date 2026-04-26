@@ -1,140 +1,34 @@
-#' @title Secreted protein activity inference
-#' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
+#' @title Secreted protein activity inference (pure R)
+#' @description Infer the activity of over 1000 secreted proteins from gene
+#'   expression profiles using a pure-R ridge + permutation kernel. No GSL
+#'   or OpenMP required. For large datasets, install \code{RidgeFast}
+#'   (CPU accelerator) or \code{RidgeCuda} (GPU accelerator) and use
+#'   \code{SecAct.activity.inference} with \code{backend="auto"}.
 #' @param Y Gene expression matrix with gene symbol (row) x sample (column).
 #' @param SigMat Secreted protein signature matrix.
 #' @param lambda Penalty factor in the ridge regression.
-#' @param nrand Number of randomization in the permutation test, with a default value 1000.
-#' @return
-#'
-#' A list with four items, each is a matrix.
-#' beta: regression coefficients
-#' se: standard errors of coefficients
-#' zscore: beta/se
-#' pvalue: statistical significance
-#'
-#' @rdname SecAct.inference.gsl
-#' @export
-#'
-SecAct.inference.gsl <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
-{
-  sig <- load_sig_matrix(SigMat, lambda)
-  X <- sig$X
-  lambda <- sig$lambda
-
-  olp <- intersect(rownames(Y),rownames(X))
-  X <- as.matrix(X[olp,,drop=F])
-  Y <- as.matrix(Y[olp,,drop=F])
-
-  X <- scale(X)
-  Y <- scale(Y)
-
-  n <- length(olp)
-  p <- ncol(X)
-  m <- ncol(Y)
-
-  res <- .C("ridgeReg",
-            X=as.double(t(X)),
-            Y=as.double(t(Y)),
-            as.integer(n),
-            as.integer(p),
-            as.integer(m),
-            as.double(lambda),
-            as.double(nrand),
-            beta=double(p*m),
-            se=double(p*m),
-            zscore=double(p*m),
-            pvalue=double(p*m)
-  )
-
-  unpack_ridge_results(res, m, colnames(X), colnames(Y))
-}
-
-#' @title Secreted protein activity inference
-#' @description Infer the activity of over 1000 secreted proteins from tumor gene expression profiles.
-#' @param Y Gene expression matrix with gene symbol (row) x sample (column).
-#' @param SigMat Secreted protein signature matrix.
-#' @param lambda Penalty factor in the ridge regression.
-#' @param nrand Number of randomizations in the permutation test, with a default value 1000.
-#' @return
-#'
-#' A list with four items, each is a matrix.
-#' beta: regression coefficients
-#' se: standard errors of coefficients
-#' zscore: beta/se
-#' pvalue: statistical significance
-#'
+#' @param nrand Number of randomizations in the permutation test.
+#' @return list(beta, se, zscore, pvalue).
 #' @rdname SecAct.inference.r
 #' @export
-#'
-SecAct.inference.r <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
+SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
 {
   sig <- load_sig_matrix(SigMat, lambda)
   X <- sig$X
   lambda <- sig$lambda
 
-  olp <- intersect(rownames(Y),rownames(X))
-  X <- as.matrix(X[olp,,drop=F])
-  Y <- as.matrix(Y[olp,,drop=F])
+  olp <- intersect(rownames(Y), rownames(X))
+  X <- as.matrix(X[olp, , drop = FALSE])
+  Y <- as.matrix(Y[olp, , drop = FALSE])
 
   X <- scale(X)
   Y <- scale(Y)
 
-  n <- nrow(Y)
-  p <- ncol(X)
-  m <- ncol(Y)
+  res <- .ridge_pureR(X, Y, lambda, nrand)
 
-  A <- crossprod(X) + lambda * diag(p)  # SPD
-  R <- chol(A)                          # A = R'R
-  beta <- backsolve(R, forwardsolve(t(R), crossprod(X, Y)))
-
-  for(i in 1:nrand)
-  {
-    set.seed(i)
-    beta_rand <- backsolve(R, forwardsolve(t(R), crossprod(X, Y[sample.int(n),])))
-
-    if(i==1)
-    {
-      aver <- beta_rand
-      aver_sq <- beta_rand^2
-      pvalue <- abs(beta_rand)>=abs(beta)
-    }else{
-      aver <- aver + beta_rand
-      aver_sq <- aver_sq + beta_rand^2
-      pvalue <- pvalue + (abs(beta_rand)>=abs(beta))
-    }
-  }
-
-  aver <- aver/nrand
-  aver_sq <- aver_sq/nrand
-  aver_sq <- sqrt(aver_sq - aver*aver)
-
-  zscore <- (beta-aver)/aver_sq
-
-  pvalue <- (pvalue+1)/(nrand+1)
-
-  rownames(beta) <- colnames(X)
-  colnames(beta) <- colnames(Y)
-
-  rownames(aver_sq) <- colnames(X)
-  colnames(aver_sq) <- colnames(Y)
-
-  rownames(zscore) <- colnames(X)
-  colnames(zscore) <- colnames(Y)
-
-  rownames(pvalue) <- colnames(X)
-  colnames(pvalue) <- colnames(Y)
-
-  beta <- expand_rows(beta)
-  aver_sq <- expand_rows(aver_sq)
-  zscore <- expand_rows(zscore)
-  pvalue <- expand_rows(pvalue)
-
-  beta <- beta[sort(rownames(beta)),,drop=F]
-  aver_sq <- aver_sq[sort(rownames(beta)),,drop=F]
-  zscore <- zscore[sort(rownames(beta)),,drop=F]
-  pvalue <- pvalue[sort(rownames(beta)),,drop=F]
-
-  res <- list(beta=beta, se=aver_sq, zscore=zscore, pvalue=pvalue)
+  for (nm in names(res)) res[[nm]] <- expand_rows(res[[nm]])
+  idx <- sort(rownames(res$beta))
+  for (nm in names(res)) res[[nm]] <- res[[nm]][idx, , drop = FALSE]
 
   res
 }
@@ -153,6 +47,24 @@ SecAct.inference.r <- function(Y, SigMat="SecAct", lambda=5e+05, nrand=1000)
 #' @param is.group.cor A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.
 #' @param lambda Penalty factor in the ridge regression. If NULL, lambda will be assigned as 5e+05 or 10000 when sigMatrix = "SecAct" or "CytoSig", respectively.
 #' @param nrand Number of randomization in the permutation test, with a default value of 1000.
+#' @param ncores Number of threads for accelerator backends (ignored by pure R). Default 1.
+#' @param backend One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
+#'   \code{"auto"} picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure
+#'   depending on what is installed. Default \code{"auto"}.
+#' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
+#'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
+#'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
+#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#' @param batch_size Optional positive integer. When supplied,
+#'   permutation inference is performed over column-batches of \code{Y}
+#'   via the backend's \code{ridge_batch} (memory-efficient path for
+#'   large sample counts). Default \code{NULL} (no batching).
+#' @param output_h5 Optional path to an HDF5 file. When supplied
+#'   (requires \code{batch_size} and the \pkg{rhdf5} package), the four
+#'   result matrices are streamed to HDF5 datasets
+#'   \code{beta/se/zscore/pvalue} and the function returns metadata in
+#'   place of the matrices. Use when even the result matrices do not fit
+#'   in RAM. Not compatible with \code{is.group.sig=TRUE}.
 #' @return
 #'
 #' A list with four items, each is a matrix.
@@ -175,7 +87,12 @@ SecAct.activity.inference <- function(
   is.group.sig=TRUE,
   is.group.cor=0.9,
   lambda=5e+05,
-  nrand=1000
+  nrand=1000,
+  ncores=1L,
+  backend="auto",
+  rng_method="mt19937",
+  batch_size=NULL,
+  output_h5=NULL
 )
 {
   if(inherits(inputProfile, "SpaCET"))
@@ -251,25 +168,21 @@ SecAct.activity.inference <- function(
   X <- scale(X)
   Y <- scale(Y)
 
-  n <- nrow(Y)
-  p <- ncol(X)
-  m <- ncol(Y)
-
-  res <- .C("ridgeReg",
-            X=as.double(t(X)),
-            Y=as.double(t(Y)),
-            as.integer(n),
-            as.integer(p),
-            as.integer(m),
-            as.double(lambda),
-            as.double(nrand),
-            beta=double(p*m),
-            se=double(p*m),
-            zscore=double(p*m),
-            pvalue=double(p*m)
-  )
-
-  res <- unpack_ridge_results(res, m, colnames(X), colnames(Y))
+  if (!is.null(batch_size)) {
+    if (!is.null(output_h5) && isTRUE(is.group.sig)) {
+      stop("output_h5 cannot be combined with is.group.sig=TRUE (group ",
+           "expansion requires matrices in memory).")
+    }
+    res <- .ridge_batch_dispatch(X, Y, lambda, nrand,
+                                 ncores = ncores, rng_method = rng_method,
+                                 backend = backend,
+                                 batch_size = as.integer(batch_size),
+                                 output_h5 = output_h5)
+    if (!is.null(output_h5)) return(invisible(res))
+  } else {
+    res <- .ridge_dispatch(X, Y, lambda, nrand,
+                           ncores = ncores, rng_method = rng_method, backend = backend)
+  }
 
   if(is.group.sig==TRUE)
   {
@@ -306,7 +219,10 @@ SecAct.activity.inference.ST <- function(
     is.group.sig=TRUE,
     is.group.cor=0.9,
     lambda=5e+05,
-    nrand=1000
+    nrand=1000,
+    ncores=1L,
+    backend="auto",
+    rng_method="mt19937"
 )
 {
   if(!inherits(inputProfile, "SpaCET"))
@@ -346,7 +262,10 @@ SecAct.activity.inference.ST <- function(
     is.group.sig = is.group.sig,
     is.group.cor = is.group.cor,
     lambda = lambda,
-    nrand = nrand
+    nrand = nrand,
+    ncores = ncores,
+    backend = backend,
+    rng_method = rng_method
   )
 
   inputProfile @results $SecAct_output $SecretedProteinActivity <- res
@@ -379,7 +298,10 @@ SecAct.activity.inference.scRNAseq <- function(
     is.group.sig=TRUE,
     is.group.cor=0.9,
     lambda=5e+05,
-    nrand=1000
+    nrand=1000,
+    ncores=1L,
+    backend="auto",
+    rng_method="mt19937"
 )
 {
   if(!inherits(inputProfile, "Seurat"))
@@ -429,7 +351,10 @@ SecAct.activity.inference.scRNAseq <- function(
     is.group.sig = is.group.sig,
     is.group.cor = is.group.cor,
     lambda = lambda,
-    nrand = nrand
+    nrand = nrand,
+    ncores = ncores,
+    backend = backend,
+    rng_method = rng_method
   )
 
   inputProfile
