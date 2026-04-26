@@ -11,18 +11,18 @@ SecAct is an R package designed for inferring the intercellular
 signaling activity of secreted proteins from gene expression profiles.
 Users can input multiple modalities of expression data, including
 spatial, single-cell, or bulk transcriptomics data. The outputs are the
-inferred signaling activities of \>1,000 secreted proteins for each
-spatial spot, individual cell, or sample, depending on the input data
-type. Based on the inferred activities, SecAct provides multiple
-downstream application modules. For spatial data, SecAct can infer the
-signaling pattern and signaling velocity for secreted proteins. For
-single-cell data, SecAct can infer the intercellular communication
-network and signaling flow from source cells to receiver cells. For bulk
-data, SecAct can infer secreted protein risk scores for a large cohort
-linked to clinical data, and can infer secreted protein activities that
-are differentially regulated between two phenotypes. These
-functionalities and terms are explained more formally in the following
-tutorials.
+inferred <b>signaling activities of \>1,000 secreted proteins</b> for
+each spatial spot, individual cell, or sample, depending on the input
+data type. Based on the inferred activities, SecAct provides multiple
+downstream application modules. For <b>spatial data</b>, SecAct can
+infer the signaling pattern and signaling velocity for secreted
+proteins. For <b>single-cell data</b>, SecAct can infer the
+intercellular communication network and signaling flow from source cells
+to receiver cells. For <b>bulk data</b>, SecAct can infer secreted
+protein risk scores for a large cohort linked to clinical data, and can
+infer secreted protein activities that are differentially regulated
+between two phenotypes. These functionalities and terms are explained
+more formally in the following tutorials.
 
 <p align="center">
 
@@ -50,22 +50,36 @@ remotes::install_deps("Path_to_the_source_code", force = TRUE)
 install.packages("Path_to_the_source_code", repos = NULL, type="source")
 ```
 
-The R package has been installed successfully on Operating Systems:
+<div style="border-left: 5px solid #ef6a32; padding: 0px 16px; background-color: #00000; border-radius: 0px;">
 
-- Red Hat Enterprise Linux 8.10 (Ootpa)
-- macOS Sequoia 15.3.1
+##### Optional accelerator:
 
-<div style="border-left: 5px solid #3b82f6; padding: 0px 16px; background-color: #00000; border-radius: 6px;">
+After installing the SecAct R package, you can complete all analyses in
+the tutorial sections. Note that the activity inference functions
+(`SecAct.activity.inference` and its `*.ST` and `*.scRNAseq` variants)
+rely on ridge regression and permutation in R language, and may run
+relatively slowly.
+
+1.  If you are working with thousands of samples, spots, or cells and
+    would like to speed up these functions, please visit
+    <a href="https://data2intelligence.github.io/SecAct/articles/accelerator.html" target="_blank">here</a>
+    to install the accelerator R package.
+2.  If your input includes only hundreds of samples, spots, or cells,
+    installing the accelerator package is generally unnecessary.
+
+</div>
+
+<div style="border-left: 5px solid #3b82f6; padding: 0px 16px; background-color: #00000; border-radius: 0px;">
 
 ##### Alternative installation options:
 
-1.  If you are not familiar with R, you can use the
+1.  If you are not familiar with R, you can use the Python version
     <img src="vignettes/img/Python-logo.png" width="2%" style="border:none" />
-    Python version of SecAct available
+    of SecAct available
     <a href="https://github.com/data2intelligence/SecActpy" target="_blank">here</a>.
 
-2.  If you prefer not to install SecAct locally, we provide a Docker
-    image for both the R and Python versions:
+2.  If you prefer not to install SecAct locally, a Docker image is
+    available for both the R and Python versions:
 
 <!-- -->
 
@@ -74,9 +88,8 @@ The R package has been installed successfully on Operating Systems:
 
 3.  An online server is also available
     <a href="https://appshare.cancer.gov/SecAct/" target="_blank">here</a>.
-    Please note that it currently supports only the basic activity
-    inference function and is limited to datasets with fewer than 10
-    samples.
+    Please note that it currently supports the basic activity inference
+    function only and is limited to datasets with fewer than 10 samples.
 
 </div>
 
@@ -86,47 +99,6 @@ The R package has been installed successfully on Operating Systems:
 - R packages: Matrix, ggplot2, reshape2, patchwork, NMF, akima,
   gganimate, metap, circlize, ComplexHeatmap, ggalluvial, networkD3,
   survival, survminer.
-- Optional accelerators (see below):
-  [RidgeFast](https://github.com/psychemistz/RidgeFast) (CPU, requires
-  GSL) and/or
-  [RidgeCuda](https://github.com/psychemistz/RidgeCuda) (GPU, requires
-  NVIDIA CUDA Toolkit).
-- Optional `rhdf5` for HDF5 streaming of large inputs/outputs in batch
-  mode.
-
-## Accelerators and batch mode
-
-The default ridge + permutation kernel is pure R with no compiled
-dependencies — SecAct installs and runs anywhere R runs. For large
-datasets, two optional accelerator packages provide drop-in speed-ups:
-
-- [RidgeFast](https://github.com/psychemistz/RidgeFast) —
-  multi-threaded CPU (GSL + OpenMP)
-- [RidgeCuda](https://github.com/psychemistz/RidgeCuda) — NVIDIA GPU
-  (CUDA)
-
-With either installed,
-`SecAct.activity.inference(..., backend = "auto")` (the default) picks
-GPU \> CPU-fast \> pure-R automatically. At `rng_method = "mt19937"`
-(default) and `ncores = 1`, output is bit-identical across all three
-backends.
-
-For memory-constrained workflows, set `batch_size` to process samples
-in column-batches:
-
-``` r
-# Memory-bounded inference on 100k samples
-res <- SecAct.activity.inference(inputProfile = Y_large,
-                                 is.differential = TRUE,
-                                 batch_size = 5000)
-
-# Stream results to HDF5 when even the result matrices don't fit in RAM
-SecAct.activity.inference(inputProfile = Y_large,
-                          is.differential = TRUE,
-                          batch_size = 5000,
-                          output_h5 = "results.h5",
-                          is.group.sig = FALSE)
-```
 
 ## Example
 
@@ -168,6 +140,11 @@ following tutorials demonstrate its applications across each data type.
   phenotypes](https://data2intelligence.github.io/SecAct/articles/bulkChange.html)
 - [Clinical relevance of secreted proteins in a large patient
   cohort](https://data2intelligence.github.io/SecAct/articles/bulkCohort.html)
+
+#### Miscellaneous
+
+- [Activity inference accelerators and batch
+  mode](https://data2intelligence.github.io/SecAct/articles/accelerator.html)
 
 ## Contact
 

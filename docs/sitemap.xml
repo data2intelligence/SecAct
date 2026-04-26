@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/404.html</loc></url>
 <url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/articles/accelerator.html</loc></url>
 <url><loc>/articles/bulk.html</loc></url>
 <url><loc>/articles/bulkChange.html</loc></url>
 <url><loc>/articles/bulkCohort.html</loc></url>
@@ -43,6 +44,13 @@
 <url><loc>/reference/SecAct.signalling.direction.html</loc></url>
 <url><loc>/reference/SecAct.spatial.velocity.html</loc></url>
 <url><loc>/reference/SecAct.survival.plot.html</loc></url>
+<url><loc>/reference/dot-gsl_mt19937_perm_table.html</loc></url>
+<url><loc>/reference/dot-resolve_backend.html</loc></url>
+<url><loc>/reference/dot-ridge_batch_dispatch.html</loc></url>
+<url><loc>/reference/dot-ridge_dispatch.html</loc></url>
+<url><loc>/reference/dot-ridge_pureR.html</loc></url>
+<url><loc>/reference/dot-ridge_pureR_batch.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/runSecActApp.html</loc></url>
 </urlset>
 

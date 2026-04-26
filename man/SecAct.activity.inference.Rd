@@ -15,7 +15,12 @@ SecAct.activity.inference(
   is.group.sig = TRUE,
   is.group.cor = 0.9,
   lambda = 5e+05,
-  nrand = 1000
+  nrand = 1000,
+  ncores = 1L,
+  backend = "auto",
+  rng_method = "mt19937",
+  batch_size = NULL,
+  output_h5 = NULL
 )
 }
 \arguments{
@@ -40,6 +45,29 @@ SecAct.activity.inference(
 \item{lambda}{Penalty factor in the ridge regression. If NULL, lambda will be assigned as 5e+05 or 10000 when sigMatrix = "SecAct" or "CytoSig", respectively.}
 
 \item{nrand}{Number of randomization in the permutation test, with a default value of 1000.}
+
+\item{ncores}{Number of threads for accelerator backends (ignored by pure R). Default 1.}
+
+\item{backend}{One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
+\code{"auto"} picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure
+depending on what is installed. Default \code{"auto"}.}
+
+\item{rng_method}{RNG for permutations. \code{"mt19937"} (default) is
+GSL-compatible MT19937 seed 0 — bit-identical across backends when
+\code{ncores=1}. Accelerators may support \code{"srand"} for faster,
+non-reproducible runs. Pure-R supports only \code{"mt19937"}.}
+
+\item{batch_size}{Optional positive integer. When supplied,
+permutation inference is performed over column-batches of \code{Y}
+via the backend's \code{ridge_batch} (memory-efficient path for
+large sample counts). Default \code{NULL} (no batching).}
+
+\item{output_h5}{Optional path to an HDF5 file. When supplied
+(requires \code{batch_size} and the \pkg{rhdf5} package), the four
+result matrices are streamed to HDF5 datasets
+\code{beta/se/zscore/pvalue} and the function returns metadata in
+place of the matrices. Use when even the result matrices do not fit
+in RAM. Not compatible with \code{is.group.sig=TRUE}.}
 }
 \value{
 A list with four items, each is a matrix.

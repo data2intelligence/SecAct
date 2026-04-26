@@ -30,6 +30,8 @@
     <li><h6 class="dropdown-header" data-toc-skip>Bulk RNA sequencing data</h6></li>
     <li><a class="dropdown-item" href="../articles/bulkCohort.html">Clinical relevance of secreted proteins in a large patient cohort</a></li>
     <li><a class="dropdown-item" href="../articles/bulkChange.html">Secreted protein activity change between two phenotypes</a></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Miscellaneous</h6></li>
+    <li><a class="dropdown-item" href="../articles/accelerator.html">Activity inference accelerators and batch mode</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">News</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -63,7 +65,10 @@
 <span>  is.group.sig <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  is.group.cor <span class="op">=</span> <span class="fl">0.9</span>,</span>
 <span>  lambda <span class="op">=</span> <span class="fl">5e+05</span>,</span>
-<span>  nrand <span class="op">=</span> <span class="fl">1000</span></span>
+<span>  nrand <span class="op">=</span> <span class="fl">1000</span>,</span>
+<span>  ncores <span class="op">=</span> <span class="fl">1L</span>,</span>
+<span>  backend <span class="op">=</span> <span class="st">"auto"</span>,</span>
+<span>  rng_method <span class="op">=</span> <span class="st">"mt19937"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -84,7 +89,7 @@
 
 
 <dt id="arg-sigmatrix">sigMatrix<a class="anchor" aria-label="anchor" href="#arg-sigmatrix"></a></dt>
-<dd><p>Secreted protein signature matrix. Could be "SecAct", "CytoSig", "SecAct-Breast", "SecAct-Colorectal", "SecAct-Glioblastoma", "SecAct-Kidney", "SecAct-Liver", "SecAct-Lung-Adeno", "SecAct-Ovarian", "SecAct-Pancreatic", "SecAct-Prostate". SecAct signatures were derived from all cancer ST samples; SecAct-XXXX signatures were derived from XXXX cancer ST samples.</p></dd>
+<dd><p>Secreted protein signature matrix. Could be "SecAct", "CytoSig", "SecAct-Breast", "SecAct-Colorectal", "SecAct-Glioblastoma", "SecAct-Kidney", "SecAct-Liver", "SecAct-Lung-Adeno", "SecAct-Ovarian", "SecAct-Pancreatic", "SecAct-Prostate". SecAct signatures were derived from all cancer ST samples; SecAct-XXX signatures were derived from XXX cancer ST samples.</p></dd>
 
 
 <dt id="arg-is-filter-sig">is.filter.sig<a class="anchor" aria-label="anchor" href="#arg-is-filter-sig"></a></dt>

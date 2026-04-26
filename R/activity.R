@@ -1,39 +1,3 @@
-#' @title Secreted protein activity inference (pure R)
-#' @description Infer the activity of over 1000 secreted proteins from gene
-#'   expression profiles using a pure-R ridge + permutation kernel. No GSL
-#'   or OpenMP required. For large datasets, install \code{RidgeFast}
-#'   (CPU accelerator) or \code{RidgeCuda} (GPU accelerator) and use
-#'   \code{SecAct.activity.inference} with \code{backend="auto"}.
-#' @param Y Gene expression matrix with gene symbol (row) x sample (column).
-#' @param SigMat Secreted protein signature matrix.
-#' @param lambda Penalty factor in the ridge regression.
-#' @param nrand Number of randomizations in the permutation test.
-#' @return list(beta, se, zscore, pvalue).
-#' @rdname SecAct.inference.r
-#' @export
-SecAct.inference.r <- function(Y, SigMat = "SecAct", lambda = 5e+05, nrand = 1000)
-{
-  sig <- load_sig_matrix(SigMat, lambda)
-  X <- sig$X
-  lambda <- sig$lambda
-
-  olp <- intersect(rownames(Y), rownames(X))
-  X <- as.matrix(X[olp, , drop = FALSE])
-  Y <- as.matrix(Y[olp, , drop = FALSE])
-
-  X <- scale(X)
-  Y <- scale(Y)
-
-  res <- .ridge_pureR(X, Y, lambda, nrand)
-
-  for (nm in names(res)) res[[nm]] <- expand_rows(res[[nm]])
-  idx <- sort(rownames(res$beta))
-  for (nm in names(res)) res[[nm]] <- res[[nm]][idx, , drop = FALSE]
-
-  res
-}
-
-
 #' @title Secreted protein activity inference
 #' @description Infer the signaling activity of over 1000 secreted proteins from gene expression profiles.
 #' @param inputProfile Gene expression matrix with gene symbol (row) x sample (column).

@@ -27,14 +27,15 @@ navbar:
         href: articles/bulkCohort.html
       - text: Secreted protein activity change between two phenotypes
         href: articles/bulkChange.html
+      - text: Miscellaneous
+      - text: Activity inference accelerators and batch mode
+        href: articles/accelerator.html
     - text: News
       href: news/index.html
 
 reference:
   - title: Activity inference
     contents:
-    - SecAct.inference.gsl
-    - SecAct.inference.r
     - SecAct.activity.inference
     - SecAct.activity.inference.ST
     - SecAct.activity.inference.scRNAseq
@@ -44,8 +45,8 @@ reference:
     - SecAct.signaling.pattern
     - SecAct.signaling.pattern.gene
     - SecAct.signaling.velocity.spotST
-    - SecAct.CCC.scST
     - SecAct.signaling.velocity.scST
+    - SecAct.CCC.scST
     - SecAct.CCC.scRNAseq
     - SecAct.coxph.regression
 
@@ -59,3 +60,4 @@ reference:
     - SecAct.bar.plot
     - SecAct.lollipop.plot
     - SecAct.survival.plot
+    - runSecActApp

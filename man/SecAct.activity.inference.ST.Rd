@@ -13,7 +13,10 @@ SecAct.activity.inference.ST(
   is.group.sig = TRUE,
   is.group.cor = 0.9,
   lambda = 5e+05,
-  nrand = 1000
+  nrand = 1000,
+  ncores = 1L,
+  backend = "auto",
+  rng_method = "mt19937"
 )
 }
 \arguments{
