@@ -52,7 +52,7 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 
 <div style="border-left: 5px solid #ef6a32; padding: 0px 16px; background-color: #FFFFFF; border-radius: 0px;">
 
-##### 🔶 Optional accelerator:
+##### 🔶 Optional accelerator
 
 After installing the SecAct R package, you can complete all analyses in
 the tutorial sections. Note that the activity inference functions
@@ -71,7 +71,7 @@ relatively slowly.
 
 <div style="border-left: 5px solid #3b82f6; padding: 0px 16px; background-color: #FFFFFF; border-radius: 0px;">
 
-##### 🔷 Alternative installation options:
+##### 🔷 Alternative installation options
 
 1.  If you are not familiar with R, you can use the Python version
     <img src="vignettes/img/Python-logo.png" width="2%" style="border:none" />
