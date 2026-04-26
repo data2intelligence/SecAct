@@ -11,18 +11,18 @@ SecAct is an R package designed for inferring the intercellular
 signaling activity of secreted proteins from gene expression profiles.
 Users can input multiple modalities of expression data, including
 spatial, single-cell, or bulk transcriptomics data. The outputs are the
-inferred <b>signaling activities of \>1,000 secreted proteins</b> for
-each spatial spot, individual cell, or sample, depending on the input
-data type. Based on the inferred activities, SecAct provides multiple
-downstream application modules. For <b>spatial data</b>, SecAct can
+inferred <b>signaling activities of 1,170 secreted proteins</b> for each
+spatial spot, individual cell, or sample, depending on the input data
+type. Based on the inferred activities, SecAct provides multiple
+downstream application modules. For <b>spatial</b> data, SecAct can
 infer the signaling pattern and signaling velocity for secreted
-proteins. For <b>single-cell data</b>, SecAct can infer the
+proteins. For <b>single-cell</b> data, SecAct can infer the
 intercellular communication network and signaling flow from source cells
-to receiver cells. For <b>bulk data</b>, SecAct can infer secreted
+to receiver cells. For <b>bulk</b> data, SecAct can infer secreted
 protein risk scores for a large cohort linked to clinical data, and can
 infer secreted protein activities that are differentially regulated
-between two phenotypes. These functionalities and terms are explained
-more formally in the following tutorials.
+between two phenotypes. These functionalities are described in more
+detail in the following tutorials.
 
 <p align="center">
 
@@ -54,7 +54,7 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 <div style="border-left: 5px solid #ef6a32; padding: 0px 16px; background-color: #FFFFFF; border-radius: 0px;">
 -->
 
-#### 🟥 Optional accelerator
+#### 🟥 Optional accelerators
 
 After installing the SecAct R package, you can complete all analyses in
 the tutorial sections. Note that the activity inference functions
