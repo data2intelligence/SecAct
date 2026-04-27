@@ -109,7 +109,7 @@ dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
 expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
 
 # infer activity; ~2 mins
-res <- SecAct.activity.inference(inputProfile=expr.diff[,rep(1,1000)], is.differential=TRUE, backend="cpu-fast", ncores=5) 
+res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE) 
 
 head(res$zscore)
 ```
