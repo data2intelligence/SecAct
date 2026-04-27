@@ -56,8 +56,8 @@ install.packages("Path_to_the_source_code", repos = NULL, type="source")
 
 #### 🔷 Optional accelerators
 
-After installing `SecAct` R package, you can complete all analyses in
-the tutorial sections. Note that the activity inference functions
+After installing the `SecAct` R package, you can complete all analyses
+in the tutorial sections. Note that the activity inference functions
 (`SecAct.activity.inference` and its `*.ST` and `*.scRNAseq` variants)
 rely on ridge regression and permutation in R language, and may run
 relatively slowly. If you would like to speed up these functions, please

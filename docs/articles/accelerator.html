@@ -83,16 +83,21 @@
 
     
     
-<p>After installing <code>SecAct</code> R package, you can complete all
-analyses in the tutorial sections. Note that the activity inference
+<p>After installing the <code>SecAct</code> R package, you can complete
+all analyses in the tutorial sections. Note that the activity inference
 functions (<code>SecAct.activity.inference</code> and its
 <code>*.ST</code> and <code>*.scRNAseq</code> variants) rely on ridge
-regression and permutation in R language, and may run relatively
-slowly.</p>
-<p>The default ridge + permutation kernel is pure R with no compiled
+regression and permutation in R language, and may run relatively slowly.
+The default ridge + permutation kernel is pure R with no compiled
 dependencies — SecAct installs and runs anywhere R runs. For large
 datasets, two optional accelerator packages provide drop-in
 speed-ups:</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p><span style="color:red;"> Once either package is installed, no
+additional configuration is required—the activity inference functions
+will automatically use the available accelerator. </span></p>
 <ul>
 <li>
 <a href="https://github.com/psychemistz/RidgeFast" class="external-link">RidgeFast</a> —
@@ -101,30 +106,37 @@ multi-threaded CPU (GSL + OpenMP)</li>
 <a href="https://github.com/psychemistz/RidgeCuda" class="external-link">RidgeCuda</a> —
 NVIDIA GPU (CUDA)</li>
 </ul>
-<p>Once either package is installed, no additional configuration is
-required—the activity inference functions will automatically use the
-available accelerator.</p>
+</div>
+<div class="section level2">
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h2>
 <p>With either installed,
 <code>SecAct.activity.inference(..., backend = "auto")</code> (the
 default) picks GPU &gt; CPU-fast &gt; pure-R automatically. At
 <code>rng_method = "mt19937"</code> (default) and
 <code>ncores = 1</code>, output is bit-identical across all three
 backends.</p>
-<p>For memory-constrained workflows, set <code>batch_size</code> to
-process samples in column-batches:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Memory-bounded inference on 100k samples</span></span>
-<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span>inputProfile <span class="op">=</span> <span class="va">Y_large</span>,</span>
-<span>                                 is.differential <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                                 batch_size <span class="op">=</span> <span class="fl">5000</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Stream results to HDF5 when even the result matrices don't fit in RAM</span></span>
-<span><span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span>inputProfile <span class="op">=</span> <span class="va">Y_large</span>,</span>
-<span>                          is.differential <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>                          batch_size <span class="op">=</span> <span class="fl">5000</span>,</span>
-<span>                          output_h5 <span class="op">=</span> <span class="st">"results.h5"</span>,</span>
-<span>                          is.group.sig <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
-  </main>
+<span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>
+<span>  inputProfile <span class="op">=</span> <span class="va">Y_large</span>,</span>
+<span>  is.differential <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="fl">5000</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>For memory-constrained workflows, set <code>batch_size</code> to
+process samples in column-batches:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Stream results to HDF5 when even the result matrices don't fit in RAM</span></span>
+<span><span class="fu"><a href="../reference/SecAct.activity.inference.html">SecAct.activity.inference</a></span><span class="op">(</span></span>
+<span>  inputProfile <span class="op">=</span> <span class="va">Y_large</span>,</span>
+<span>  is.differential <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="fl">5000</span>,</span>
+<span>  output_h5 <span class="op">=</span> <span class="st">"results.h5"</span>,</span>
+<span>  is.group.sig <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside>
 </div>
 
 
