@@ -21,8 +21,8 @@ intercellular communication network and signaling flow from source cells
 to receiver cells. For <b>bulk</b> data, SecAct can infer secreted
 protein risk scores for a large cohort linked to clinical data, and can
 infer secreted protein activities that are differentially regulated
-between two phenotypes. Please see the tutorials below for step-by-step
-guidance.
+between two phenotypes. Check the tutorials below for details on how to
+use the package.
 
 <p align="center">
 
@@ -109,7 +109,7 @@ dataPath <- file.path(system.file(package = "SecAct"), "extdata/")
 expr.diff <- read.table(paste0(dataPath, "Ly86-Fc_vs_Vehicle_logFC.txt"))
 
 # infer activity; ~2 mins
-res <- SecAct.activity.inference(inputProfile=expr.diff, is.differential=TRUE) 
+res <- SecAct.activity.inference(inputProfile=expr.diff[,rep(1,1000)], is.differential=TRUE, backend="cpu-fast", ncores=5) 
 
 head(res$zscore)
 ```
@@ -117,8 +117,7 @@ head(res$zscore)
 ## Tutorial
 
 SecAct is applicable to multiple modalities of gene expression profiles,
-including spatial, single-cell, and bulk transcriptomics data. The
-following tutorials demonstrate its applications across each data type.
+including spatial, single-cell, and bulk transcriptomics data.
 
 #### Spatial transcriptomcis (ST) data
 
