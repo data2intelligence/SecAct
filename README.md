@@ -21,8 +21,8 @@ intercellular communication network and signaling flow from source cells
 to receiver cells. For <b>bulk</b> data, SecAct can infer secreted
 protein risk scores for a large cohort linked to clinical data, and can
 infer secreted protein activities that are differentially regulated
-between two phenotypes. These functionalities are described in more
-detail in the following tutorials.
+between two phenotypes. Please see the tutorials below for step-by-step
+guidance.
 
 <p align="center">
 
