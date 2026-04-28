@@ -202,6 +202,24 @@ load_sig_matrix <- function(sigMatrix, lambda = NULL)
   list(X = X, lambda = lambda)
 }
 
+cluster_signatures <- function(X,is.group.cor=0.9)
+{
+  dis <- as.dist(1-cor(X,method="pearson"))
+  hc <- hclust(dis,method="complete")
+
+  group_labels <- cutree(hc, h = 1 - is.group.cor)
+  newsig <- data.frame()
+
+  for(j in unique(group_labels))
+  {
+    geneGroups <- names(group_labels)[group_labels==j]
+
+    newsig[rownames(X),paste0(geneGroups,collapse="|")] <- rowMeans(X[,geneGroups,drop=F])
+  }
+
+  newsig
+}
+
 expand_rows <- function(mat)
 {
   new_rows <- lapply(1:nrow(mat), function(i) {

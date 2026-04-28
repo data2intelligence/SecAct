@@ -29,8 +29,8 @@ Once either package is installed, no additional configuration is required—the 
 </span>
 
 
-* [RidgeFast](https://github.com/psychemistz/RidgeFast) — multi-threaded CPU (GSL + OpenMP)
-* [RidgeCuda](https://github.com/psychemistz/RidgeCuda) — NVIDIA GPU (CUDA)
+* [RidgeFast](https://github.com/data2intelligence/RidgeFast) — multi-threaded CPU (GSL + OpenMP)
+* [RidgeCuda](https://github.com/data2intelligence/RidgeCuda) — NVIDIA GPU (CUDA)
 
 ## Example
 

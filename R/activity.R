@@ -106,20 +106,7 @@ SecAct.activity.inference <- function(
 
   if(is.group.sig==TRUE)
   {
-    dis <- as.dist(1-cor(X,method="pearson"))
-    hc <- hclust(dis,method="complete")
-
-    group_labels <- cutree(hc, h = 1 - is.group.cor)
-    newsig <- data.frame()
-
-    for(j in unique(group_labels))
-    {
-      geneGroups <- names(group_labels)[group_labels==j]
-
-      newsig[rownames(X),paste0(geneGroups,collapse="|")] <- rowMeans(X[,geneGroups,drop=F])
-    }
-
-    X <- newsig
+    X <- cluster_signatures(X,is.group.cor)
   }
 
   olp <- intersect(rownames(Y),rownames(X))
