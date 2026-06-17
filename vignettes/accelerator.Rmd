@@ -25,16 +25,15 @@ After installing the `SecAct` R package, you can complete all analyses in the tu
 ## Installation
 
 <span style="color:red;">
-Once either package is installed, no additional configuration is required—the activity inference functions will automatically use the available accelerator.
+Once FlashReg is installed, no additional configuration is required—the activity inference functions will automatically use the available accelerator.
 </span>
 
 
-* [RidgeFast](https://github.com/data2intelligence/RidgeFast) — multi-threaded CPU (GSL + OpenMP)
-* [RidgeCuda](https://github.com/data2intelligence/RidgeCuda) — NVIDIA GPU (CUDA)
+* [FlashReg](https://github.com/data2intelligence/FlashReg) — one R package, both CPU (C+OpenMP) and GPU (NVIDIA CUDA) backends, GSL required and CUDA toolkit optional. FlashReg replaces the historical pair of accelerator packages (RidgeFast for CPU, RidgeCuda for GPU).
 
 ## Example
 
-With either installed, `SecAct.activity.inference(..., backend = "auto")` (the default) picks GPU > CPU-fast > pure-R automatically. At `rng_method = "mt19937"` (default) and `ncores = 1`, output is bit-identical across all three backends.
+With FlashReg installed, `SecAct.activity.inference(..., backend = "auto")` (the default) picks GPU > CPU-fast > pure-R automatically — FlashReg detects CUDA availability at runtime. At `rng_method = "mt19937"` (default) and `ncores = 1`, output is bit-identical across all three backends.
 
 ``` r
 # Memory-bounded inference on 100k samples

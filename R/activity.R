@@ -13,8 +13,12 @@
 #' @param nrand Number of randomization in the permutation test, with a default value of 1000.
 #' @param ncores Number of threads for accelerator backends (ignored by pure R). Default 1.
 #' @param backend One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
-#'   \code{"auto"} picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure
-#'   depending on what is installed. Default \code{"auto"}.
+#'   \code{"auto"} picks the best FlashReg backend available:
+#'   GPU (\code{FlashReg::ridge(backend="cuda_native")}) > CPU-fast
+#'   (\code{FlashReg::ridge(backend="omp")}) > CPU-pure (in-house loop)
+#'   depending on what FlashReg detects at install / load time. Default
+#'   \code{"auto"}. Legacy backend names \code{"gpu"} / \code{"cpu-fast"}
+#'   are kept for backward compatibility.
 #' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
 #'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
 #'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
