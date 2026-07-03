@@ -24,6 +24,15 @@ infer secreted protein activities that are differentially regulated
 between two phenotypes. Check the tutorials below for details on how to
 use the package.
 
+> **Fast regression engine.** SecAct’s ridge-regression + permutation-testing
+> core can be accelerated by
+> [FlashReg](https://github.com/data2intelligence/FlashReg) (R) /
+> [FlashRegPy](https://github.com/data2intelligence/FlashRegPy) (Python) — an
+> ultra-fast, GPU-capable ridge engine — which makes atlas-scale (millions of
+> cells) activity inference tractable: the permutation nulls that project to
+> days–months on naïve refit-per-permutation solvers run in minutes on a single
+> GPU.
+
 <p align="center">
 
 <img src="man/figures/workflow.png" width="100%"/>
