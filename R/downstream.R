@@ -595,6 +595,8 @@ SecAct.CCC.scST <- function(
   print("Step 1. Filtering")
 
   exp <- SpaCET_obj@input$counts
+  if(tolower(SpaCET_obj@input$organism)=="mouse") expr <- mouse2human_mat(expr)
+
   rownames(exp) <- transferSymbol(rownames(exp))
   exp <- rm_duplicates(exp)
 

@@ -111,7 +111,7 @@ SecAct.activity.inference <- function(
 
   olp <- intersect(rownames(Y),rownames(X))
 
-  if(length(olp)<2) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
+  if(length(olp)<20) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
 
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
@@ -184,6 +184,9 @@ SecAct.activity.inference.ST <- function(
   # extract count matrix
   expr <- inputProfile@input$counts
   expr <- expr[Matrix::rowSums(expr)>0,]
+
+  if(tolower(inputProfile@input$organism)=="mouse") expr <- mouse2human_mat(expr)
+
   rownames(expr) <- transferSymbol(rownames(expr))
   expr <- rm_duplicates(expr)
 

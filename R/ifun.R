@@ -305,6 +305,45 @@ compute_spatial_correlation <- function(act_new, exp_new, exp_new_aggr)
   data.frame(r=rs, p=ps, padj=p.adjust(ps, method="BH"))
 }
 
+mouse2human_mat <- function(mat) {
+  m2h <- read.csv( system.file("extdata",'Mouse2Human_filter.csv',package = 'SpaCET'), row.names=1)
+  m2h <- m2h[,c("mouse","human")]
+
+  if (is.null(rownames(mat))) {
+    stop("mat must have rownames.")
+  }
+
+  # keep only mapped mouse genes
+  idx <- match(rownames(mat), m2h$mouse)
+  keep <- !is.na(idx)
+
+  mat2 <- mat[keep, , drop = FALSE]
+  human <- m2h$human[idx[keep]]
+
+  if (nrow(mat2) == 0) {
+    stop("No mouse genes matched the mapping table.")
+  }
+
+  # group rows by human gene
+  grp <- factor(human)
+  lev <- levels(grp)
+
+  # sparse aggregation matrix: one row per human gene
+  A <- Matrix::sparseMatrix(
+    i = as.integer(grp),
+    j = seq_along(grp),
+    x = 1,
+    dims = c(length(lev), length(grp)),
+    dimnames = list(lev, NULL)
+  )
+
+  # collapse mouse rows to human rows
+  out <- A %*% mat2
+
+  rownames(out) <- lev
+  out
+}
+
 
 # =========================================================
 # Pure R implementation of GSL's MT19937 (Mersenne Twister)

@@ -157,5 +157,5 @@ content is not permitted.
 Beibei Ru, Lanqi Gong, Emily Yang, Seongyong Park, George Zaki, Kenneth
 Aldape, Lalage Wakefield, Peng Jiang. Inference of secreted protein
 activities in intercellular communication. **Nature Methods**, 2026.
-\[<a href="https://github.com/data2intelligence/SecAct"
+\[<a href="https://doi.org/10.1038/s41592-026-03172-0"
 target="_blank">Full Text</a>\]
