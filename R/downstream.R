@@ -590,7 +590,7 @@ SecAct.CCC.scST <- function(
   }
 
   coordinate_mat <- SpaCET_obj@input$spotCoordinates
-  cellType_vec <- SpaCET_obj@input$metaData[,cellType_meta]
+  cellType_vec <- as.character(SpaCET_obj@input$metaData[,cellType_meta])
 
   print("Step 1. Filtering")
 
