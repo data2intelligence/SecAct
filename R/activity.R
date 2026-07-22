@@ -99,6 +99,9 @@ SecAct.activity.inference <- function(
   X <- sig$X
   lambda <- sig$lambda
 
+  olp <- intersect(rownames(Y),rownames(X))
+  if(length(olp)<20) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
+
   if(is.filter.sig==TRUE)
   {
     X <- X[,colnames(X)%in%rownames(Y)]
@@ -108,10 +111,6 @@ SecAct.activity.inference <- function(
   {
     X <- cluster_signatures(X,is.group.cor)
   }
-
-  olp <- intersect(rownames(Y),rownames(X))
-
-  if(length(olp)<20) stop("The overlapped genes between your expression matrix and our signature matrix are too few!")
 
   X <- as.matrix(X[olp,,drop=F])
   Y <- as.matrix(Y[olp,,drop=F])
