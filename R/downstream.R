@@ -782,9 +782,9 @@ SecAct.CCC.scST <- function(
 SecAct.CCC.scRNAseq <- function(
   Seurat_obj,
   cellType_meta,
-  condition_meta,
-  conditionCase,
-  conditionControl,
+  condition_meta=NULL,
+  conditionCase=NULL,
+  conditionControl=NULL,
   scale.factor = 1e+05,
   act_diff_cutoff = 2,
   exp_logFC_cutoff = 0.2,
