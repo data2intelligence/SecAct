@@ -40,6 +40,8 @@ SecAct.CCC.scRNAseq(
 
 \item{exp_logFC_cutoff}{Cut off for log fold change in step 2.}
 
+\item{exp_mean_all_cutoff}{Cut off for mean expression across all cells required in step 2.}
+
 \item{exp_fraction_case_cutoff}{Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.}
 
 \item{padj_cutoff}{Adjusted p value cut off.}

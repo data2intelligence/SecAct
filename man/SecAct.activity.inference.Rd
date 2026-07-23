@@ -32,7 +32,7 @@ SecAct.activity.inference(
 
 \item{is.paired}{A logical flag indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired (Default: FALSE).}
 
-\item{is.singleSampleLevel}{A logical flag indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control (Default: FALSE). If FALSE, calculate the overall activity change between two phenotypes .}
+\item{is.singleSampleLevel}{A logical flag indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control (Default: FALSE). If FALSE, calculate the overall activity change between two phenotypes.}
 
 \item{sigMatrix}{Secreted protein signature matrix. Could be "SecAct", "CytoSig", "SecAct-Breast", "SecAct-Colorectal", "SecAct-Glioblastoma", "SecAct-Kidney", "SecAct-Liver", "SecAct-Lung-Adeno", "SecAct-Ovarian", "SecAct-Pancreatic", "SecAct-Prostate". SecAct signatures were derived from all cancer ST samples; SecAct-XXX signatures were derived from XXX cancer ST samples.}
 

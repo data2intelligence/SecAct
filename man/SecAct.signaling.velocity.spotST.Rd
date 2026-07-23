@@ -28,6 +28,8 @@ SecAct.signaling.velocity.spotST(
 
 \item{contourMap}{A logical flag indicating whether to transform as contour map.}
 
+\item{contourBins}{Number of bins used to generate the contour map.}
+
 \item{animated}{A logical flag indicating whether to generate animated figure.}
 }
 \value{

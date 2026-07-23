@@ -4,7 +4,7 @@
 #' @param inputProfile_control Gene expression matrix with gene symbol (row) x sample (column).
 #' @param is.differential A logical flag indicating whether inputProfile has been differential profiles against the control (Default: FALSE).
 #' @param is.paired A logical flag indicating whether you want a paired operation of differential profiles between inputProfile and inputProfile_control if samples in inputProfile and inputProfile_control are paired (Default: FALSE).
-#' @param is.singleSampleLevel A logical flag indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control (Default: FALSE). If FALSE, calculate the overall activity change between two phenotypes .
+#' @param is.singleSampleLevel A logical flag indicating whether to calculate activity change for each single sample between inputProfile and inputProfile_control (Default: FALSE). If FALSE, calculate the overall activity change between two phenotypes.
 #' @param sigMatrix Secreted protein signature matrix. Could be "SecAct", "CytoSig", "SecAct-Breast", "SecAct-Colorectal", "SecAct-Glioblastoma", "SecAct-Kidney", "SecAct-Liver", "SecAct-Lung-Adeno", "SecAct-Ovarian", "SecAct-Pancreatic", "SecAct-Prostate". SecAct signatures were derived from all cancer ST samples; SecAct-XXX signatures were derived from XXX cancer ST samples.
 #' @param is.filter.sig A logical flag indicating whether to filter the secreted protein signatures based on the genes from inputProfile (Default: FALSE). Because some sequencing platforms (e.g., CosMx) cover only a subset of secreted proteins, setting this option to TRUE restricts the activity inference on those proteins.
 #' @param is.group.sig A logical flag indicating whether to group similar signatures (Default: TRUE). Many secreted proteins, such as cytokines with similar cell surface receptors and downstream pathways, have cellular effects that appear redundant within a cellular context. When enabled, this option clusters secreted proteins based on Pearson correlations among their composite signatures. The output still reports activity estimates for all secreted proteins prior to clustering. Secreted proteins assigned to the same non-redundant cluster share the same inferred activity.
@@ -146,7 +146,7 @@ SecAct.activity.inference <- function(
 
 
 #' @title Spot activity inference from spatial data
-#' @description Calculate secreted protein signaling activity of spots from spatial transcriptomocs data.
+#' @description Calculate secreted protein signaling activity of spots from spatial transcriptomics data.
 #' @param inputProfile A SpaCET object.
 #' @param inputProfile_control A SpaCET object.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
@@ -156,6 +156,18 @@ SecAct.activity.inference <- function(
 #' @param is.group.cor A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.
 #' @param lambda Penalty factor in the ridge regression. If NULL, lambda will be assigned as 5e+05 or 10000 when sigMatrix = "SecAct" or "CytoSig", respectively.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
+#' @param ncores Number of threads for accelerator backends (ignored by pure R). Default 1.
+#' @param backend One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
+#'   \code{"auto"} picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure
+#'   depending on what is installed. Default \code{"auto"}.
+#' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
+#'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
+#'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
+#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#' @param batch_size Optional positive integer. When supplied,
+#'   permutation inference is performed over column-batches of \code{Y}
+#'   via the backend's \code{ridge_batch} (memory-efficient path for
+#'   large sample counts). Default \code{NULL} (no batching).
 #' @return A SpaCET object.
 #' @rdname SecAct.activity.inference.ST
 #' @export
@@ -172,7 +184,8 @@ SecAct.activity.inference.ST <- function(
     nrand=1000,
     ncores=1L,
     backend="auto",
-    rng_method="mt19937"
+    rng_method="mt19937",
+    batch_size=NULL
 )
 {
   if(!inherits(inputProfile, "SpaCET"))
@@ -218,7 +231,8 @@ SecAct.activity.inference.ST <- function(
     nrand = nrand,
     ncores = ncores,
     backend = backend,
-    rng_method = rng_method
+    rng_method = rng_method,
+    batch_size = batch_size
   )
 
   inputProfile @results $SecAct_output $SecretedProteinActivity <- res
@@ -238,6 +252,18 @@ SecAct.activity.inference.ST <- function(
 #' @param is.group.cor A numeric value specifying the correlation cutoff used to define similar signatures (Default: 0.90). When r > 0.90, 1,170 secreted protein signatures are grouped into 657 non-redundant signature groups.
 #' @param lambda Penalty factor in the ridge regression. If NULL, lambda will be assigned as 5e+05 or 10000 when sigMatrix = "SecAct" or "CytoSig", respectively.
 #' @param nrand Number of randomization in the permutation test, with a default value 1000.
+#' @param ncores Number of threads for accelerator backends (ignored by pure R). Default 1.
+#' @param backend One of \code{"auto"}, \code{"gpu"}, \code{"cpu-fast"}, \code{"cpu-pure"}.
+#'   \code{"auto"} picks GPU (RidgeCuda) > CPU-fast (RidgeFast) > CPU-pure
+#'   depending on what is installed. Default \code{"auto"}.
+#' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
+#'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
+#'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
+#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#' @param batch_size Optional positive integer. When supplied,
+#'   permutation inference is performed over column-batches of \code{Y}
+#'   via the backend's \code{ridge_batch} (memory-efficient path for
+#'   large sample counts). Default \code{NULL} (no batching).
 #' @return A Seurat object.
 #' @rdname SecAct.activity.inference.scRNAseq
 #' @export
@@ -254,7 +280,8 @@ SecAct.activity.inference.scRNAseq <- function(
     nrand=1000,
     ncores=1L,
     backend="auto",
-    rng_method="mt19937"
+    rng_method="mt19937",
+    batch_size=NULL
 )
 {
   if(!inherits(inputProfile, "Seurat"))
@@ -307,7 +334,8 @@ SecAct.activity.inference.scRNAseq <- function(
     nrand = nrand,
     ncores = ncores,
     backend = backend,
-    rng_method = rng_method
+    rng_method = rng_method,
+    batch_size = batch_size
   )
 
   inputProfile

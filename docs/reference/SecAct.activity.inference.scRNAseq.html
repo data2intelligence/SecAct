@@ -69,7 +69,8 @@
 <span>  nrand <span class="op">=</span> <span class="fl">1000</span>,</span>
 <span>  ncores <span class="op">=</span> <span class="fl">1L</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"auto"</span>,</span>
-<span>  rng_method <span class="op">=</span> <span class="st">"mt19937"</span></span>
+<span>  rng_method <span class="op">=</span> <span class="st">"mt19937"</span>,</span>
+<span>  batch_size <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -111,6 +112,30 @@
 
 <dt id="arg-nrand">nrand<a class="anchor" aria-label="anchor" href="#arg-nrand"></a></dt>
 <dd><p>Number of randomization in the permutation test, with a default value 1000.</p></dd>
+
+
+<dt id="arg-ncores">ncores<a class="anchor" aria-label="anchor" href="#arg-ncores"></a></dt>
+<dd><p>Number of threads for accelerator backends (ignored by pure R). Default 1.</p></dd>
+
+
+<dt id="arg-backend">backend<a class="anchor" aria-label="anchor" href="#arg-backend"></a></dt>
+<dd><p>One of <code>"auto"</code>, <code>"gpu"</code>, <code>"cpu-fast"</code>, <code>"cpu-pure"</code>.
+<code>"auto"</code> picks GPU (RidgeCuda) &gt; CPU-fast (RidgeFast) &gt; CPU-pure
+depending on what is installed. Default <code>"auto"</code>.</p></dd>
+
+
+<dt id="arg-rng-method">rng_method<a class="anchor" aria-label="anchor" href="#arg-rng-method"></a></dt>
+<dd><p>RNG for permutations. <code>"mt19937"</code> (default) is
+GSL-compatible MT19937 seed 0 — bit-identical across backends when
+<code>ncores=1</code>. Accelerators may support <code>"srand"</code> for faster,
+non-reproducible runs. Pure-R supports only <code>"mt19937"</code>.</p></dd>
+
+
+<dt id="arg-batch-size">batch_size<a class="anchor" aria-label="anchor" href="#arg-batch-size"></a></dt>
+<dd><p>Optional positive integer. When supplied,
+permutation inference is performed over column-batches of <code>Y</code>
+via the backend's <code>ridge_batch</code> (memory-efficient path for
+large sample counts). Default <code>NULL</code> (no batching).</p></dd>
 
 </dl></div>
     <div class="section level2">

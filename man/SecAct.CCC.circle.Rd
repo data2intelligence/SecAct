@@ -10,6 +10,10 @@ SecAct.CCC.circle(data, colors_cellType, sender = NULL, receiver = NULL)
 \item{data}{A SpaCET object or a Seurat object.}
 
 \item{colors_cellType}{Colors for cell types.}
+
+\item{sender}{Sender cell types (optional).}
+
+\item{receiver}{Receiver cell types (optional).}
 }
 \value{
 A circlize object.

@@ -306,7 +306,7 @@ compute_spatial_correlation <- function(act_new, exp_new, exp_new_aggr)
 }
 
 mouse2human_mat <- function(mat) {
-  m2h <- read.csv( system.file("extdata",'Mouse2Human_filter.csv',package = 'SpaCET'), row.names=1)
+  m2h <- read.csv( system.file("extdata",'Mouse2Human_filter.csv',package = 'SecAct'), row.names=1)
   m2h <- m2h[,c("mouse","human")]
 
   if (is.null(rownames(mat))) {

@@ -47,6 +47,8 @@ SecAct.CCC.heatmap <- function(data, row.sorted=FALSE, column.sorted=FALSE, colo
 #' @description Draw a circle plot of cell-cell communication mediated by secreted proteins.
 #' @param data A SpaCET object or a Seurat object.
 #' @param colors_cellType Colors for cell types.
+#' @param sender Sender cell types (optional).
+#' @param receiver Receiver cell types (optional).
 #' @return A circlize object.
 #' @rdname SecAct.CCC.circle
 #' @export

@@ -33,6 +33,8 @@ SecAct.signaling.velocity.scST(
 
 \item{receiver}{Receiver cell types.}
 
+\item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
+
 \item{scale.factor}{Sets the scale factor for spot-level normalization.}
 
 \item{CustomizedAreaCoordinates}{A vector of four numbers for coordinates of the Customized Area, i.e., x_left, x_right, y_bottom, y_top.}

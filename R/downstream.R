@@ -15,7 +15,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=20
 {
   if(!inherits(SpaCET_obj, "SpaCET"))
   {
-    stop("SpaCET object is requried.")
+    stop("SpaCET object is required.")
   }
   if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
   {
@@ -118,6 +118,7 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 #' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
 #' @param radius Radius cut off.
 #' @param contourMap A logical flag indicating whether to transform as contour map.
+#' @param contourBins Number of bins used to generate the contour map.
 #' @param animated A logical flag indicating whether to generate animated figure.
 #' @return A ggplot2 object.
 #' @details
@@ -387,6 +388,7 @@ SecAct.signaling.velocity.spotST <- function(
 #' @param sender Sender cell types.
 #' @param secretedProtein Secreted proteins.
 #' @param receiver Receiver cell types.
+#' @param cellType_meta Column name in meta data that includes cell-type annotations.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param CustomizedAreaCoordinates A vector of four numbers for coordinates of the Customized Area, i.e., x_left, x_right, y_bottom, y_top.
 #' @param radius Radius cut off (unit: um).
@@ -765,6 +767,7 @@ SecAct.CCC.scST <- function(
 #' @param scale.factor Sets the scale factor for cell-level normalization in step2.
 #' @param act_diff_cutoff Cut off for activity change (i.e., z score) in step 1.
 #' @param exp_logFC_cutoff Cut off for log fold change in step 2.
+#' @param exp_mean_all_cutoff Cut off for mean expression across all cells required in step 2.
 #' @param exp_fraction_case_cutoff Cut off for the fraction of cells expressing secreted protein-coding genes in step 2.
 #' @param padj_cutoff Adjusted p value cut off.
 #' @param sigMatrix Secreted protein signature matrix.
