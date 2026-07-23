@@ -442,7 +442,7 @@ SecAct.signaling.velocity.scST <- function(
   }
 
   coordinate_mat <- SpaCET_obj@input$spotCoordinates
-  cellType_vec <- SpaCET_obj@input$metaData[,cellType_meta]
+  cellType_vec <- as.character(SpaCET_obj@input$metaData[,cellType_meta])
 
 
   cellType1_cells <- which(cellType_vec==sender)
