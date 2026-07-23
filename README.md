@@ -145,6 +145,13 @@ including spatial, single-cell, and bulk transcriptomics data.
 - [Activity inference accelerators and batch
   mode](https://data2intelligence.github.io/SecAct/articles/accelerator.html)
 
+## Data availability
+
+This <a href="https://doi.org/10.5281/zenodo.17664022"
+target="_blank">Link</a> provides access to the 1,258 spatial
+transcriptomics samples spanning 37 cancer types that were used to train
+the secreted protein signaling signatures.
+
 ## Contact
 
 For questions, bug reports, or feature requests, please submit an
