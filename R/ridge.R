@@ -87,9 +87,11 @@
   }
 
   if (chosen == "gpu") {
+    message(paste0("RidgeCuda used."))
     RidgeCuda::ridge(X = X, Y = Y, lambda = lambda, nrand = nrand,
                                  ncores = ncores, rng_method = rng_method)
   } else if (chosen == "cpu-fast") {
+    message(paste0("RidgeFast used."))
     RidgeFast::ridge(X = X, Y = Y, lambda = lambda, nrand = nrand,
                                  ncores = ncores, rng_method = rng_method)
   } else {

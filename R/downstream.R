@@ -91,7 +91,7 @@ SecAct.signaling.pattern <- function(SpaCET_obj, scale.factor = 1e+05, radius=20
 #' @param n Pattern order.
 #' @return A matrix.
 #' @examples
-#' SpaCET_obj <- SecAct.pattern.gene(SpaCET_obj, n=3)
+#' SpaCET_obj <- SecAct.signaling.pattern.gene(SpaCET_obj, n=3)
 #'
 #' @rdname SecAct.signaling.pattern.gene
 #' @export
@@ -115,7 +115,7 @@ SecAct.signaling.pattern.gene <- function(SpaCET_obj, n)
 #' @param SpaCET_obj A SpaCET object.
 #' @param scale.factor Sets the scale factor for spot-level normalization.
 #' @param gene Gene symbol coding a secreted protein.
-#' @param signalMode Mode of signaling velocity, i.e., "receiving", "sending", and "both".
+#' @param signalMode Mode of signaling velocity, i.e., "receiving" or "sending".
 #' @param radius Radius cut off.
 #' @param contourMap A logical flag indicating whether to transform as contour map.
 #' @param contourBins Number of bins used to generate the contour map.
@@ -144,7 +144,7 @@ SecAct.signaling.velocity.spotST <- function(
 {
   if(!inherits(SpaCET_obj, "SpaCET"))
   {
-    stop("SpaCET object is requried.")
+    stop("SpaCET object is required.")
   }
   if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
   {
@@ -152,7 +152,7 @@ SecAct.signaling.velocity.spotST <- function(
   }
   if(contourMap==TRUE&animated==TRUE)
   {
-    stop("contourMap and animated can not be TRUE simultaneously.")
+    stop("contourMap and animated cannot be TRUE simultaneously.")
   }
 
   act <- SpaCET_obj@results$SecAct_output$SecretedProteinActivity$zscore
@@ -418,7 +418,6 @@ SecAct.signaling.velocity.scST <- function(
     secretedProtein,
     receiver,
     cellType_meta,
-    scale.factor = 1e+05,
     CustomizedAreaCoordinates = NULL,
     radius = 20,
     show.coordinates = TRUE,
@@ -434,7 +433,7 @@ SecAct.signaling.velocity.scST <- function(
 {
   if(!inherits(SpaCET_obj, "SpaCET"))
   {
-    stop("SpaCET object is requried.")
+    stop("SpaCET object is required.")
   }
   if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
   {
@@ -577,7 +576,7 @@ SecAct.CCC.scST <- function(
 {
   if(!inherits(SpaCET_obj, "SpaCET"))
   {
-    stop("SpaCET object is requried.")
+    stop("SpaCET object is required.")
   }
   if(is.null(SpaCET_obj @results $SecAct_output $SecretedProteinActivity))
   {

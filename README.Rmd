@@ -98,6 +98,7 @@ SecAct is applicable to multiple modalities of gene expression profiles, includi
 #### Spatial transcriptomcis (ST) data
 * [Signaling patterns and velocities for multi-cellular ST data](https://data2intelligence.github.io/SecAct/articles/stPattern.html)  
 * [Intercellular communication for single-cell resolution ST data](https://data2intelligence.github.io/SecAct/articles/stCCC.html)
+* [Application to sub-cellular ST data](https://data2intelligence.github.io/SecAct/articles/stSub.html)
 
 #### Single-cell RNA sequencing data
 * [Secreted protein signaling activity for distinct cell states](https://data2intelligence.github.io/SecAct/articles/scState.html)

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">SecAct</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-tutorials"><li><h6 class="dropdown-header" data-toc-skip>Spatial data</h6></li>
     <li><a class="dropdown-item" href="../articles/stPattern.html">Signaling patterns and velocities for multi-cellular ST data</a></li>
     <li><a class="dropdown-item" href="../articles/stCCC.html">Intercellular communication for single-cell resolution ST data</a></li>
+    <li><a class="dropdown-item" href="../articles/stSub.html">Application to sub-cellular ST data</a></li>
     <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Single-cell data</h6></li>
     <li><a class="dropdown-item" href="../articles/scState.html">Secreted protein signaling activity for various cell states</a></li>
@@ -60,9 +61,9 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">SecAct.CCC.scRNAseq</span><span class="op">(</span></span>
 <span>  <span class="va">Seurat_obj</span>,</span>
 <span>  <span class="va">cellType_meta</span>,</span>
-<span>  <span class="va">condition_meta</span>,</span>
-<span>  <span class="va">conditionCase</span>,</span>
-<span>  <span class="va">conditionControl</span>,</span>
+<span>  condition_meta <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  conditionCase <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  conditionControl <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  scale.factor <span class="op">=</span> <span class="fl">1e+05</span>,</span>
 <span>  act_diff_cutoff <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  exp_logFC_cutoff <span class="op">=</span> <span class="fl">0.2</span>,</span>

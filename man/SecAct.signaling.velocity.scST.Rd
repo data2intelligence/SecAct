@@ -10,7 +10,6 @@ SecAct.signaling.velocity.scST(
   secretedProtein,
   receiver,
   cellType_meta,
-  scale.factor = 1e+05,
   CustomizedAreaCoordinates = NULL,
   radius = 20,
   show.coordinates = TRUE,
@@ -35,8 +34,6 @@ SecAct.signaling.velocity.scST(
 
 \item{cellType_meta}{Column name in meta data that includes cell-type annotations.}
 
-\item{scale.factor}{Sets the scale factor for spot-level normalization.}
-
 \item{CustomizedAreaCoordinates}{A vector of four numbers for coordinates of the Customized Area, i.e., x_left, x_right, y_bottom, y_top.}
 
 \item{radius}{Radius cut off (unit: um).}
@@ -58,6 +55,8 @@ SecAct.signaling.velocity.scST(
 \item{arrow.width}{The width of the arrow.}
 
 \item{arrow.size}{The size of the arrow.}
+
+\item{scale.factor}{Sets the scale factor for spot-level normalization.}
 }
 \value{
 A ggplot2 object.

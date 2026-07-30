@@ -22,7 +22,7 @@ SecAct.signaling.velocity.spotST(
 
 \item{gene}{Gene symbol coding a secreted protein.}
 
-\item{signalMode}{Mode of signaling velocity, i.e., "receiving", "sending", and "both".}
+\item{signalMode}{Mode of signaling velocity, i.e., "receiving" or "sending".}
 
 \item{radius}{Radius cut off.}
 

@@ -125,6 +125,8 @@ including spatial, single-cell, and bulk transcriptomics data.
   data](https://data2intelligence.github.io/SecAct/articles/stPattern.html)  
 - [Intercellular communication for single-cell resolution ST
   data](https://data2intelligence.github.io/SecAct/articles/stCCC.html)
+- [Application to sub-cellular ST
+  data](https://data2intelligence.github.io/SecAct/articles/stSub.html)
 
 #### Single-cell RNA sequencing data
 
