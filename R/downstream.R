@@ -574,6 +574,8 @@ SecAct.CCC.scST <- function(
     coreNo=6
 )
 {
+  restoreThreads <- pinBLASThreads(); on.exit(restoreThreads(), add=TRUE)
+
   if(!inherits(SpaCET_obj, "SpaCET"))
   {
     stop("SpaCET object is required.")
