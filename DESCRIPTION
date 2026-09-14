@@ -23,6 +23,7 @@ Imports:
     survival,
     survminer,
     parallel,
+    RhpcBLASctl,
     ComplexHeatmap,
     RANN
 Suggests:
