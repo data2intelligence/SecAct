@@ -4,7 +4,7 @@
 \alias{.ridge_pureR}
 \title{Pure-R ridge + permutation kernel}
 \usage{
-.ridge_pureR(X, Y, lambda, nrand)
+.ridge_pureR(X, Y, lambda, nrand, rng_method = "mt19937")
 }
 \arguments{
 \item{X}{Numeric matrix, n x p, column-scaled.}
@@ -14,6 +14,9 @@
 \item{lambda}{Ridge penalty.}
 
 \item{nrand}{Number of permutations.}
+
+\item{rng_method}{\code{"mt19937"} or \code{"legacy_r"}; see
+\code{\link{.perm_table}}.}
 }
 \value{
 list(beta, se, zscore, pvalue) — each a p x m matrix.

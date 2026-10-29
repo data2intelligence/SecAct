@@ -9,9 +9,11 @@
 #' @param Y Numeric matrix, n x m, column-scaled.
 #' @param lambda Ridge penalty.
 #' @param nrand Number of permutations.
+#' @param rng_method \code{"mt19937"} or \code{"legacy_r"}; see
+#'   \code{\link{.perm_table}}.
 #' @return list(beta, se, zscore, pvalue) — each a p x m matrix.
 #' @keywords internal
-.ridge_pureR <- function(X, Y, lambda, nrand) {
+.ridge_pureR <- function(X, Y, lambda, nrand, rng_method = "mt19937") {
   n <- nrow(Y); p <- ncol(X); m <- ncol(Y)
 
   A <- crossprod(X) + lambda * diag(p)
@@ -20,7 +22,7 @@
   T_proj <- backsolve(R, forwardsolve(Rt, t(X)))   # p x n
   beta <- T_proj %*% Y
 
-  perm_table <- .gsl_mt19937_perm_table(n, nrand)
+  perm_table <- .perm_table(n, nrand, rng_method)
 
   aver <- matrix(0, p, m)
   aver_sq <- matrix(0, p, m)
@@ -47,6 +49,69 @@
   dimnames(pvalue) <- dn
 
   list(beta = beta, se = se, zscore = zscore, pvalue = pvalue)
+}
+
+#' Permutation table for the pure-R kernel
+#'
+#' \code{"mt19937"}: GSL MT19937 seed 0, shared with RidgeFast/RidgeCuda.
+#' \code{"legacy_r"}: permutation \emph{i} is \code{set.seed(i); sample.int(n)},
+#' the stream of SecAct 1.0.0 \code{SecAct.inference.r}, which produced the
+#' published SecAct (Nature Methods 2026) z-scores.
+#'
+#' @return nrand x n integer matrix of 0-based row indices.
+#' @keywords internal
+.perm_table <- function(n, nrand, rng_method = c("mt19937", "legacy_r")) {
+  switch(match.arg(rng_method),
+         mt19937  = .gsl_mt19937_perm_table(n, nrand),
+         legacy_r = .legacy_r_perm_table(n, nrand))
+}
+
+#' Legacy SecAct 1.0.0 R permutation stream
+#'
+#' Pins the RNG kind to R >= 3.6 defaults (Mersenne-Twister / Inversion /
+#' Rejection) so the stream does not depend on the caller's \code{RNGkind},
+#' and restores the caller's RNG kind and \code{.Random.seed} on exit.
+#'
+#' @keywords internal
+.legacy_r_perm_table <- function(n, nrand) {
+  genv <- globalenv()
+  had_seed <- exists(".Random.seed", envir = genv, inherits = FALSE)
+  if (had_seed) old_seed <- get(".Random.seed", envir = genv, inherits = FALSE)
+  old_kind <- RNGkind()
+  on.exit({
+    do.call(RNGkind, as.list(old_kind))
+    if (had_seed) {
+      assign(".Random.seed", old_seed, envir = genv)
+    } else if (exists(".Random.seed", envir = genv, inherits = FALSE)) {
+      rm(".Random.seed", envir = genv)
+    }
+  }, add = TRUE)
+
+  RNGkind("Mersenne-Twister", "Inversion", "Rejection")
+  t(vapply(seq_len(nrand), function(i) {
+    set.seed(i)
+    sample.int(n) - 1L
+  }, integer(n)))
+}
+
+#' Route rng_method to a backend that can generate it
+#'
+#' \code{"legacy_r"} exists only in pure R: \code{"auto"} falls back to
+#' \code{"cpu-pure"}; an explicitly requested accelerator is an error.
+#' @keywords internal
+.backend_for_rng <- function(backend, rng_method) {
+  chosen <- .resolve_backend(backend)
+  if (rng_method == "legacy_r" && chosen != "cpu-pure") {
+    if (backend != "auto") {
+      stop("rng_method='legacy_r' is only available with backend='cpu-pure'.")
+    }
+    chosen <- "cpu-pure"
+  }
+  if (chosen == "cpu-pure" && rng_method == "srand") {
+    stop("rng_method='srand' requires RidgeFast or RidgeCuda; ",
+         "pure-R supports only 'mt19937' and 'legacy_r'.")
+  }
+  chosen
 }
 
 #' Resolve backend based on installed packages and GPU availability
@@ -79,8 +144,9 @@
                             ncores = 1L,
                             rng_method = "mt19937",
                             backend = c("auto", "gpu", "cpu-fast", "cpu-pure")) {
-  rng_method <- match.arg(tolower(rng_method), c("mt19937", "srand"))
-  chosen <- .resolve_backend(backend)
+  rng_method <- match.arg(tolower(rng_method), c("mt19937", "srand", "legacy_r"))
+  backend <- match.arg(backend)
+  chosen <- .backend_for_rng(backend, rng_method)
   if (isTRUE(getOption("SecAct.verbose", FALSE))) {
     message("[SecAct] ridge backend: ", chosen, " (rng_method=", rng_method,
             ", ncores=", ncores, ")")
@@ -95,11 +161,7 @@
     RidgeFast::ridge(X = X, Y = Y, lambda = lambda, nrand = nrand,
                                  ncores = ncores, rng_method = rng_method)
   } else {
-    if (rng_method != "mt19937") {
-      stop("rng_method='", rng_method, "' requires RidgeFast or RidgeCuda; ",
-           "pure-R supports only 'mt19937'.")
-    }
-    .ridge_pureR(X, Y, lambda, nrand)
+    .ridge_pureR(X, Y, lambda, nrand, rng_method = rng_method)
   }
 }
 
@@ -125,8 +187,9 @@
                                   batch_size = 5000L,
                                   reader = NULL, n_samples = NULL,
                                   output_h5 = NULL) {
-  rng_method <- match.arg(tolower(rng_method), c("mt19937", "srand"))
-  chosen <- .resolve_backend(backend)
+  rng_method <- match.arg(tolower(rng_method), c("mt19937", "srand", "legacy_r"))
+  backend <- match.arg(backend)
+  chosen <- .backend_for_rng(backend, rng_method)
   if (isTRUE(getOption("SecAct.verbose", FALSE))) {
     message("[SecAct] ridge_batch backend: ", chosen,
             " (batch_size=", batch_size, ", rng_method=", rng_method, ")")
@@ -143,11 +206,8 @@
                            batch_size = batch_size, reader = reader,
                            n_samples = n_samples, output_h5 = output_h5)
   } else {
-    if (rng_method != "mt19937") {
-      stop("rng_method='", rng_method, "' requires RidgeFast or RidgeCuda; ",
-           "pure-R supports only 'mt19937'.")
-    }
     .ridge_pureR_batch(X, Y, lambda, nrand,
+                       rng_method = rng_method,
                        batch_size = batch_size,
                        reader = reader, n_samples = n_samples,
                        output_h5 = output_h5)
@@ -164,6 +224,7 @@
 #'
 #' @keywords internal
 .ridge_pureR_batch <- function(X, Y, lambda, nrand,
+                               rng_method = "mt19937",
                                batch_size = 5000L,
                                reader = NULL, n_samples = NULL,
                                output_h5 = NULL) {
@@ -211,7 +272,7 @@
     storage.mode(Y_batch) <- "double"
     if (is.null(colnames(Y_batch))) colnames(Y_batch) <- samp_names[s:e]
 
-    res <- .ridge_pureR(X, Y_batch, lambda, nrand)
+    res <- .ridge_pureR(X, Y_batch, lambda, nrand, rng_method = rng_method)
 
     if (h5_out) {
       for (nm in c("beta", "se", "zscore", "pvalue")) {

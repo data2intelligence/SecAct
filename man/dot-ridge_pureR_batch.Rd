@@ -9,6 +9,7 @@
   Y,
   lambda,
   nrand,
+  rng_method = "mt19937",
   batch_size = 5000L,
   reader = NULL,
   n_samples = NULL,

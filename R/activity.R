@@ -18,7 +18,10 @@
 #' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
 #'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
 #'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
-#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#'   non-reproducible runs. \code{"legacy_r"} reproduces the SecAct 1.0.0
+#'   pure-R stream (\code{set.seed(i); sample.int(n)} per permutation) used
+#'   for the published SecAct results; it runs on the pure-R backend only
+#'   (\code{backend="auto"} falls back to \code{"cpu-pure"}).
 #' @param batch_size Optional positive integer. When supplied,
 #'   permutation inference is performed over column-batches of \code{Y}
 #'   via the backend's \code{ridge_batch} (memory-efficient path for
@@ -163,7 +166,10 @@ SecAct.activity.inference <- function(
 #' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
 #'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
 #'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
-#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#'   non-reproducible runs. \code{"legacy_r"} reproduces the SecAct 1.0.0
+#'   pure-R stream (\code{set.seed(i); sample.int(n)} per permutation) used
+#'   for the published SecAct results; it runs on the pure-R backend only
+#'   (\code{backend="auto"} falls back to \code{"cpu-pure"}).
 #' @param batch_size Optional positive integer. When supplied,
 #'   permutation inference is performed over column-batches of \code{Y}
 #'   via the backend's \code{ridge_batch} (memory-efficient path for
@@ -259,7 +265,10 @@ SecAct.activity.inference.ST <- function(
 #' @param rng_method RNG for permutations. \code{"mt19937"} (default) is
 #'   GSL-compatible MT19937 seed 0 — bit-identical across backends when
 #'   \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
-#'   non-reproducible runs. Pure-R supports only \code{"mt19937"}.
+#'   non-reproducible runs. \code{"legacy_r"} reproduces the SecAct 1.0.0
+#'   pure-R stream (\code{set.seed(i); sample.int(n)} per permutation) used
+#'   for the published SecAct results; it runs on the pure-R backend only
+#'   (\code{backend="auto"} falls back to \code{"cpu-pure"}).
 #' @param batch_size Optional positive integer. When supplied,
 #'   permutation inference is performed over column-batches of \code{Y}
 #'   via the backend's \code{ridge_batch} (memory-efficient path for
