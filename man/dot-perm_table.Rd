@@ -12,7 +12,9 @@ nrand x n integer matrix of 0-based row indices.
 \description{
 \code{"mt19937"}: GSL MT19937 seed 0, shared with RidgeFast/RidgeCuda.
 \code{"legacy_r"}: permutation \emph{i} is \code{set.seed(i); sample.int(n)},
-the stream of SecAct 1.0.0 \code{SecAct.inference.r}, which produced the
-published SecAct (Nature Methods 2026) z-scores.
+the stream of the SecAct 1.0.0 pure-R function \code{SecAct.inference.r}.
+Results match that function to floating-point precision (~1e-15), not
+bit-identically. The 1.0.0 default entry points permuted with C
+\code{srand(0)/rand()}, which this does not reproduce.
 }
 \keyword{internal}

@@ -55,10 +55,13 @@ depending on what is installed. Default \code{"auto"}.}
 \item{rng_method}{RNG for permutations. \code{"mt19937"} (default) is
 GSL-compatible MT19937 seed 0 — bit-identical across backends when
 \code{ncores=1}. Accelerators may support \code{"srand"} for faster,
-non-reproducible runs. \code{"legacy_r"} reproduces the SecAct 1.0.0
-pure-R stream (\code{set.seed(i); sample.int(n)} per permutation) used
-for the published SecAct results; it runs on the pure-R backend only
-(\code{backend="auto"} falls back to \code{"cpu-pure"}).}
+ non-reproducible runs. \code{"legacy_r"} reproduces the permutation
+ stream of the SecAct 1.0.0 pure-R function \code{SecAct.inference.r}
+ (\code{set.seed(i); sample.int(n)} per permutation), to floating-point
+ precision (~1e-15), not bit-identically. It does not reproduce the 1.0.0
+ default entry points, which permuted with C \code{srand(0)/rand()}.
+ Runs on the pure-R backend only (\code{backend="auto"} falls back to
+ \code{"cpu-pure"}).}
 
 \item{batch_size}{Optional positive integer. When supplied,
 permutation inference is performed over column-batches of \code{Y}

@@ -47,7 +47,8 @@ test_that("dispatcher rejects unsupported rng_method on cpu-pure", {
   )
 })
 
-# SecAct 1.0.0 SecAct.inference.r permutation loop (source of the published z-scores)
+# Reimplementation, inside this test file, of the SecAct 1.0.0 SecAct.inference.r
+# permutation loop. It is not the shipped 1.0.0 code; it transcribes its algorithm.
 legacy_ref <- function(X, Y, lambda, nrand) {
   n <- nrow(Y)
   R <- chol(crossprod(X) + lambda * diag(ncol(X)))
@@ -118,4 +119,16 @@ test_that("legacy_r batched path matches the single-call path", {
                                           rng_method = "legacy_r", backend = "cpu-pure",
                                           batch_size = 2L)
   for (nm in c("beta", "se", "zscore", "pvalue")) expect_equal(r_bat[[nm]], r_one[[nm]], tolerance = 1e-12)
+})
+
+test_that("legacy_r restores a Rounding sample.kind without warning", {
+  d <- legacy_data()
+  suppressWarnings(RNGkind("Mersenne-Twister", "Inversion", "Rounding"))
+  on.exit(RNGkind("default", "default", "default"), add = TRUE)
+  set.seed(5)
+  kind <- RNGkind(); seed <- .Random.seed
+  expect_no_warning(SecAct:::.ridge_dispatch(d$X, d$Y, lambda = 100, nrand = 20,
+                                             rng_method = "legacy_r", backend = "cpu-pure"))
+  expect_identical(RNGkind(), kind)
+  expect_identical(.Random.seed, seed)
 })
